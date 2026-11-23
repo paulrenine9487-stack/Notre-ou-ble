@@ -67,10 +67,15 @@ export default function LearningPage() {
   const [stageLoading, setStageLoading] = useState(false);
 
   const updateStageUrl = useCallback((stageNum) => {
-    if (stageNum && parseInt(searchParams.get('stage'), 10) !== stageNum) {
-      setSearchParams({ stage: stageNum }, { replace: true });
-    }
-  }, [searchParams, setSearchParams]);
+    if (!stageNum) return;
+    setSearchParams(prev => {
+      const current = parseInt(prev.get('stage'), 10);
+      if (current === stageNum) return prev;
+      const next = new URLSearchParams(prev);
+      next.set('stage', stageNum);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   // Load 5 stages
   const loadStages = async (silent = false) => {
@@ -80,19 +85,27 @@ export default function LearningPage() {
       const res = await api.getFiveStages();
       if (res.success) {
         setModuleData(res.module);
-        setStages(res.stages || []);
-
-        // Pick selected stage: url param ?stage=X (only if unlocked), or previously selected (if unlocked), or current active, or stage 1
         const stageList = res.stages || [];
-        let initialStageId = selectedStageId;
+        setStages(stageList);
+
+        // Pick selected stage: url param ?stage=X (only if accessible), or previously selected, or current active, or stage 1
+        let initialStageId = null;
         if (requestedStageNum && stageList.length > 0) {
           const match = stageList.find(s => s.stage_number === requestedStageNum);
-          if (match && match.is_unlocked !== false) {
-            initialStageId = match.id;
+          if (match) {
+            const matchIdx = stageList.findIndex(s => s.id === match.id);
+            const prevSt = matchIdx > 0 ? stageList[matchIdx - 1] : null;
+            if (match.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed))) {
+              initialStageId = match.id;
+            }
           }
         }
-        if (!initialStageId || (stageList.length > 0 && stageList.find(s => s.id === initialStageId)?.is_unlocked === false)) {
-          initialStageId = (res.currentStage ? res.currentStage.id : (stageList[0] ? stageList[0].id : null));
+        if (!initialStageId && selectedStageId) {
+          const prevMatch = stageList.find(s => s.id === selectedStageId);
+          if (prevMatch) initialStageId = prevMatch.id;
+        }
+        if (!initialStageId) {
+          initialStageId = res.currentStage ? res.currentStage.id : (stageList[0] ? stageList[0].id : null);
         }
         if (initialStageId) {
           setSelectedStageId(initialStageId);
@@ -133,16 +146,14 @@ export default function LearningPage() {
   useEffect(() => {
     if (selectedStageId) {
       loadStageDetails(selectedStageId);
+      const st = stages.find(s => s.id === selectedStageId);
+      if (st && st.stage_number) {
+        updateStageUrl(st.stage_number);
+      }
     }
-  }, [selectedStageId]);
+  }, [selectedStageId, stages, updateStageUrl]);
 
   const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
-
-  useEffect(() => {
-    if (selectedStage && selectedStage.stage_number) {
-      updateStageUrl(selectedStage.stage_number);
-    }
-  }, [selectedStage?.stage_number, updateStageUrl]);
 
   useEffect(() => {
     if (requestedStageNum && stages.length > 0) {

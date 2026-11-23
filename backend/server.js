@@ -13,9 +13,6 @@ const { getBreakersHealth } = require('./services/circuitBreakerService');
 const gatewayMiddleware = require('./middleware/gatewayMiddleware');
 const {
   generalApiLimiter,
-  authLimiter,
-  registerLimiter,
-  otpLimiter,
   adminApiLimiter
 } = require('./middleware/rateLimiter');
 
@@ -120,12 +117,6 @@ app.use(cors({
 
 // 3. Distributed Redis Rate Limiting Protection (Brute-force / Credential Stuffing / DoS Defense)
 app.use('/api', generalApiLimiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', registerLimiter);
-app.use('/api/auth/verify-mfa', authLimiter);
-app.use('/api/auth/refresh', authLimiter);
-app.use('/api/auth/forgot-password', otpLimiter);
-app.use('/api/auth/verify-otp', otpLimiter);
 app.use('/api/admin', adminApiLimiter);
 
 // 4. Request Body Parsing with strict size limits (OWASP DoS Protection)

@@ -77,11 +77,22 @@ export function AuthProvider({ children }) {
           setToken(null);
         }
       } catch (err) {
-        console.warn('Session verification failed, logging out:', err.message);
-        localStorage.removeItem('resonova_token');
-        localStorage.removeItem('resonova_user');
-        setUser(null);
-        setToken(null);
+        console.warn('Session verification notice:', err.message);
+        // Only log out if it is an explicit 401 Unauthorized response from backend
+        if (err.status === 401) {
+          localStorage.removeItem('resonova_token');
+          localStorage.removeItem('resonova_user');
+          setUser(null);
+          setToken(null);
+        } else {
+          // For 429 (rate limit), 503, or temporary network interruptions, preserve existing cached session
+          try {
+            const cachedUser = localStorage.getItem('resonova_user');
+            if (cachedUser) {
+              setUser(JSON.parse(cachedUser));
+            }
+          } catch (e) {}
+        }
       } finally {
         setIsLoading(false);
       }
