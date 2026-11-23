@@ -1,0 +1,12 @@
+{
+  "name": "resonova-vocal-portal-root",
+  "version": "1.0.0",
+  "description": "No Tre(ou)ble - Breath Management & Vocal Training Web Portal",
+  "scripts": {
+    "start": "cd resonova-portal/backend && node server.js",
+    "test": "cd resonova-portal/backend && node test_suite.js",
+    "build": "cd resonova-portal/frontend && npm run build",
+    "dev:frontend": "cd resonova-portal/frontend && npm run dev",
+    "init:db": "cd resonova-portal/backend && node config/initDb.js"
+  }
+}

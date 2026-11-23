@@ -1,0 +1,86 @@
+﻿/* No Tre(ou)ble Continuous Music Background Styles */
+
+:root {
+  --mb-bg-0: #FAF9FE;
+  --mb-bg-24: #F8F6FD;
+  --mb-bg-50: #F6F8FE;
+  --mb-bg-76: #FAF6FC;
+  --mb-bg-100: #F7F5FD;
+
+  --mb-glow-lavender: rgba(167, 139, 250, 0.14);
+  --mb-glow-sky: rgba(125, 211, 252, 0.14);
+  --mb-glow-pink: rgba(244, 114, 182, 0.10);
+
+  --mb-violet: #A78BFA;
+  --mb-violet-light: #C4B5FD;
+  --mb-sky: #7DD3FC;
+  --mb-blue: #38BDF8;
+  --mb-pink: #F472B6;
+}
+
+.music-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Base layer with vertical gradient and 6 alternating color glows */
+.music-bg-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    /* Glow 1: Lavender (top-left, Zone A) */
+    radial-gradient(circle 380px at -80px 6%, var(--mb-glow-lavender) 0%, rgba(167, 139, 250, 0.06) 36%, transparent 66%),
+    /* Glow 2: Sky Blue (right, Zone A) */
+    radial-gradient(circle 390px at calc(100% + 90px) 21%, var(--mb-glow-sky) 0%, rgba(125, 211, 252, 0.06) 36%, transparent 66%),
+    /* Glow 3: Pink (left, Zone B) */
+    radial-gradient(circle 370px at -70px 38%, var(--mb-glow-pink) 0%, rgba(244, 114, 182, 0.05) 36%, transparent 66%),
+    /* Glow 4: Lavender (right, Zone B) */
+    radial-gradient(circle 385px at calc(100% + 80px) 54%, var(--mb-glow-lavender) 0%, rgba(167, 139, 250, 0.06) 36%, transparent 66%),
+    /* Glow 5: Sky Blue (left, Zone C) */
+    radial-gradient(circle 380px at -90px 71%, var(--mb-glow-sky) 0%, rgba(125, 211, 252, 0.06) 36%, transparent 66%),
+    /* Glow 6: Pink (right, Zone C) */
+    radial-gradient(circle 375px at calc(100% + 80px) 88%, var(--mb-glow-pink) 0%, rgba(244, 114, 182, 0.05) 36%, transparent 66%),
+    /* Base Vertical Gradient */
+    linear-gradient(180deg, var(--mb-bg-0) 0%, var(--mb-bg-24) 24%, var(--mb-bg-50) 50%, var(--mb-bg-76) 76%, var(--mb-bg-100) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* SVG Vector Overlay */
+.music-bg-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Responsiveness on screens under 640px */
+@media (max-width: 640px) {
+  .mb-watermark-note {
+    display: none !important;
+  }
+
+  .mb-mobile-hide {
+    display: none !important;
+  }
+}
+
+/* Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+
+  .music-bg-container,
+  .music-bg-container * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

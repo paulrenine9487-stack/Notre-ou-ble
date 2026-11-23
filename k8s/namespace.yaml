@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: notrouble
+  labels:
+    app.kubernetes.io/name: notrouble-portal
+    app.kubernetes.io/part-of: resonova-ecosystem
+    pod-security.kubernetes.io/enforce: restricted

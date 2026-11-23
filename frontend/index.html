@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/IMG_7974.PNG" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>No Tre(ou)ble – Breathe Better. Sing Better.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('resonova_theme');
+          if (saved) {
+            var t = JSON.parse(saved);
+            var root = document.documentElement;
+            if (t.primary_color) {
+              root.style.setProperty('--dash-sidebar-bg', t.primary_color);
+              root.style.setProperty('--brand-deep', t.primary_color);
+            }
+            if (t.secondary_color) {
+              root.style.setProperty('--dash-accent', t.secondary_color);
+              root.style.setProperty('--brand-primary', t.secondary_color);
+              root.style.setProperty('--primary-purple', t.secondary_color);
+              root.style.setProperty('--accent-purple', t.secondary_color);
+              root.style.setProperty('--border-focus', t.secondary_color);
+            }
+            if (t.accent_bg_color) {
+              root.style.setProperty('--dash-accent-bg', t.accent_bg_color);
+              root.style.setProperty('--background-soft', t.accent_bg_color);
+            }
+            if (t.main_bg_color) {
+              root.style.setProperty('--dash-bg', t.main_bg_color);
+              root.style.setProperty('--background-main', t.main_bg_color);
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
