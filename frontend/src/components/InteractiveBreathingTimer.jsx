@@ -283,6 +283,9 @@ export default function InteractiveBreathingTimer({
       }
     } catch (err) {
       console.error('Failed to log breathing session to MySQL:', err);
+      if (onSessionComplete) {
+        onSessionComplete(sessionPayload);
+      }
     } finally {
       setSavingSession(false);
     }
@@ -620,6 +623,9 @@ export default function InteractiveBreathingTimer({
               </div>
               <div style={{ flex: 1 }}>
                 <input
+                  id="inhale-duration-slider"
+                  name="inhale_duration"
+                  aria-label="Inhale duration in seconds"
                   type="range"
                   className="breathe-slider-track breathe-slider-inhale"
                   min={selectedLevelKey === 'advanced' ? 0.5 : 4}
@@ -675,6 +681,9 @@ export default function InteractiveBreathingTimer({
               </div>
               <div style={{ flex: 1 }}>
                 <input
+                  id="hold-duration-slider"
+                  name="hold_duration"
+                  aria-label="Hold duration in seconds"
                   type="range"
                   className="breathe-slider-track breathe-slider-hold"
                   min={selectedLevelKey === 'beginner' ? 2 : customHold}
@@ -734,6 +743,9 @@ export default function InteractiveBreathingTimer({
               </div>
               <div style={{ flex: 1 }}>
                 <input
+                  id="exhale-duration-slider"
+                  name="exhale_duration"
+                  aria-label="Exhale duration in seconds"
                   type="range"
                   className="breathe-slider-track breathe-slider-exhale"
                   min={activeLevel.exhale_min || 8}
@@ -753,6 +765,8 @@ export default function InteractiveBreathingTimer({
             {selectedLevelKey === 'advanced' && (
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: '#334155', cursor: 'pointer', fontWeight: 600, marginTop: 4 }}>
                 <input
+                  id="pulsed-rhythm-checkbox"
+                  name="pulsed_rhythm"
                   type="checkbox"
                   checked={pulsedRhythm}
                   onChange={(e) => setPulsedRhythm(e.target.checked)}

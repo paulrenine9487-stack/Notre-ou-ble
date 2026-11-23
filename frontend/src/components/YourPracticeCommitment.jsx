@@ -344,11 +344,11 @@ export default function YourPracticeCommitment({ onCommitmentSaved }) {
 
           {/* Input 1: Minutes per session */}
           <div>
-            <label style={{ fontSize: '0.88rem', fontWeight: 750, color: '#1E293B', display: 'block', marginBottom: 8 }}>
+            <label htmlFor="practice-minutes-input" style={{ fontSize: '0.88rem', fontWeight: 750, color: '#1E293B', display: 'block', marginBottom: 8 }}>
               Minutes per session
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              {[5, 10, 15, 20, 30].map(mins => (
+              {[15, 20, 30].map(mins => (
                 <button
                   key={mins}
                   type="button"
@@ -371,10 +371,13 @@ export default function YourPracticeCommitment({ onCommitmentSaved }) {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
                 <input
+                  id="practice-minutes-input"
+                  name="practice_minutes"
+                  aria-label="Custom minutes per session"
                   type="number"
-                  min="1"
+                  min="15"
                   max="240"
-                  placeholder="10"
+                  placeholder="15"
                   value={minutesPerSession}
                   onChange={(e) => {
                     const val = e.target.value;

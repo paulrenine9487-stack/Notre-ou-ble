@@ -303,21 +303,10 @@ export default function LoginPage() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '14px',
               textDecoration: 'none',
               marginBottom: '18px'
             }}
           >
-            <img
-              src="/IMG_7974.PNG"
-              alt="No Tre(ou)ble Logo"
-              style={{
-                height: '52px',
-                width: 'auto',
-                objectFit: 'contain',
-                display: 'block'
-              }}
-            />
             <img
               src="/NoTreble-Classicfinal.png"
               alt="No Tre(ou)ble"
@@ -465,11 +454,13 @@ export default function LoginPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Field 1: Email ID */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                <label htmlFor="login-email" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                   Email ID <span style={{ color: '#DC4C64' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
+                    id="login-email"
+                    name="email"
                     type="email"
                     placeholder="Enter your registered email"
                     value={email}
@@ -502,7 +493,7 @@ export default function LoginPage() {
               {/* Field 2: Password */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
-                  <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
+                  <label htmlFor="login-password" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
                     Password <span style={{ color: '#DC4C64' }}>*</span>
                   </label>
                   <button
@@ -533,6 +524,8 @@ export default function LoginPage() {
                 </div>
                 <div style={{ position: 'relative' }}>
                   <input
+                    id="login-password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     value={password}
@@ -831,11 +824,13 @@ export default function LoginPage() {
                   Enter your registered No Tre(ou)ble email address. We will verify your account in MySQL and dispatch a 6-digit OTP code to your Gmail.
                 </p>
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                  <label htmlFor="forgot-email" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
                     Registered Email Address
                   </label>
                   <div style={{ position: 'relative' }}>
                     <input
+                      id="forgot-email"
+                      name="forgot_email"
                       type="email"
                       placeholder="e.g. paulrenine9487@gmail.com"
                       value={forgotEmail}
@@ -896,10 +891,12 @@ export default function LoginPage() {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px', textAlign: 'center' }}>
+                  <label htmlFor="otp-code" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px', textAlign: 'center' }}>
                     Enter 6-Digit OTP Code
                   </label>
                   <input
+                    id="otp-code"
+                    name="otp_code"
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
@@ -995,11 +992,13 @@ export default function LoginPage() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
                   <div>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '4px' }}>
+                    <label htmlFor="new-password" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '4px' }}>
                       New Password
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
+                        id="new-password"
+                        name="new_password"
                         type={showNewPassword ? 'text' : 'password'}
                         placeholder="Minimum 6 characters (letters & numbers)"
                         value={newPassword}
@@ -1032,11 +1031,13 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '4px' }}>
+                    <label htmlFor="confirm-new-password" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '4px' }}>
                       Confirm New Password
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
+                        id="confirm-new-password"
+                        name="confirm_new_password"
                         type={showConfirmPassword ? 'text' : 'password'}
                         placeholder="Re-enter new password"
                         value={confirmNewPassword}
@@ -1177,10 +1178,12 @@ export default function LoginPage() {
 
             <form onSubmit={handleVerifyMfaModal}>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                <label htmlFor="mfa-code" style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
                   6-Digit Verification Code
                 </label>
                 <input
+                  id="mfa-code"
+                  name="mfa_code"
                   type="text"
                   maxLength={6}
                   pattern="[0-9]*"

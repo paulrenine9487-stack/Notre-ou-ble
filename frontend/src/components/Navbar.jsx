@@ -43,37 +43,21 @@ export default function Navbar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
             textDecoration: 'none',
             flexShrink: 0
           }}
           aria-label="No Tre(ou)ble Home"
         >
           <img
-            src="/IMG_7974.PNG"
-            alt="No Tre(ou)ble Logo"
+            src={isDark ? '/NoTreble-Classicfinal.png' : '/NoTreble-Classic-darktext.png'}
+            alt="No Tre(ou)ble"
             style={{
-              height: '46px',
+              height: '42px',
               width: 'auto',
-              maxHeight: '46px',
               objectFit: 'contain',
-              flexShrink: 0,
-              display: 'block',
-              ...(isDark ? { background: '#FFFFFF', borderRadius: '10px', padding: '3px 5px' } : {})
+              display: 'block'
             }}
           />
-          <div>
-            <img
-              src={isDark ? '/NoTreble-Classicfinal.png' : '/NoTreble-Classic-darktext.png'}
-              alt="No Tre(ou)ble"
-              style={{
-                height: '42px',
-                width: 'auto',
-                objectFit: 'contain',
-                display: 'block'
-              }}
-            />
-          </div>
         </Link>
 
         {/* Right-Side Controls: LOGIN BUTTON → ACCESSIBILITY ICON BUTTON */}

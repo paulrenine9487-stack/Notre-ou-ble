@@ -157,7 +157,7 @@ async function migrateCms() {
         body_content: '© 2026 No Tre(ou)ble. All rights reserved. Vocal breath management, kinetic simulation, and diagnostic learning system.',
         cta_button_text: 'Accessibility Controls',
         cta_button_url: '#accessibility',
-        media_url: '/logo.png',
+        media_url: '/NoTreble-Classicfinal.png',
         extra_settings: JSON.stringify({
           contactEmail: 'contact@notreoble.com',
           privacyUrl: '/privacy',
@@ -175,7 +175,7 @@ async function migrateCms() {
         body_content: 'This acknowledges that the vocalist has demonstrated posture alignment, sustained exhalation control, song breath-marking execution, and consistent weekly practice journal entries.',
         cta_button_text: 'Download Certificate',
         cta_button_url: '#download',
-        media_url: '/logo.png',
+        media_url: '/NoTreble-Classicfinal.png',
         extra_settings: JSON.stringify({
           accreditation: 'No Tre(ou)ble Vocal Academy',
           passingScoreMin: 80
@@ -252,12 +252,12 @@ async function migrateCms() {
         used_on_pages: JSON.stringify(['homepage.hero'])
       },
       {
-        file_name: 'logo.png',
-        original_name: 'logo.png',
+        file_name: 'NoTreble-Classicfinal.png',
+        original_name: 'NoTreble-Classicfinal.png',
         file_type: 'IMAGE',
         mime_type: 'image/png',
-        file_size_bytes: 77750,
-        storage_path: '/logo.png',
+        file_size_bytes: 103985,
+        storage_path: '/NoTreble-Classicfinal.png',
         alt_text: 'No Tre(ou)ble Logo Badge',
         caption: 'Official brand mark of No Tre(ou)ble.',
         used_on_pages: JSON.stringify(['navbar.logo', 'footer.logo'])

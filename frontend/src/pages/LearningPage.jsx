@@ -55,7 +55,7 @@ import '../styles/dashboard.css';
 export default function LearningPage() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const requestedStageNum = parseInt(searchParams.get('stage'), 10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,18 +64,19 @@ export default function LearningPage() {
   const [stages, setStages] = useState([]);
   const [selectedStageId, setSelectedStageId] = useState(null);
   const [stageDetails, setStageDetails] = useState(null);
+  const [stageDetailsCache, setStageDetailsCache] = useState({});
   const [stageLoading, setStageLoading] = useState(false);
 
   const updateStageUrl = useCallback((stageNum) => {
     if (!stageNum) return;
-    setSearchParams(prev => {
-      const current = parseInt(prev.get('stage'), 10);
-      if (current === stageNum) return prev;
-      const next = new URLSearchParams(prev);
-      next.set('stage', stageNum);
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    try {
+      const url = new URL(window.location.href);
+      if (parseInt(url.searchParams.get('stage'), 10) !== stageNum) {
+        url.searchParams.set('stage', stageNum);
+        window.history.replaceState(null, '', url.pathname + url.search);
+      }
+    } catch (e) {}
+  }, []);
 
   // Load 5 stages
   const loadStages = async (silent = false) => {
@@ -86,30 +87,44 @@ export default function LearningPage() {
       if (res.success) {
         setModuleData(res.module);
         const stageList = res.stages || [];
-        setStages(stageList);
+        
+        // Merge with existing stages state to preserve locally unlocked stages
+        setStages(prevStages => {
+          if (!prevStages || prevStages.length === 0) return stageList;
+          return stageList.map(serverStage => {
+            const localStage = prevStages.find(p => p.id === serverStage.id);
+            return {
+              ...serverStage,
+              // If previously unlocked in local state, keep it unlocked
+              is_unlocked: serverStage.is_unlocked || (localStage ? localStage.is_unlocked : false)
+            };
+          });
+        });
 
-        // Pick selected stage: url param ?stage=X (only if accessible), or previously selected, or current active, or stage 1
-        let initialStageId = null;
-        if (requestedStageNum && stageList.length > 0) {
-          const match = stageList.find(s => s.stage_number === requestedStageNum);
-          if (match) {
-            const matchIdx = stageList.findIndex(s => s.id === match.id);
-            const prevSt = matchIdx > 0 ? stageList[matchIdx - 1] : null;
-            if (match.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed))) {
-              initialStageId = match.id;
+        // ONLY pick initial stage if selectedStageId is NOT already selected (initial page load or reload)
+        setSelectedStageId(currentSelectedId => {
+          if (currentSelectedId) {
+            // Already have an active stage selected: ensure it exists in stageList
+            const stillExists = stageList.some(s => s.id === currentSelectedId);
+            if (stillExists) return currentSelectedId;
+          }
+
+          // Initial selection: check URL ?stage=X param
+          const currentUrlStageNum = parseInt(new URLSearchParams(window.location.search).get('stage'), 10);
+          if (currentUrlStageNum && stageList.length > 0) {
+            const match = stageList.find(s => s.stage_number === currentUrlStageNum);
+            if (match) {
+              const matchIdx = stageList.findIndex(s => s.id === match.id);
+              const prevSt = matchIdx > 0 ? stageList[matchIdx - 1] : null;
+              if (match.is_unlocked || match.status === 'COMPLETED' || match.stage_number === 1 || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed))) {
+                return match.id;
+              }
             }
           }
-        }
-        if (!initialStageId && selectedStageId) {
-          const prevMatch = stageList.find(s => s.id === selectedStageId);
-          if (prevMatch) initialStageId = prevMatch.id;
-        }
-        if (!initialStageId) {
-          initialStageId = res.currentStage ? res.currentStage.id : (stageList[0] ? stageList[0].id : null);
-        }
-        if (initialStageId) {
-          setSelectedStageId(initialStageId);
-        }
+
+          // Fallback to active unlocked stage from backend, or stage 1
+          return res.currentStage ? res.currentStage.id : (stageList[0] ? stageList[0].id : null);
+        });
       } else {
         setError(res.message || 'Failed to load learning stages.');
       }
@@ -125,100 +140,198 @@ export default function LearningPage() {
     loadStages();
   }, []);
 
-  // Fetch full details of the currently selected stage
-  const loadStageDetails = async (stageId, silent = false) => {
+  // Fetch full details of the currently selected stage (silent by default to prevent UI flashing)
+  const loadStageDetails = async (stageId, silent = true) => {
     if (!stageId) return;
     try {
-      if (!silent) setStageLoading(true);
+      if (!silent && !stageDetailsCache[stageId]) setStageLoading(true);
+      setError(null);
       const res = await api.getStageDetails(stageId);
-      if (res.success) {
+      if (res && res.success && res.stage) {
         setStageDetails(res.stage);
-      } else if (res.isLocked) {
-        setError(`This stage is locked. Please complete the previous stage first.`);
+        setStageDetailsCache(prev => ({ ...prev, [stageId]: res.stage }));
       }
     } catch (err) {
-      console.error('Error loading stage details:', err);
+      console.warn('Error loading stage details:', err);
+      const fallbackStage = stages.find(s => s.id === stageId || s.stage_number === stageId);
+      if (fallbackStage) {
+        setStageDetails(fallbackStage);
+      }
     } finally {
-      if (!silent) setStageLoading(false);
+      setStageLoading(false);
     }
   };
 
   const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
-  const activeStage = (stageDetails && stageDetails.id === selectedStage?.id) ? stageDetails : selectedStage;
+  const activeStage = stageDetailsCache[selectedStage?.id] || (stageDetails && stageDetails.id === selectedStage?.id ? stageDetails : selectedStage);
 
   useEffect(() => {
     if (selectedStageId) {
-      loadStageDetails(selectedStageId);
+      loadStageDetails(selectedStageId, true);
     }
   }, [selectedStageId]);
 
-  useEffect(() => {
-    if (selectedStage && selectedStage.stage_number) {
-      updateStageUrl(selectedStage.stage_number);
-    }
-  }, [selectedStage?.stage_number, updateStageUrl]);
+  const stageSaveRef = useRef(null);
+  const [navigatingNext, setNavigatingNext] = useState(false);
+  const [navError, setNavError] = useState(null);
 
-  useEffect(() => {
-    if (requestedStageNum && stages.length > 0) {
-      const match = stages.find(s => s.stage_number === requestedStageNum);
-      if (match && selectedStageId !== match.id) {
-        setSelectedStageId(match.id);
-      }
+  const navigateToStage = (targetStageNumber, isNextOrPrevNavigation = false) => {
+    setNavError(null);
+    const targetStage = stages.find(s => s.stage_number === targetStageNumber);
+    if (!targetStage) return;
+
+    // A stage is accessible if:
+    // 1. targetStage is Stage 1 (always unlocked), OR
+    // 2. isNextOrPrevNavigation is true (called from Next/Previous navigation after save/review), OR
+    // 3. targetStage is already unlocked or completed, OR
+    // 4. the immediately preceding stage is completed (Rule 3: unrestricted navigation among unlocked stages), OR
+    // 5. targetStage status is IN PROGRESS or COMPLETED
+    const targetIdx = stages.findIndex(s => s.stage_number === targetStageNumber);
+    const prevStageInList = targetIdx > 0 ? stages[targetIdx - 1] : null;
+    const isAccessible = isNextOrPrevNavigation ||
+      targetStage.stage_number === 1 ||
+      targetStage.is_unlocked === true || 
+      targetStage.status === 'COMPLETED' ||
+      targetStage.status === 'IN PROGRESS' ||
+      (prevStageInList && (prevStageInList.status === 'COMPLETED' || prevStageInList.is_completed));
+
+    if (!isAccessible) {
+      setNavError(`Stage ${targetStage.stage_number} is locked. You must complete the preceding stages first.`);
+      return;
     }
-  }, [requestedStageNum, stages, selectedStageId]);
+
+    // Immediately mark as unlocked in local stages state
+    setStages(prev =>
+      prev.map(s => {
+        if (s.stage_number <= targetStageNumber) {
+          return { ...s, is_unlocked: true };
+        }
+        return s;
+      })
+    );
+
+    const targetId = targetStage.id;
+    // 1. Immediately switch stage in React state (0ms instant transition)
+    setSelectedStageId(targetId);
+
+    // 2. Immediately activate cached details if available
+    if (stageDetailsCache[targetId]) {
+      setStageDetails(stageDetailsCache[targetId]);
+    }
+
+    // 3. Update URL in browser address bar without triggering React Router reload
+    updateStageUrl(targetStageNumber);
+
+    // 4. Smooth scroll
+    window.scrollTo({ top: 80, behavior: 'smooth' });
+
+    if (targetStage.status === 'NOT STARTED') {
+      api.startStage(targetId).catch(() => {});
+    }
+
+    // 5. Silently refresh details in background
+    loadStageDetails(targetId, true);
+    loadStages(true);
+  };
 
   const handleSelectStage = (stage) => {
     const stageIdx = stages.findIndex(s => s.id === stage.id);
-    const prevSt = stageIdx > 0 ? stages[stageIdx - 1] : null;
-    const canAccess = stage.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed)) || stage.status === 'COMPLETED';
-    if (!canAccess) {
-      alert(`Stage ${stage.stage_number} is locked. You must complete Stage ${stage.stage_number - 1} first.`);
+    const prevStageInList = stageIdx > 0 ? stages[stageIdx - 1] : null;
+    const isAccessible = stage.stage_number === 1 ||
+      stage.is_unlocked === true ||
+      stage.status === 'COMPLETED' ||
+      stage.status === 'IN PROGRESS' ||
+      (prevStageInList && (prevStageInList.status === 'COMPLETED' || prevStageInList.is_completed));
+
+    if (!isAccessible) {
+      setNavError(`Stage ${stage.stage_number} is locked. Complete previous stages to unlock.`);
       return;
     }
-    setSelectedStageId(stage.id);
-    updateStageUrl(stage.stage_number);
+    navigateToStage(stage.stage_number, true);
   };
 
   const currentStageIndex = stages.findIndex(s => s.id === (selectedStage ? selectedStage.id : selectedStageId));
   const prevStage = currentStageIndex > 0 ? stages[currentStageIndex - 1] : null;
   const nextStage = currentStageIndex >= 0 && currentStageIndex < stages.length - 1 ? stages[currentStageIndex + 1] : null;
 
-  const handlePrevStage = () => {
+  const handlePrevStage = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (prevStage) {
-      setSelectedStageId(prevStage.id);
-      updateStageUrl(prevStage.stage_number);
-      window.scrollTo({ top: 80, behavior: 'smooth' });
+      setNavError(null);
+      // Students can revisit previous stages at any time (Rule 1)
+      navigateToStage(prevStage.stage_number, true);
     }
   };
 
-  const handleProceedToStage = (targetStageNumber) => {
-    setStages(prevStages =>
-      prevStages.map(s => {
-        if (s.stage_number < targetStageNumber) {
+  const handleNextStage = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    console.log('[LEARNING_NAV] 1. NEXT_BUTTON_CLICKED', {
+      timestamp: new Date().toISOString()
+    });
+    console.log('[LEARNING_NAV] 2. CURRENT_MODULE_ID', moduleData?.id || 1);
+    console.log('[LEARNING_NAV] 3. CURRENT_STAGE_ID', selectedStage?.id || selectedStageId);
+    console.log('[LEARNING_NAV] 4. CURRENT_STAGE_COMPLETION_STATUS', selectedStage?.status || 'UNKNOWN');
+
+    if (navigatingNext || !nextStage) {
+      console.warn('[LEARNING_NAV] Navigation blocked: navigatingNext or !nextStage', { navigatingNext, nextStage });
+      return;
+    }
+    setNavError(null);
+
+    // Save the current task's valid answers and progress before navigating
+    if (stageSaveRef.current) {
+      try {
+        setNavigatingNext(true);
+        console.log('[LEARNING_NAV] 5. VALIDATION_RESULT: Calling stageSaveRef handler');
+        console.log('[LEARNING_NAV] 6. SAVE_API_REQUEST_STARTED');
+
+        const saveSuccess = await stageSaveRef.current();
+        console.log('[LEARNING_NAV] 7. SAVE_API_RESPONSE_RECEIVED', { saveSuccess });
+
+        if (saveSuccess === false) {
+          setNavigatingNext(false);
+          console.warn('[LEARNING_NAV] Save returned false, navigation aborted');
+          return;
+        }
+      } catch (err) {
+        console.error('[LEARNING_NAV] 8. SAVE_API_ERROR', err);
+        setNavigatingNext(false);
+        setNavError(err.message || 'Failed to save progress. Please try again.');
+        return;
+      } finally {
+        setNavigatingNext(false);
+      }
+    } else {
+      console.log('[LEARNING_NAV] 5. VALIDATION_RESULT: No stageSaveRef registered, proceeding');
+    }
+
+    // Optimistically unlock next stage so navigation always succeeds after successful save
+    setStages(prev =>
+      prev.map(s => {
+        if (s.stage_number === (selectedStage ? selectedStage.stage_number : 0)) {
           return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
         }
-        if (s.stage_number === targetStageNumber) {
-          return { ...s, is_unlocked: true, status: s.status === 'COMPLETED' ? 'COMPLETED' : 'IN PROGRESS' };
+        if (s.stage_number === nextStage.stage_number) {
+          return { ...s, is_unlocked: true };
         }
         return s;
       })
     );
-    const targetStage = stages.find(s => s.stage_number === targetStageNumber);
-    if (targetStage) {
-      setSelectedStageId(targetStage.id);
-      api.startStage(targetStage.id).catch(() => {});
-    }
-    updateStageUrl(targetStageNumber);
-    window.scrollTo({ top: 80, behavior: 'smooth' });
-    setTimeout(() => {
-      loadStages(true);
-    }, 600);
-  };
 
-  const handleNextStage = () => {
-    if (nextStage) {
-      handleProceedToStage(nextStage.stage_number);
-    }
+    console.log('[LEARNING_NAV] 9. NAVIGATION_FUNCTION_EXECUTED', {
+      targetStageNumber: nextStage.stage_number,
+      targetStageId: nextStage.id
+    });
+    console.log('[LEARNING_NAV] 10. NEXT_ROUTE', `/learning?stage=${nextStage.stage_number}`);
+
+    navigateToStage(nextStage.stage_number, true);
+
+    console.log('[LEARNING_NAV] 11. NAVIGATION_COMPLETED', {
+      openedStageNumber: nextStage.stage_number
+    });
   };
 
   const renderStatusPill = (status) => {
@@ -247,19 +360,7 @@ export default function LearningPage() {
         >
           <Menu size={22} />
         </button>
-        <div className="mobile-brand-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img
-            src="/IMG_7974.PNG"
-            alt="No Tre(ou)ble"
-            style={{
-              height: '30px',
-              width: 'auto',
-              objectFit: 'contain',
-              background: '#FFFFFF',
-              borderRadius: '8px',
-              padding: '2px 4px'
-            }}
-          />
+        <div className="mobile-brand-title" style={{ display: 'flex', alignItems: 'center' }}>
           <img
             src="/NoTreble-Classic-darktext.png"
             alt="No Tre(ou)ble"
@@ -334,8 +435,7 @@ export default function LearningPage() {
                 const isCompleted = st.status === 'COMPLETED';
                 const isInProgress = st.status === 'IN_PROGRESS';
                 const prevSt = idx > 0 ? stages[idx - 1] : null;
-                const isLocked = st.is_unlocked === false && !(prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed));
-                const isNotStarted = !isCompleted && !isInProgress && !isSelected && !isLocked;
+                const isStepAccessible = st.stage_number === 1 || st.is_unlocked === true || isCompleted || st.status === 'IN PROGRESS' || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed));
                 const formattedNum = String(st.stage_number).padStart(2, '0');
                 const hasNext = idx < stages.length - 1;
 
@@ -361,16 +461,17 @@ export default function LearningPage() {
                     <button
                       type="button"
                       onClick={() => handleSelectStage(st)}
-                      className={`horizontal-stage-step ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''} ${isLocked ? 'locked' : isNotStarted ? 'not-started' : ''}`}
+                      disabled={!isStepAccessible}
+                      className={`horizontal-stage-step ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''} ${!isStepAccessible ? 'locked' : ''}`}
                       aria-current={isSelected ? 'step' : undefined}
-                      title={isLocked ? `Stage ${st.stage_number} is locked. Complete Stage ${st.stage_number - 1} first.` : `${formattedNum} ${stageTitle}`}
+                      title={!isStepAccessible ? `Stage ${st.stage_number} is locked. Complete preceding stages first.` : `${formattedNum} ${stageTitle}`}
                       style={{
-                        cursor: isLocked ? 'not-allowed' : 'pointer',
-                        opacity: isLocked ? 0.62 : 1
+                        cursor: isStepAccessible ? 'pointer' : 'not-allowed',
+                        opacity: isStepAccessible ? 1 : 0.55
                       }}
                     >
                       <div className="horizontal-stage-circle">
-                        {isLocked ? <Lock size={15} /> : isCompleted ? <Check size={18} strokeWidth={3} /> : formattedNum}
+                        {isCompleted ? <Check size={18} strokeWidth={3} /> : formattedNum}
                       </div>
 
                       <div className="horizontal-stage-details">
@@ -378,7 +479,7 @@ export default function LearningPage() {
                           {formattedNum} {stageTitle}
                         </span>
                         <span className="horizontal-stage-subtitle">
-                          {isLocked ? 'Locked 🔒' : isCompleted ? 'Completed ✓' : isSelected ? 'Active' : stageSubtitle}
+                          {isCompleted ? 'Completed ✓' : isSelected ? 'Active' : stageSubtitle}
                         </span>
                       </div>
                     </button>
@@ -407,17 +508,13 @@ export default function LearningPage() {
           <div className="gagne-learning-container">
             {/* Full-Width Active Stage Content View (curriculum-sidebar removed) */}
             <div className="task-runner-workspace" style={{ width: '100%', minWidth: 0 }}>
-              {stageLoading ? (
-                <div style={{ padding: 60, textAlign: 'center', color: '#77728A', background: '#FFFFFF', borderRadius: 16 }}>
-                  <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 10px' }} />
-                  <p>Loading stage activities...</p>
-                </div>
-              ) : selectedStage ? (
+              {selectedStage ? (
                 <div>
                   {selectedStage.stage_number === 1 && (
                     <StageOneGainAttention
                       stage={activeStage}
-                      onProceedToNextStage={() => handleProceedToStage(2)}
+                      onProceedToNextStage={() => navigateToStage(2, true)}
+                      onRegisterSave={(fn) => { stageSaveRef.current = fn; }}
                       onUpdate={() => {
                         setStages(prev =>
                           prev.map(s => {
@@ -439,7 +536,8 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 2 && (
                     <StageTwoStimulateRecall
                       stage={activeStage}
-                      onProceedToNextStage={() => handleProceedToStage(3)}
+                      onProceedToNextStage={() => navigateToStage(3, true)}
+                      onRegisterSave={(fn) => { stageSaveRef.current = fn; }}
                       onUpdate={() => {
                         setStages(prev =>
                           prev.map(s => {
@@ -461,7 +559,8 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 3 && (
                     <StageThreePresentContent
                       stage={activeStage}
-                      onProceedToNextStage={() => handleProceedToStage(4)}
+                      onProceedToNextStage={() => navigateToStage(4, true)}
+                      onRegisterSave={(fn) => { stageSaveRef.current = fn; }}
                       onUpdate={() => {
                         setStages(prev =>
                           prev.map(s => {
@@ -483,7 +582,8 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 4 && (
                     <StageFourAssessPerformance
                       stage={activeStage}
-                      onProceedToNextStage={() => handleProceedToStage(5)}
+                      onProceedToNextStage={() => navigateToStage(5, true)}
+                      onRegisterSave={(fn) => { stageSaveRef.current = fn; }}
                       onUpdate={() => {
                         setStages(prev =>
                           prev.map(s => {
@@ -506,10 +606,30 @@ export default function LearningPage() {
                     <StageFiveProvideFeedback
                       stage={activeStage}
                       onUpdate={() => {
-                        loadStages();
-                        loadStageDetails(selectedStage.id);
+                        loadStages(true);
+                        loadStageDetails(selectedStage.id, true);
                       }}
                     />
+                  )}
+
+                  {/* Navigation Error Alert Banner */}
+                  {navError && (
+                    <div style={{
+                      marginTop: 20,
+                      padding: '12px 18px',
+                      background: '#FEE2E2',
+                      border: '1px solid #FCA5A5',
+                      borderRadius: 12,
+                      color: '#991B1B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      fontSize: '0.92rem',
+                      fontWeight: 650
+                    }}>
+                      <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                      <span>{navError}</span>
+                    </div>
                   )}
 
                   {/* Previous / Next Navigation Buttons Bar */}
@@ -518,7 +638,8 @@ export default function LearningPage() {
                       <button
                         type="button"
                         onClick={handlePrevStage}
-                        className="stage-bottom-btn"
+                        className="stage-bottom-btn prev"
+                        title={`Go back to ${prevStage.title}`}
                       >
                         <ChevronLeft size={18} />
                         <span>Previous: {prevStage.title}</span>
@@ -532,29 +653,29 @@ export default function LearningPage() {
                     </div>
 
                     {nextStage ? (
-                      (() => {
-                        const isCurrentStageCompleted =
-                          selectedStage?.status === 'COMPLETED' ||
-                          selectedStage?.is_completed ||
-                          stageDetails?.progress?.is_completed;
-                        const isUnlocked = nextStage.is_unlocked !== false || isCurrentStageCompleted;
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => handleProceedToStage(nextStage.stage_number)}
-                            disabled={!isUnlocked}
-                            className={`stage-bottom-btn next ${!isUnlocked ? 'disabled' : ''}`}
-                            style={{
-                              cursor: !isUnlocked ? 'not-allowed' : 'pointer',
-                              opacity: !isUnlocked ? 0.6 : 1
-                            }}
-                            title={!isUnlocked ? `Complete Stage ${selectedStage.stage_number} to unlock` : `Proceed to ${nextStage.title}`}
-                          >
-                            <span>{!isUnlocked ? `Locked: ${nextStage.title}` : `Next: ${nextStage.title}`}</span>
-                            {!isUnlocked ? <Lock size={16} /> : <ChevronRight size={18} />}
-                          </button>
-                        );
-                      })()
+                      <button
+                        type="button"
+                        onClick={handleNextStage}
+                        disabled={navigatingNext}
+                        className="stage-bottom-btn next"
+                        style={{
+                          cursor: navigatingNext ? 'wait' : 'pointer',
+                          opacity: navigatingNext ? 0.75 : 1
+                        }}
+                        title={`Proceed to ${nextStage.title}`}
+                      >
+                        {navigatingNext ? (
+                          <>
+                            <RefreshCw size={16} className="animate-spin" />
+                            <span>Saving & Opening Next...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{`Next: ${nextStage.title}`}</span>
+                            <ChevronRight size={18} />
+                          </>
+                        )}
+                      </button>
                     ) : (
                       <div style={{ minWidth: 140 }} />
                     )}
@@ -650,7 +771,7 @@ function renderObjectiveCardIcon(iconName, size = 44) {
 // ============================================================================
 // STAGE 01: GAIN ATTENTION (Subtitle: Get curious)
 // ============================================================================
-function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage }) {
+function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage, onRegisterSave }) {
   const introContent = stage.content?.find(c => c.content_type === 'introduction');
   const videoContent = stage.content?.find(c => c.content_type === 'intro_video' || c.content_type === 'video');
 
@@ -667,6 +788,34 @@ function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage }) {
   const [objectivesReviewed, setObjectivesReviewed] = useState(
     stage.activities?.some(a => a.activity_id === 's1_objectives') || false
   );
+
+  // Register save handler for Stage 1
+  useEffect(() => {
+    if (onRegisterSave) {
+      onRegisterSave(async () => {
+        try {
+          await api.acknowledgeStageObjectives(stage.id || 1).catch(() => {});
+          await api.recordActivityProgress({
+            stage_id: stage.id || 1,
+            activity_id: 's1_video',
+            activity_type: 'video'
+          }).catch(() => {});
+          await api.recordActivityProgress({
+            stage_id: stage.id || 1,
+            activity_id: 's1_objectives',
+            activity_type: 'objectives'
+          }).catch(() => {});
+          if (onUpdate) onUpdate();
+          return true;
+        } catch (e) {
+          return true;
+        }
+      });
+    }
+    return () => {
+      if (onRegisterSave) onRegisterSave(null);
+    };
+  }, [stage.id, onRegisterSave, onUpdate]);
 
   // Fetch live objectives & acknowledgement status from MySQL
   useEffect(() => {
@@ -703,6 +852,12 @@ function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage }) {
       });
       setVideoWatched(true);
       if (onUpdate) onUpdate();
+      setTimeout(() => {
+        const objEl = document.querySelector('.objectives-flip-section');
+        if (objEl) {
+          objEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 400);
     } catch (e) {
       console.error(e);
     }
@@ -924,48 +1079,6 @@ function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage }) {
           })}
         </div>
       </div>
-
-      {/* Stage 1 Completion / Next Stage Action */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <button
-          type="button"
-          onClick={async () => {
-            try {
-              await api.acknowledgeStageObjectives(stage.id || 1).catch(() => {});
-              await api.recordActivityProgress({
-                stage_id: stage.id || 1,
-                activity_id: 's1_video',
-                activity_type: 'video'
-              }).catch(() => {});
-              await api.recordActivityProgress({
-                stage_id: stage.id || 1,
-                activity_id: 's1_objectives',
-                activity_type: 'objectives'
-              }).catch(() => {});
-            } catch (e) {}
-            if (onUpdate) onUpdate();
-            if (onProceedToNextStage) onProceedToNextStage();
-          }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '12px 26px',
-            borderRadius: 10,
-            border: 'none',
-            background: 'linear-gradient(135deg, #7C3AED, #6D28D9)',
-            color: '#FFFFFF',
-            fontSize: '0.94rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
-            transition: 'all 0.18s ease'
-          }}
-        >
-          <span>Complete & Next: Stage 02 What Do You Know?</span>
-          <ChevronRight size={18} />
-        </button>
-      </div>
     </div>
   );
 }
@@ -988,7 +1101,7 @@ const DEFAULT_STAGE02_QUESTIONS = [
 // ============================================================================
 // STAGE 02: STIMULATE RECALL (Subtitle: Remember)
 // ============================================================================
-function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
+function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage, onRegisterSave }) {
   const questions = (stage.recallQuestions && stage.recallQuestions.length > 0)
     ? stage.recallQuestions
     : DEFAULT_STAGE02_QUESTIONS;
@@ -1016,7 +1129,7 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
     loadPeerBoards();
   }, [loadPeerBoards]);
 
-  // Answer state
+  // Answer state initialized from existing saved answers
   const [answers, setAnswers] = useState(() => {
     const map = {};
     questions.forEach(q => {
@@ -1026,9 +1139,73 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
     return map;
   });
 
+  // Sync answers with stage.userAnswers when loaded/updated from MySQL
+  useEffect(() => {
+    if (stage.userAnswers && stage.userAnswers.length > 0) {
+      setAnswers(prev => {
+        const nextAnswers = { ...prev };
+        let hasChanges = false;
+        stage.userAnswers.forEach(a => {
+          if (a.question_id && a.answer && (!prev[a.question_id] || prev[a.question_id].trim() === '')) {
+            nextAnswers[a.question_id] = a.answer;
+            hasChanges = true;
+          }
+        });
+        return hasChanges ? nextAnswers : prev;
+      });
+    }
+  }, [stage.userAnswers]);
+
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // Register save handler for the unified bottom Next button
+  useEffect(() => {
+    if (onRegisterSave) {
+      onRegisterSave(async () => {
+        setSaveError('');
+        const payload = Object.entries(answers).map(([qId, ans]) => ({
+          question_id: parseInt(qId, 10),
+          answer: ans
+        })).filter(item => item.answer && item.answer.trim().length > 0);
+
+        if (payload.length > 0) {
+          try {
+            setSaving(true);
+            const res = await api.saveRecallAnswers({
+              stage_id: stage.id || 2,
+              answers: payload
+            });
+            if (res && res.success) {
+              setSaveSuccess(true);
+              loadPeerBoards();
+              if (onUpdate) onUpdate();
+              return true;
+            } else {
+              const msg = res?.message || 'Could not save answers.';
+              setSaveError(msg);
+              throw new Error(msg);
+            }
+          } finally {
+            setSaving(false);
+          }
+        }
+
+        // If no answers typed, check if this stage was already completed in MySQL
+        if (stage.is_completed || stage.status === 'COMPLETED' || (stage.userAnswers && stage.userAnswers.length > 0)) {
+          return true;
+        }
+
+        const emptyMsg = 'Please provide an answer to at least one question before proceeding to Stage 03.';
+        setSaveError(emptyMsg);
+        throw new Error(emptyMsg);
+      });
+    }
+    return () => {
+      if (onRegisterSave) onRegisterSave(null);
+    };
+  }, [answers, stage, onRegisterSave, onUpdate, loadPeerBoards]);
 
   const handleSaveAnswers = async () => {
     setSaveError('');
@@ -1153,6 +1330,8 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
 
                 <textarea
                   id={`q-${q.id}`}
+                  name={`recall_question_${q.id}`}
+                  aria-label={q.question}
                   rows={3}
                   value={currentVal}
                   onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
@@ -1213,30 +1392,6 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 20 }}>
-          {saveSuccess && onProceedToNextStage && (
-            <button
-              type="button"
-              onClick={onProceedToNextStage}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '12px 24px',
-                background: 'linear-gradient(135deg, #0D9488, #059669)',
-                color: '#FFFFFF',
-                borderRadius: 10,
-                fontWeight: 750,
-                fontSize: '0.92rem',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(13, 148, 136, 0.28)'
-              }}
-            >
-              <span>Next: Stage 03 How To Do It</span>
-              <ChevronRight size={18} />
-            </button>
-          )}
-
           <button
             onClick={handleSaveAnswers}
             disabled={saving}
@@ -1274,7 +1429,7 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
 // ============================================================================
 // STAGE 03: PRESENT CONTENT (Subtitle: Understand)
 // ============================================================================
-function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
+function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage, onRegisterSave }) {
   const teachingVideo = stage.content?.find(c => c.content_type === 'teaching_video' || c.content_type === 'video');
   const tips = stage.breathingTips || [];
   const songs = stage.songs || [];
@@ -1289,6 +1444,25 @@ function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
   const [practicing, setPracticing] = useState(false);
   const [practiceSuccess, setPracticeSuccess] = useState('');
 
+  // Register save / check handler for bottom Next button
+  useEffect(() => {
+    if (onRegisterSave) {
+      onRegisterSave(async () => {
+        if (stage.status === 'COMPLETED' || stage.is_completed) {
+          return true;
+        }
+        const hasSong = stage.activities?.some(a => a.activity_id.startsWith('song_practice_') || a.activity_id === 's3_song');
+        if (hasSong) {
+          return true;
+        }
+        throw new Error("Please complete the Snowman song practice session to unlock Stage 04: Let's Check Ourselves.");
+      });
+    }
+    return () => {
+      if (onRegisterSave) onRegisterSave(null);
+    };
+  }, [stage, onRegisterSave]);
+
   const handleVideoCompleted = async () => {
     try {
       await api.recordActivityProgress({
@@ -1298,6 +1472,12 @@ function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
       });
       setVideoViewed(true);
       if (onUpdate) onUpdate();
+      setTimeout(() => {
+        const p2 = document.querySelector('.part-two-container');
+        if (p2) {
+          p2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 400);
     } catch (e) {
       console.error(e);
     }
@@ -1372,7 +1552,7 @@ function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
 // ============================================================================
 // STAGE 04: ASSESS PERFORMANCE (Subtitle: Show what you know)
 // ============================================================================
-function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage }) {
+function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage, onRegisterSave }) {
   // Filter out any matching_pairs / Match the Part challenges completely
   const challenges = (stage.challenges || []).filter(
     ch => ch.challenge_type !== 'matching_pairs' && !ch.title?.toLowerCase().includes('match the part')
@@ -1381,6 +1561,25 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage }) {
 
   const [activeChallengeIdx, setActiveChallengeIdx] = useState(0);
   const activeChallenge = challenges[activeChallengeIdx] || challenges[0] || { challenge_type: 'myth_or_fact' };
+
+  // Register save / check handler for Stage 4
+  useEffect(() => {
+    if (onRegisterSave) {
+      onRegisterSave(async () => {
+        if (stage.status === 'COMPLETED' || stage.is_completed) {
+          return true;
+        }
+        const hasRec = (stage.recordings && stage.recordings.length > 0) || stage.activities?.some(a => a.activity_id === 'song_recording' || a.activity_id === 's4_student_recording');
+        if (hasRec) {
+          return true;
+        }
+        throw new Error("Please submit your song recording performance to complete Stage 04 and unlock Stage 05.");
+      });
+    }
+    return () => {
+      if (onRegisterSave) onRegisterSave(null);
+    };
+  }, [stage, onRegisterSave]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -1408,15 +1607,35 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage }) {
           stageId={stage.id}
           onCompleted={() => {
             if (onUpdate) onUpdate();
+            setTimeout(() => {
+              const el = document.getElementById('personal-reflection-pinboard');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 600);
           }}
         />
       </div>
 
       {/* SECTION B: PERSONAL LEARNING REFLECTION PINBOARD (Three Reflection Questions & Sticky Note Cards) */}
-      <PersonalLearningPinboard stageId={stage.id} moduleId={1} onUpdate={onUpdate} />
+      <div id="personal-reflection-pinboard">
+        <PersonalLearningPinboard
+          stageId={stage.id}
+          moduleId={1}
+          onUpdate={() => {
+            if (onUpdate) onUpdate();
+            setTimeout(() => {
+              const el = document.getElementById('student-audio-recorder-section');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 600);
+          }}
+        />
+      </div>
 
       {/* SECTION C: RECORD YOUR SONG */}
-      <div style={{ background: '#FFFFFF', padding: 24, borderRadius: 16, border: '1px solid #EAE5F3' }}>
+      <div id="student-audio-recorder-section" style={{ background: '#FFFFFF', padding: 24, borderRadius: 16, border: '1px solid #EAE5F3' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <span
@@ -1490,34 +1709,9 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage }) {
                 </div>
               ))}
             </div>
-
-            {onProceedToNextStage && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
-                <button
-                  type="button"
-                  onClick={onProceedToNextStage}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '12px 26px',
-                    borderRadius: 10,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #0D9488, #059669)',
-                    color: '#FFFFFF',
-                    fontSize: '0.94rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(13, 148, 136, 0.28)'
-                  }}
-                >
-                  <span>Next: Stage 05 Keep It Going</span>
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            )}
           </div>
         )}
+
       </div>
     </div>
   );
@@ -1693,6 +1887,9 @@ function CustomVideoPlayer({ src, fallbackSrc, onEnded, onMarkCompleted, isCompl
 
         {/* Scrub progress bar */}
         <input
+          id="video-seek-slider"
+          name="video_seek"
+          aria-label="Video playback progress"
           type="range"
           min="0"
           max="100"
@@ -1811,6 +2008,9 @@ function CustomAudioPlayer({ src }) {
 
         <div style={{ flex: 1 }}>
           <input
+            id="audio-seek-slider"
+            name="audio_seek"
+            aria-label="Audio playback progress"
             type="range"
             min="0"
             max="100"
@@ -2076,7 +2276,15 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
             }}
           >
             <Upload size={14} /> Select File
-            <input type="file" accept="audio/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+            <input
+              id="student-audio-file"
+              name="student_audio_file"
+              aria-label="Upload audio recording file"
+              type="file"
+              accept="audio/*"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+            />
           </label>
         </div>
       </div>
@@ -2091,10 +2299,12 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
       )}
 
       <div>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#191B35', display: 'block', marginBottom: 4 }}>
+        <label htmlFor="trainer-comments" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#191B35', display: 'block', marginBottom: 4 }}>
           Optional Comments for Trainer
         </label>
         <textarea
+          id="trainer-comments"
+          name="trainer_comments"
           rows={2}
           value={comments}
           onChange={(e) => setComments(e.target.value)}

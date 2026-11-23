@@ -251,6 +251,9 @@ export default function PersonalLearningPinboard({ stageId = 4, moduleId = 1, on
                 </p>
 
                 <textarea
+                  id="reflection-q1"
+                  name="question_1_answer"
+                  aria-label="What I Know reflection"
                   rows={5}
                   value={q1}
                   onChange={(e) => setQ1(e.target.value.slice(0, MAX_CHARS))}
@@ -315,6 +318,9 @@ export default function PersonalLearningPinboard({ stageId = 4, moduleId = 1, on
                 </p>
 
                 <textarea
+                  id="reflection-q2"
+                  name="question_2_answer"
+                  aria-label="What I Want to Know reflection"
                   rows={5}
                   value={q2}
                   onChange={(e) => setQ2(e.target.value.slice(0, MAX_CHARS))}
@@ -379,6 +385,9 @@ export default function PersonalLearningPinboard({ stageId = 4, moduleId = 1, on
                 </p>
 
                 <textarea
+                  id="reflection-q3"
+                  name="question_3_answer"
+                  aria-label="What I Learned reflection"
                   rows={5}
                   value={q3}
                   onChange={(e) => setQ3(e.target.value.slice(0, MAX_CHARS))}

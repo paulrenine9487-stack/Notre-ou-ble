@@ -214,21 +214,22 @@ exports.getStages = async (req, res, next) => {
     }
 
     // Determine unlocked status:
-    // Stage 1 (index 0) is always unlocked.
+    // Stage 1 (stage_number 1) is always unlocked.
     // Completing Stage k unlocks Stage k+1.
     // Any stage already in progress or completed is always accessible.
-    let maxUnlockedIndex = 0;
+    let maxUnlockedStage = 1;
     for (let i = 0; i < stagesWithProgress.length; i++) {
-      if (stagesWithProgress[i].is_completed) {
-        maxUnlockedIndex = Math.max(maxUnlockedIndex, i + 1);
+      const st = stagesWithProgress[i];
+      if (st.is_completed) {
+        maxUnlockedStage = Math.max(maxUnlockedStage, st.stage_number + 1);
       }
-      if (stagesWithProgress[i].status === 'IN PROGRESS' || stagesWithProgress[i].progress_percentage > 0) {
-        maxUnlockedIndex = Math.max(maxUnlockedIndex, i);
+      if (st.status === 'IN PROGRESS' || (parseFloat(st.progress_percentage || 0) > 0)) {
+        maxUnlockedStage = Math.max(maxUnlockedStage, st.stage_number);
       }
     }
 
     for (let i = 0; i < stagesWithProgress.length; i++) {
-      stagesWithProgress[i].is_unlocked = (i <= maxUnlockedIndex);
+      stagesWithProgress[i].is_unlocked = (stagesWithProgress[i].stage_number <= maxUnlockedStage);
     }
 
     const completedStagesCount = stagesWithProgress.filter(s => s.is_completed).length;
@@ -274,7 +275,9 @@ exports.getStageDetails = async (req, res, next) => {
     }
     const stage = stageRows[0];
 
-    // Sequential stage unlocking enforcement (Requirement 4)
+    // Sequential stage unlocking enforcement:
+    // Stage 1 is always unlocked.
+    // Stage k (k > 1) is unlocked if it has already been started/completed OR if stage k-1 is completed.
     if (stage.stage_number > 1) {
       const [currentStageProg] = await pool.query(
         'SELECT status, progress_percentage FROM learning_stage_progress WHERE user_id = ? AND stage_id = ?',
@@ -300,6 +303,13 @@ exports.getStageDetails = async (req, res, next) => {
         }
       }
     }
+
+    // Automatically record stage as IN PROGRESS if accessed and unlocked
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at)
+      VALUES (?, ?, 'IN PROGRESS', 0, NOW())
+      ON DUPLICATE KEY UPDATE started_at = COALESCE(started_at, NOW())
+    `, [userId, stageId]).catch(() => {});
 
     // Fetch stage content
     const [contentList] = await pool.query(
@@ -455,7 +465,7 @@ exports.startStage = async (req, res, next) => {
     if (existing.length === 0 || existing[0].status === 'NOT STARTED') {
       await pool.query(`
         INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at)
-        VALUES (?, ?, 'IN PROGRESS', 10, NOW())
+        VALUES (?, ?, 'IN PROGRESS', 0, NOW())
         ON DUPLICATE KEY UPDATE status = 'IN PROGRESS', started_at = COALESCE(started_at, NOW())
       `, [userId, stageId]);
     }
@@ -563,6 +573,23 @@ exports.saveRecallAnswers = async (req, res, next) => {
     for (const item of answers) {
       if (!item.question_id || !item.answer) continue;
 
+      const trimmedAns = item.answer.trim();
+
+      // Check if user's latest saved answer is already identical to avoid unnecessary duplicate submissions
+      const [latest] = await pool.query(
+        'SELECT id, answer, attempt_number FROM recall_answers WHERE user_id = ? AND question_id = ? ORDER BY submitted_at DESC LIMIT 1',
+        [userId, item.question_id]
+      );
+      if (latest.length > 0 && latest[0].answer === trimmedAns) {
+        savedAnswers.push({
+          id: latest[0].id,
+          question_id: item.question_id,
+          answer: latest[0].answer,
+          attempt_number: latest[0].attempt_number
+        });
+        continue;
+      }
+
       // Determine attempt number
       const [prevAttempts] = await pool.query(
         'SELECT MAX(attempt_number) AS max_attempt FROM recall_answers WHERE user_id = ? AND question_id = ?',
@@ -573,12 +600,12 @@ exports.saveRecallAnswers = async (req, res, next) => {
       const [insertRes] = await pool.query(`
         INSERT INTO recall_answers (user_id, question_id, answer, attempt_number, submitted_at)
         VALUES (?, ?, ?, ?, NOW())
-      `, [userId, item.question_id, item.answer.trim(), nextAttempt]);
+      `, [userId, item.question_id, trimmedAns, nextAttempt]);
 
       savedAnswers.push({
         id: insertRes.insertId,
         question_id: item.question_id,
-        answer: item.answer,
+        answer: trimmedAns,
         attempt_number: nextAttempt
       });
     }

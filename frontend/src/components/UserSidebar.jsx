@@ -53,17 +53,6 @@ export default function UserSidebar({ isOpen, onClose }) {
         {/* Brand Header */}
         <div>
           <div className="dash-sidebar-brand">
-            <img
-              src="/IMG_7974.PNG"
-              alt="No Tre(ou)ble Logo"
-              style={{
-                height: 38,
-                width: 'auto',
-                objectFit: 'contain',
-                flexShrink: 0,
-                display: 'block'
-              }}
-            />
             <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
               <img
                 src="/NoTreble-Classicfinal.png"

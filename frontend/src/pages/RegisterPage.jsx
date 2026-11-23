@@ -198,21 +198,7 @@ export default function RegisterPage() {
     }}>
       {/* Top Header Logo */}
       <div style={{ maxWidth: '780px', margin: '0 auto 32px', textAlign: 'center' }}>
-        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img
-            src="/IMG_7974.PNG"
-            alt="No Tre(ou)ble Logo"
-            style={{
-              height: '52px',
-              width: 'auto',
-              objectFit: 'contain',
-              display: 'block',
-              background: '#FFFFFF',
-              borderRadius: '12px',
-              padding: '4px 6px',
-              boxShadow: '0 4px 12px rgba(25, 27, 53, 0.08)'
-            }}
-          />
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
           <img
             src="/NoTreble-Classic-darktext.png"
             alt="No Tre(ou)ble"
@@ -411,11 +397,12 @@ export default function RegisterPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             {/* Field 1: Username (Required, unique) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-username" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 1. Username <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-username"
                   type="text"
                   name="username"
                   placeholder="Enter a unique username"
@@ -444,11 +431,12 @@ export default function RegisterPage() {
 
             {/* Field 2: Gender (Required dropdown) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-gender" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 2. Gender <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <select
+                  id="reg-gender"
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
@@ -482,11 +470,12 @@ export default function RegisterPage() {
 
             {/* Field 3: Email ID (Required, valid email, unique) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-email" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 3. Email ID <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-email"
                   type="email"
                   name="email"
                   placeholder="name@example.com"
@@ -514,11 +503,12 @@ export default function RegisterPage() {
 
             {/* Field 4: Phone Number (Required, Indian mobile numbers) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-phone" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 4. Phone Number <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-phone"
                   type="tel"
                   name="phone"
                   placeholder="e.g. 9876543210 or +91 98765 43210"
@@ -599,7 +589,7 @@ export default function RegisterPage() {
             {/* Field 6: Vocal Trainer Name (OPTIONAL) */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
+                <label htmlFor="reg-trainer-name" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
                   6. Vocal Trainer Name
                 </label>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7C3AED', background: '#f3e8ff', padding: '2px 8px', borderRadius: '6px' }}>
@@ -608,6 +598,7 @@ export default function RegisterPage() {
               </div>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-trainer-name"
                   type="text"
                   name="vocal_trainer_name"
                   placeholder="Enter your vocal guru / mentor name (optional)"
@@ -635,11 +626,12 @@ export default function RegisterPage() {
 
             {/* Field 7: Password (Required, secure, show/hide, strength) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 7. Password <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   placeholder="Create a secure password (letters and numbers)"
@@ -686,11 +678,12 @@ export default function RegisterPage() {
 
             {/* Field 8: Confirm Password (Required, must match) */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+              <label htmlFor="reg-confirm-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
                 8. Confirm Password <span style={{ color: '#DC4C64' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="reg-confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirm_password"
                   placeholder="Re-enter your password"

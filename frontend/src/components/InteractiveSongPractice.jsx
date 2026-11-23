@@ -58,6 +58,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
   const [toastMessage, setToastMessage] = useState(null);
 
   const audioRef = useRef(null);
+  const handleCompleteSessionRef = useRef(null);
 
   // Helper to safely resolve audio URLs (supports relative, /uploads/audio, full URLs, and fallback)
   const resolveAudioUrl = (url) => {
@@ -159,6 +160,9 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
       } else {
         setIsPlaying(false);
         setCurrentLoopCount(1);
+        if (handleCompleteSessionRef.current) {
+          handleCompleteSessionRef.current();
+        }
       }
     };
 
@@ -308,6 +312,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
       }
     }
   };
+  handleCompleteSessionRef.current = handleCompleteSession;
 
   // Format Seconds to MM:SS
   const formatTime = (seconds) => {
@@ -810,6 +815,9 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                 />
                 {/* Hidden range input for interactive seek */}
                 <input
+                  id="song-seek-slider"
+                  name="song_seek"
+                  aria-label="Song seek slider"
                   type="range"
                   min={0}
                   max={duration || 10}
@@ -840,6 +848,9 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                     {isMuted || volume === 0 ? <VolumeX size={17} /> : <Volume2 size={17} />}
                   </button>
                   <input
+                    id="song-volume-slider"
+                    name="song_volume"
+                    aria-label="Audio playback volume"
                     type="range"
                     min={0}
                     max={1}
@@ -1104,33 +1115,10 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                 ← Back to Breathe
               </button>
 
-              <button
-                type="button"
-                onClick={sessionCompleted && onProceedToNextStage ? onProceedToNextStage : handleCompleteSession}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 24px',
-                  borderRadius: 10,
-                  border: 'none',
-                  background: sessionCompleted ? '#0F766E' : '#168B7A',
-                  color: '#FFFFFF',
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(22, 139, 122, 0.28)',
-                  transition: 'all 0.18s ease'
-                }}
-              >
-                <Check size={16} />
-                <span>{sessionCompleted ? 'Session Completed ✓' : 'Complete Practice Session ✓'}</span>
-              </button>
-
-              {sessionCompleted && onProceedToNextStage && (
+              {sessionCompleted ? (
                 <button
                   type="button"
-                  onClick={onProceedToNextStage}
+                  onClick={onProceedToNextStage || handleCompleteSession}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1149,6 +1137,29 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                 >
                   <span>Next: Stage 04 Let's Check Ourselves</span>
                   <ArrowRight size={16} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCompleteSession}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '10px 24px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#168B7A',
+                    color: '#FFFFFF',
+                    fontSize: '0.92rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(22, 139, 122, 0.28)',
+                    transition: 'all 0.18s ease'
+                  }}
+                >
+                  <Check size={16} />
+                  <span>Complete Practice Session ✓</span>
                 </button>
               )}
             </div>

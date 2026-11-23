@@ -100,19 +100,7 @@ export default function ModuleSelectionPage() {
         >
           <Menu size={22} />
         </button>
-        <div className="mobile-brand-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img
-            src="/IMG_7974.PNG"
-            alt="No Tre(ou)ble"
-            style={{
-              height: '30px',
-              width: 'auto',
-              objectFit: 'contain',
-              background: '#FFFFFF',
-              borderRadius: '8px',
-              padding: '2px 4px'
-            }}
-          />
+        <div className="mobile-brand-title" style={{ display: 'flex', alignItems: 'center' }}>
           <img
             src="/NoTreble-Classic-darktext.png"
             alt="No Tre(ou)ble"

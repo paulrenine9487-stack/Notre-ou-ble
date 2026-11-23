@@ -350,17 +350,6 @@ export default function AdminPortalPage() {
         }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <img
-              src="/IMG_7974.PNG"
-              alt="No Tre(ou)ble Logo"
-              style={{
-                height: '56px',
-                width: 'auto',
-                objectFit: 'contain',
-                marginBottom: '16px',
-                display: 'inline-block'
-              }}
-            />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <img
                 src="/NoTreble-Classic-darktext.png"
@@ -797,16 +786,6 @@ export default function AdminPortalPage() {
       <aside className={`admin-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         {/* Brand Header */}
         <div className="admin-sidebar-header">
-          <img
-            src="/IMG_7974.PNG"
-            alt="No Tre(ou)ble Logo"
-            className="admin-sidebar-logo"
-            style={{
-              height: '38px',
-              width: 'auto',
-              objectFit: 'contain'
-            }}
-          />
           <div className="admin-sidebar-brand-text">
             <span className="admin-sidebar-brand-name">
               <img

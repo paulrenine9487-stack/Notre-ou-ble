@@ -912,12 +912,7 @@ export default function ColorPaletteWheel({ onThemeApplied }) {
                 flexDirection: 'column',
                 justifyContent: 'space-between'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <img
-                    src="/IMG_7974.PNG"
-                    alt="Logo"
-                    style={{ height: '18px', width: 'auto', objectFit: 'contain', background: '#FFFFFF', borderRadius: '4px', padding: '1px 3px' }}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <img
                     src="/NoTreble-Classicfinal.png"
                     alt="No Tre(ou)ble"

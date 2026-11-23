@@ -152,15 +152,9 @@ export default function PartTwoInteractivePractice({
     }
   }, [stage?.id]);
 
-  const loadedStageIdRef = useRef(null);
-
   useEffect(() => {
-    const targetStageId = stage?.id || 3;
-    if (loadedStageIdRef.current !== targetStageId) {
-      loadedStageIdRef.current = targetStageId;
-      loadPartData();
-    }
-  }, [stage?.id, loadPartData]);
+    loadPartData();
+  }, [loadPartData]);
 
   // Handle Checklist item toggle
   const handleToggleChecklistItem = async (itemId) => {
@@ -184,6 +178,9 @@ export default function PartTwoInteractivePractice({
       });
       if (isAllChecked) {
         await api.completePartTab(2, { tab_key: 'posture', duration_minutes: 5 });
+        setTimeout(() => {
+          setActiveTab('breathe');
+        }, 500);
       }
     } catch (err) {
       console.error('Failed to save posture progress to MySQL:', err);
@@ -633,6 +630,10 @@ export default function PartTwoInteractivePractice({
             initialLevels={partData?.breathingLevels || []}
             onSessionComplete={() => {
               setIsBreatheCompleted(true);
+              api.completePartTab(2, { tab_key: 'breathe', duration_minutes: 5 }).catch(() => {});
+              setTimeout(() => {
+                setActiveTab('song');
+              }, 600);
             }}
           />
 

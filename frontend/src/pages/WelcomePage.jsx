@@ -749,17 +749,6 @@ export default function WelcomePage() {
               transition: 'color 0.25s ease'
             }}>
               <img
-                src="/IMG_7974.PNG"
-                alt="No Tre(ou)ble Logo"
-                style={{
-                  height: '28px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                  display: 'block',
-                  ...(isDark ? { background: '#FFFFFF', borderRadius: '6px', padding: '2px 4px' } : {})
-                }}
-              />
-              <img
                 src={isDark ? '/NoTreble-Classicfinal.png' : '/NoTreble-Classic-darktext.png'}
                 alt="No Tre(ou)ble"
                 style={{
