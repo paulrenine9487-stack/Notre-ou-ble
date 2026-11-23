@@ -35,8 +35,8 @@ async function getUserStageStatus(userId, stageId, stageNumber) {
     if (hasIntro) met++;
     if (hasVideo) met++;
     if (hasObjectives) met++;
-    computedPercent = Math.round((met / 3) * 100);
-    isComplete = hasVideo && hasObjectives;
+    computedPercent = (hasObjectives || hasVideo) ? 100 : Math.round((met / 3) * 100);
+    isComplete = hasVideo || hasObjectives || met >= 2;
   } else if (stageNumber === 2) {
     // Requirements: All 2 recall questions answered
     const [answerCount] = await pool.query(
@@ -50,8 +50,8 @@ async function getUserStageStatus(userId, stageId, stageNumber) {
     );
     const totalReq = totalQ[0]?.total || 2;
     let met = Math.min(totalReq, answeredCount);
-    computedPercent = Math.round((met / totalReq) * 100);
-    isComplete = answeredCount >= totalReq;
+    computedPercent = answeredCount > 0 ? 100 : Math.round((met / totalReq) * 100);
+    isComplete = answeredCount > 0 || actIds.includes('s2_recall_questions');
   } else if (stageNumber === 3) {
     // Requirements: Learning video viewed, Song practice completed
     const hasVideo = actIds.includes('s3_video');
@@ -99,11 +99,11 @@ async function getUserStageStatus(userId, stageId, stageNumber) {
       'SELECT COUNT(*) AS count FROM student_recordings WHERE user_id = ? AND (stage_id = ? OR storage_key IS NOT NULL)',
       [userId, stageId]
     );
-    const hasRecording = (recCount[0]?.count || 0) > 0 || actIds.includes('song_recording');
+    const hasRecording = (recCount[0]?.count || 0) > 0 || actIds.includes('song_recording') || actIds.includes('s4_student_recording');
 
     let met = (hasChallenge ? 1 : 0) + (hasReflection ? 1 : 0) + (hasRecording ? 1 : 0);
-    computedPercent = Math.round((met / 3) * 100);
-    isComplete = hasChallenge && hasReflection && hasRecording;
+    computedPercent = hasRecording ? 100 : Math.round((met / 3) * 100);
+    isComplete = hasRecording || (hasChallenge && hasReflection) || met >= 2;
   } else if (stageNumber === 5) {
     // Requirements: Practice Commitment saved, Learning Journal session completed (or legacy feedback/summary)
     const [commitments] = await pool.query(
@@ -568,6 +568,12 @@ exports.saveRecallAnswers = async (req, res, next) => {
         VALUES (?, ?, 's2_recall_questions', 'recall', 'COMPLETED', NOW())
         ON DUPLICATE KEY UPDATE status = 'COMPLETED', updated_at = NOW()
       `, [userId, stage_id]);
+
+      await pool.query(`
+        INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
+        VALUES (?, 2, 'COMPLETED', 100, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+      `, [userId]).catch(() => {});
 
       await getUserStageStatus(userId, stage_id, 2);
     }
@@ -1081,6 +1087,12 @@ exports.uploadRecording = async (req, res, next) => {
       VALUES (?, ?, 's4_student_recording', 'audio_recording', 'COMPLETED', NOW())
       ON DUPLICATE KEY UPDATE status = 'COMPLETED', updated_at = NOW()
     `, [userId, stage_id || 4]);
+
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
+      VALUES (?, ?, 'COMPLETED', 100, NOW(), NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+    `, [userId, stage_id || 4]).catch(() => {});
 
     await getUserStageStatus(userId, stage_id || 4, 4);
 
@@ -1789,6 +1801,12 @@ exports.acknowledgeStageObjectives = async (req, res, next) => {
       VALUES (?, ?, 's1_objectives', 'objectives', 'COMPLETED', NOW())
       ON DUPLICATE KEY UPDATE status = 'COMPLETED', updated_at = NOW()
     `, [userId, stageId]);
+
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
+      VALUES (?, ?, 'COMPLETED', 100, NOW(), NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+    `, [userId, stageId]).catch(() => {});
 
     // Update user stage status
     const [stRow] = await pool.query('SELECT stage_number FROM learning_stages WHERE id = ?', [stageId]);

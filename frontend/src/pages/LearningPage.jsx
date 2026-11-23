@@ -55,7 +55,7 @@ import '../styles/dashboard.css';
 export default function LearningPage() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const requestedStageNum = parseInt(searchParams.get('stage'), 10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,6 +65,12 @@ export default function LearningPage() {
   const [selectedStageId, setSelectedStageId] = useState(null);
   const [stageDetails, setStageDetails] = useState(null);
   const [stageLoading, setStageLoading] = useState(false);
+
+  const updateStageUrl = useCallback((stageNum) => {
+    if (stageNum && parseInt(searchParams.get('stage'), 10) !== stageNum) {
+      setSearchParams({ stage: stageNum }, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Load 5 stages
   const loadStages = async (silent = false) => {
@@ -132,6 +138,25 @@ export default function LearningPage() {
 
   const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
 
+  useEffect(() => {
+    if (selectedStage && selectedStage.stage_number) {
+      updateStageUrl(selectedStage.stage_number);
+    }
+  }, [selectedStage?.stage_number, updateStageUrl]);
+
+  useEffect(() => {
+    if (requestedStageNum && stages.length > 0) {
+      const match = stages.find(s => s.stage_number === requestedStageNum);
+      if (match && selectedStageId !== match.id) {
+        const matchIdx = stages.findIndex(s => s.id === match.id);
+        const prevSt = matchIdx > 0 ? stages[matchIdx - 1] : null;
+        if (match.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed))) {
+          setSelectedStageId(match.id);
+        }
+      }
+    }
+  }, [requestedStageNum, stages, selectedStageId]);
+
   const handleSelectStage = (stage) => {
     const stageIdx = stages.findIndex(s => s.id === stage.id);
     const prevSt = stageIdx > 0 ? stages[stageIdx - 1] : null;
@@ -141,6 +166,7 @@ export default function LearningPage() {
       return;
     }
     setSelectedStageId(stage.id);
+    updateStageUrl(stage.stage_number);
   };
 
   const currentStageIndex = stages.findIndex(s => s.id === (selectedStage ? selectedStage.id : selectedStageId));
@@ -150,6 +176,7 @@ export default function LearningPage() {
   const handlePrevStage = () => {
     if (prevStage) {
       setSelectedStageId(prevStage.id);
+      updateStageUrl(prevStage.stage_number);
       window.scrollTo({ top: 80, behavior: 'smooth' });
     }
   };
@@ -169,6 +196,7 @@ export default function LearningPage() {
     const targetStage = stages.find(s => s.stage_number === targetStageNumber);
     if (targetStage) {
       setSelectedStageId(targetStage.id);
+      updateStageUrl(targetStageNumber);
       window.scrollTo({ top: 80, behavior: 'smooth' });
     }
     loadStages(true);
@@ -190,6 +218,7 @@ export default function LearningPage() {
         prevStages.map(s => s.id === nextStage.id ? { ...s, is_unlocked: true } : s)
       );
       setSelectedStageId(nextStage.id);
+      updateStageUrl(nextStage.stage_number);
       window.scrollTo({ top: 80, behavior: 'smooth' });
     }
   };
@@ -390,9 +419,21 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 1 && (
                     <StageOneGainAttention
                       stage={stageDetails || selectedStage}
+                      onProceedToNextStage={() => handleProceedToStage(2)}
                       onUpdate={() => {
-                        loadStages();
-                        loadStageDetails(selectedStage.id);
+                        setStages(prev =>
+                          prev.map(s => {
+                            if (s.stage_number === 1) {
+                              return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
+                            }
+                            if (s.stage_number === 2) {
+                              return { ...s, is_unlocked: true };
+                            }
+                            return s;
+                          })
+                        );
+                        loadStages(true);
+                        loadStageDetails(selectedStage.id, true);
                       }}
                     />
                   )}
@@ -400,9 +441,21 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 2 && (
                     <StageTwoStimulateRecall
                       stage={stageDetails || selectedStage}
+                      onProceedToNextStage={() => handleProceedToStage(3)}
                       onUpdate={() => {
-                        loadStages();
-                        loadStageDetails(selectedStage.id);
+                        setStages(prev =>
+                          prev.map(s => {
+                            if (s.stage_number === 2) {
+                              return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
+                            }
+                            if (s.stage_number === 3) {
+                              return { ...s, is_unlocked: true };
+                            }
+                            return s;
+                          })
+                        );
+                        loadStages(true);
+                        loadStageDetails(selectedStage.id, true);
                       }}
                     />
                   )}
@@ -432,9 +485,21 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 4 && (
                     <StageFourAssessPerformance
                       stage={stageDetails || selectedStage}
+                      onProceedToNextStage={() => handleProceedToStage(5)}
                       onUpdate={() => {
-                        loadStages();
-                        loadStageDetails(selectedStage.id);
+                        setStages(prev =>
+                          prev.map(s => {
+                            if (s.stage_number === 4) {
+                              return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
+                            }
+                            if (s.stage_number === 5) {
+                              return { ...s, is_unlocked: true };
+                            }
+                            return s;
+                          })
+                        );
+                        loadStages(true);
+                        loadStageDetails(selectedStage.id, true);
                       }}
                     />
                   )}
@@ -587,7 +652,7 @@ function renderObjectiveCardIcon(iconName, size = 44) {
 // ============================================================================
 // STAGE 01: GAIN ATTENTION (Subtitle: Get curious)
 // ============================================================================
-function StageOneGainAttention({ stage, onUpdate }) {
+function StageOneGainAttention({ stage, onUpdate, onProceedToNextStage }) {
   const introContent = stage.content?.find(c => c.content_type === 'introduction');
   const videoContent = stage.content?.find(c => c.content_type === 'intro_video' || c.content_type === 'video');
 
@@ -861,6 +926,48 @@ function StageOneGainAttention({ stage, onUpdate }) {
           })}
         </div>
       </div>
+
+      {/* Stage 1 Completion / Next Stage Action */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await api.acknowledgeStageObjectives(stage.id || 1).catch(() => {});
+              await api.recordActivityProgress({
+                stage_id: stage.id || 1,
+                activity_id: 's1_video',
+                activity_type: 'video'
+              }).catch(() => {});
+              await api.recordActivityProgress({
+                stage_id: stage.id || 1,
+                activity_id: 's1_objectives',
+                activity_type: 'objectives'
+              }).catch(() => {});
+            } catch (e) {}
+            if (onUpdate) onUpdate();
+            if (onProceedToNextStage) onProceedToNextStage();
+          }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '12px 26px',
+            borderRadius: 10,
+            border: 'none',
+            background: 'linear-gradient(135deg, #7C3AED, #6D28D9)',
+            color: '#FFFFFF',
+            fontSize: '0.94rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
+            transition: 'all 0.18s ease'
+          }}
+        >
+          <span>Complete & Next: Stage 02 What Do You Know?</span>
+          <ChevronRight size={18} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -883,7 +990,7 @@ const DEFAULT_STAGE02_QUESTIONS = [
 // ============================================================================
 // STAGE 02: STIMULATE RECALL (Subtitle: Remember)
 // ============================================================================
-function StageTwoStimulateRecall({ stage, onUpdate }) {
+function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage }) {
   const questions = (stage.recallQuestions && stage.recallQuestions.length > 0)
     ? stage.recallQuestions
     : DEFAULT_STAGE02_QUESTIONS;
@@ -950,6 +1057,11 @@ function StageTwoStimulateRecall({ stage, onUpdate }) {
         setSaveSuccess(true);
         loadPeerBoards();
         if (onUpdate) onUpdate();
+        if (onProceedToNextStage) {
+          setTimeout(() => {
+            onProceedToNextStage();
+          }, 600);
+        }
       } else {
         setSaveError(res.message || 'Could not save answers.');
       }
@@ -1102,7 +1214,31 @@ function StageTwoStimulateRecall({ stage, onUpdate }) {
           })}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 20 }}>
+          {saveSuccess && onProceedToNextStage && (
+            <button
+              type="button"
+              onClick={onProceedToNextStage}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #0D9488, #059669)',
+                color: '#FFFFFF',
+                borderRadius: 10,
+                fontWeight: 750,
+                fontSize: '0.92rem',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(13, 148, 136, 0.28)'
+              }}
+            >
+              <span>Next: Stage 03 How To Do It</span>
+              <ChevronRight size={18} />
+            </button>
+          )}
+
           <button
             onClick={handleSaveAnswers}
             disabled={saving}
@@ -1238,7 +1374,7 @@ function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
 // ============================================================================
 // STAGE 04: ASSESS PERFORMANCE (Subtitle: Show what you know)
 // ============================================================================
-function StageFourAssessPerformance({ stage, onUpdate }) {
+function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage }) {
   // Filter out any matching_pairs / Match the Part challenges completely
   const challenges = (stage.challenges || []).filter(
     ch => ch.challenge_type !== 'matching_pairs' && !ch.title?.toLowerCase().includes('match the part')
@@ -1310,6 +1446,7 @@ function StageFourAssessPerformance({ stage, onUpdate }) {
 
         <StudentAudioRecorder
           stageId={stage.id}
+          onProceedToNextStage={onProceedToNextStage}
           onRecordingUploaded={() => {
             if (onUpdate) onUpdate();
           }}
@@ -1355,6 +1492,32 @@ function StageFourAssessPerformance({ stage, onUpdate }) {
                 </div>
               ))}
             </div>
+
+            {onProceedToNextStage && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+                <button
+                  type="button"
+                  onClick={onProceedToNextStage}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '12px 26px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #0D9488, #059669)',
+                    color: '#FFFFFF',
+                    fontSize: '0.94rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(13, 148, 136, 0.28)'
+                  }}
+                >
+                  <span>Next: Stage 05 Keep It Going</span>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1745,7 +1908,7 @@ function InteractiveBreathingSimulationGuide() {
 }
 
 // 5. In-Browser Audio Recorder (MediaRecorder API)
-function StudentAudioRecorder({ stageId, onRecordingUploaded }) {
+function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextStage }) {
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
@@ -1831,6 +1994,11 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded }) {
         setFileToUpload(null);
         setComments('');
         if (onRecordingUploaded) onRecordingUploaded();
+        if (onProceedToNextStage) {
+          setTimeout(() => {
+            onProceedToNextStage();
+          }, 700);
+        }
       }
     } catch (e) {
       alert(`Upload error: ${e.message}`);
