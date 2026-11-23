@@ -143,17 +143,20 @@ export default function LearningPage() {
     }
   };
 
+  const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
+  const activeStage = (stageDetails && stageDetails.id === selectedStage?.id) ? stageDetails : selectedStage;
+
   useEffect(() => {
     if (selectedStageId) {
       loadStageDetails(selectedStageId);
-      const st = stages.find(s => s.id === selectedStageId);
-      if (st && st.stage_number) {
-        updateStageUrl(st.stage_number);
-      }
     }
-  }, [selectedStageId, stages, updateStageUrl]);
+  }, [selectedStageId]);
 
-  const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
+  useEffect(() => {
+    if (selectedStage && selectedStage.stage_number) {
+      updateStageUrl(selectedStage.stage_number);
+    }
+  }, [selectedStage?.stage_number, updateStageUrl]);
 
   useEffect(() => {
     if (requestedStageNum && stages.length > 0) {
@@ -429,7 +432,7 @@ export default function LearningPage() {
                 <div>
                   {selectedStage.stage_number === 1 && (
                     <StageOneGainAttention
-                      stage={stageDetails || selectedStage}
+                      stage={activeStage}
                       onProceedToNextStage={() => handleProceedToStage(2)}
                       onUpdate={() => {
                         setStages(prev =>
@@ -451,7 +454,7 @@ export default function LearningPage() {
 
                   {selectedStage.stage_number === 2 && (
                     <StageTwoStimulateRecall
-                      stage={stageDetails || selectedStage}
+                      stage={activeStage}
                       onProceedToNextStage={() => handleProceedToStage(3)}
                       onUpdate={() => {
                         setStages(prev =>
@@ -473,7 +476,7 @@ export default function LearningPage() {
 
                   {selectedStage.stage_number === 3 && (
                     <StageThreePresentContent
-                      stage={stageDetails || selectedStage}
+                      stage={activeStage}
                       onProceedToNextStage={() => handleProceedToStage(4)}
                       onUpdate={() => {
                         setStages(prev =>
@@ -495,7 +498,7 @@ export default function LearningPage() {
 
                   {selectedStage.stage_number === 4 && (
                     <StageFourAssessPerformance
-                      stage={stageDetails || selectedStage}
+                      stage={activeStage}
                       onProceedToNextStage={() => handleProceedToStage(5)}
                       onUpdate={() => {
                         setStages(prev =>
@@ -517,7 +520,7 @@ export default function LearningPage() {
 
                   {selectedStage.stage_number === 5 && (
                     <StageFiveProvideFeedback
-                      stage={stageDetails || selectedStage}
+                      stage={activeStage}
                       onUpdate={() => {
                         loadStages();
                         loadStageDetails(selectedStage.id);

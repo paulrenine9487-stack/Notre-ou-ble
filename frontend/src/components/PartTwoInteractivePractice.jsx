@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import PostureViewer3D from './PostureViewer3D';
 import InteractiveBreathingTimer from './InteractiveBreathingTimer';
@@ -152,9 +152,15 @@ export default function PartTwoInteractivePractice({
     }
   }, [stage?.id]);
 
+  const loadedStageIdRef = useRef(null);
+
   useEffect(() => {
-    loadPartData();
-  }, [loadPartData]);
+    const targetStageId = stage?.id || 3;
+    if (loadedStageIdRef.current !== targetStageId) {
+      loadedStageIdRef.current = targetStageId;
+      loadPartData();
+    }
+  }, [stage?.id, loadPartData]);
 
   // Handle Checklist item toggle
   const handleToggleChecklistItem = async (itemId) => {

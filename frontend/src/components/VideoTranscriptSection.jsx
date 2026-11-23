@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, FileText, Music, Clock, Copy, Check, Volume2 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -13,10 +13,14 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const fetchedKeyRef = useRef(null);
+
   useEffect(() => {
     let isMounted = true;
+    const requestKey = `${stageId}_${videoId}`;
+
     async function fetchTranscript() {
-      if (!videoId) return;
+      if (!videoId || !stageId) return;
       try {
         setLoading(true);
         const res = await api.getVideoTranscript(stageId, videoId);
@@ -33,7 +37,8 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
       }
     }
 
-    if (autoLoad) {
+    if (autoLoad && fetchedKeyRef.current !== requestKey) {
+      fetchedKeyRef.current = requestKey;
       fetchTranscript();
     }
 
