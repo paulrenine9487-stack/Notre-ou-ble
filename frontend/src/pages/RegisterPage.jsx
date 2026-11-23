@@ -47,6 +47,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
+  const [conflictField, setConflictField] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -172,12 +173,16 @@ export default function RegisterPage() {
         }, 1800);
       }
     } catch (err) {
-      if (err.data?.message) {
-        setServerError(err.data.message);
-      } else if (err.message) {
-        setServerError(err.message);
-      } else {
-        setServerError('Registration failed. Please verify your details and try again.');
+      const msg = err.data?.message || err.message || 'Registration failed. Please verify your details and try again.';
+      setServerError(msg);
+      if (err.status === 409 || err.data?.conflictField || /already exists|already taken/i.test(msg)) {
+        const field = err.data?.conflictField || (/username/i.test(msg) ? 'username' : 'email');
+        setConflictField(field);
+        if (field === 'username') {
+          setErrors(prev => ({ ...prev, username: 'This username is already taken. Please choose another username.' }));
+        } else {
+          setErrors(prev => ({ ...prev, email: 'An account with this email already exists. Please log in.' }));
+        }
       }
       window.scrollTo({ top: 140, behavior: 'smooth' });
     } finally {
@@ -327,17 +332,77 @@ export default function RegisterPage() {
         {serverError && (
           <div style={{
             background: '#fef2f2',
-            border: '1px solid #DC4C64',
-            borderRadius: '14px',
-            padding: '14px 18px',
+            border: '1.5px solid #DC4C64',
+            borderRadius: '16px',
+            padding: '16px 20px',
             marginBottom: '28px',
             display: 'flex',
-            alignItems: 'center',
+            flexDirection: 'column',
             gap: '12px',
-            color: '#991b1b'
+            color: '#991b1b',
+            boxShadow: '0 4px 14px rgba(220, 76, 100, 0.08)'
           }}>
-            <AlertCircle size={20} style={{ color: '#DC4C64', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.94rem', fontWeight: 600 }}>{serverError}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <AlertCircle size={22} style={{ color: '#DC4C64', flexShrink: 0 }} />
+              <div style={{ fontSize: '0.96rem', fontWeight: 700 }}>{serverError}</div>
+            </div>
+
+            {conflictField === 'email' && (
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '12px',
+                paddingTop: '6px',
+                borderTop: '1px solid #fee2e2'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login', {
+                    state: {
+                      registeredEmail: formData.email.trim(),
+                      infoMessage: `Welcome back! An account with ${formData.email.trim()} is already registered. Please log in.`
+                    }
+                  })}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '9px 18px',
+                    background: '#DC4C64',
+                    color: '#FFFFFF',
+                    borderRadius: '10px',
+                    border: 'none',
+                    fontWeight: 750,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Log In with this Email</span>
+                  <ArrowRight size={15} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login', {
+                    state: {
+                      registeredEmail: formData.email.trim(),
+                      openForgotModal: true
+                    }
+                  })}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#991b1b',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    textDecoration: 'underline',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Forgot your password? Reset it here
+                </button>
+              </div>
+            )}
           </div>
         )}
 

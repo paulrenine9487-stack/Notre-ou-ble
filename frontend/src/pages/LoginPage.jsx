@@ -43,8 +43,8 @@ export default function LoginPage() {
   const [secretCopied, setSecretCopied] = useState(false);
 
   // Forgot password modal state (3-Step OTP Verification Flow)
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(Boolean(location.state?.openForgotModal));
+  const [forgotEmail, setForgotEmail] = useState(location.state?.registeredEmail || '');
   const [maskedEmail, setMaskedEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [forgotToken, setForgotToken] = useState('');

@@ -110,6 +110,7 @@ exports.register = async (req, res, next) => {
     if (existingUsernames.length > 0) {
       return res.status(409).json({
         success: false,
+        conflictField: 'username',
         message: 'This username is already taken. Please choose another username.'
       });
     }
@@ -122,6 +123,7 @@ exports.register = async (req, res, next) => {
     if (existingEmails.length > 0) {
       return res.status(409).json({
         success: false,
+        conflictField: 'email',
         message: 'An account with this email already exists. Please log in.'
       });
     }

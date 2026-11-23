@@ -299,6 +299,13 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
       console.error('Error completing song session:', err);
       setToastMessage('Practice record saved to your journal.');
       setTimeout(() => setToastMessage(null), 4000);
+      setSessionCompleted(true);
+      if (onSessionComplete) onSessionComplete();
+      if (onProceedToNextStage) {
+        setTimeout(() => {
+          onProceedToNextStage();
+        }, 800);
+      }
     }
   };
 

@@ -162,11 +162,7 @@ export default function LearningPage() {
     if (requestedStageNum && stages.length > 0) {
       const match = stages.find(s => s.stage_number === requestedStageNum);
       if (match && selectedStageId !== match.id) {
-        const matchIdx = stages.findIndex(s => s.id === match.id);
-        const prevSt = matchIdx > 0 ? stages[matchIdx - 1] : null;
-        if (match.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed))) {
-          setSelectedStageId(match.id);
-        }
+        setSelectedStageId(match.id);
       }
     }
   }, [requestedStageNum, stages, selectedStageId]);
@@ -174,7 +170,7 @@ export default function LearningPage() {
   const handleSelectStage = (stage) => {
     const stageIdx = stages.findIndex(s => s.id === stage.id);
     const prevSt = stageIdx > 0 ? stages[stageIdx - 1] : null;
-    const canAccess = stage.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed));
+    const canAccess = stage.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed)) || stage.status === 'COMPLETED';
     if (!canAccess) {
       alert(`Stage ${stage.stage_number} is locked. You must complete Stage ${stage.stage_number - 1} first.`);
       return;
@@ -202,7 +198,7 @@ export default function LearningPage() {
           return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
         }
         if (s.stage_number === targetStageNumber) {
-          return { ...s, is_unlocked: true };
+          return { ...s, is_unlocked: true, status: s.status === 'COMPLETED' ? 'COMPLETED' : 'IN PROGRESS' };
         }
         return s;
       })
@@ -210,30 +206,18 @@ export default function LearningPage() {
     const targetStage = stages.find(s => s.stage_number === targetStageNumber);
     if (targetStage) {
       setSelectedStageId(targetStage.id);
-      updateStageUrl(targetStageNumber);
-      window.scrollTo({ top: 80, behavior: 'smooth' });
+      api.startStage(targetStage.id).catch(() => {});
     }
-    loadStages(true);
+    updateStageUrl(targetStageNumber);
+    window.scrollTo({ top: 80, behavior: 'smooth' });
+    setTimeout(() => {
+      loadStages(true);
+    }, 600);
   };
 
   const handleNextStage = () => {
     if (nextStage) {
-      const isCurrentCompleted =
-        selectedStage?.status === 'COMPLETED' ||
-        selectedStage?.is_completed ||
-        stageDetails?.progress?.is_completed;
-
-      if (nextStage.is_unlocked === false && !isCurrentCompleted) {
-        alert(`Stage ${nextStage.stage_number} is locked. Please complete all required activities in Stage ${selectedStage.stage_number} first.`);
-        return;
-      }
-
-      setStages(prevStages =>
-        prevStages.map(s => s.id === nextStage.id ? { ...s, is_unlocked: true } : s)
-      );
-      setSelectedStageId(nextStage.id);
-      updateStageUrl(nextStage.stage_number);
-      window.scrollTo({ top: 80, behavior: 'smooth' });
+      handleProceedToStage(nextStage.stage_number);
     }
   };
 
@@ -557,14 +541,14 @@ export default function LearningPage() {
                         return (
                           <button
                             type="button"
-                            onClick={handleNextStage}
+                            onClick={() => handleProceedToStage(nextStage.stage_number)}
                             disabled={!isUnlocked}
                             className={`stage-bottom-btn next ${!isUnlocked ? 'disabled' : ''}`}
                             style={{
                               cursor: !isUnlocked ? 'not-allowed' : 'pointer',
                               opacity: !isUnlocked ? 0.6 : 1
                             }}
-                            title={!isUnlocked ? `Complete Stage ${selectedStage.stage_number} to unlock` : ''}
+                            title={!isUnlocked ? `Complete Stage ${selectedStage.stage_number} to unlock` : `Proceed to ${nextStage.title}`}
                           >
                             <span>{!isUnlocked ? `Locked: ${nextStage.title}` : `Next: ${nextStage.title}`}</span>
                             {!isUnlocked ? <Lock size={16} /> : <ChevronRight size={18} />}

@@ -192,14 +192,12 @@ exports.getStages = async (req, res, next) => {
       LIMIT 5
     `);
 
-    let prevCompleted = true; // Stage 1 is always unlocked
     const stagesWithProgress = [];
 
     for (let i = 0; i < stages.length; i++) {
       const st = stages[i];
       const prog = await getUserStageStatus(userId, st.id, st.stage_number);
-      const isCompleted = prog.status === 'COMPLETED' || prog.isComplete;
-      const isUnlocked = i === 0 ? true : prevCompleted;
+      const isCompleted = prog.status === 'COMPLETED' || prog.isComplete || (prog.progressPercentage >= 100);
 
       stagesWithProgress.push({
         id: st.id,
@@ -208,14 +206,29 @@ exports.getStages = async (req, res, next) => {
         subtitle: st.subtitle,
         description: st.description,
         display_order: st.display_order,
-        status: prog.status,
-        progress_percentage: prog.progressPercentage,
-        is_unlocked: isUnlocked,
-        is_completed: isCompleted
+        status: isCompleted ? 'COMPLETED' : prog.status,
+        progress_percentage: isCompleted ? 100 : prog.progressPercentage,
+        is_completed: isCompleted,
+        is_unlocked: false
       });
+    }
 
-      // Next stage unlocks only if current stage is completed
-      prevCompleted = prevCompleted && isCompleted;
+    // Determine unlocked status:
+    // Stage 1 (index 0) is always unlocked.
+    // Completing Stage k unlocks Stage k+1.
+    // Any stage already in progress or completed is always accessible.
+    let maxUnlockedIndex = 0;
+    for (let i = 0; i < stagesWithProgress.length; i++) {
+      if (stagesWithProgress[i].is_completed) {
+        maxUnlockedIndex = Math.max(maxUnlockedIndex, i + 1);
+      }
+      if (stagesWithProgress[i].status === 'IN PROGRESS' || stagesWithProgress[i].progress_percentage > 0) {
+        maxUnlockedIndex = Math.max(maxUnlockedIndex, i);
+      }
+    }
+
+    for (let i = 0; i < stagesWithProgress.length; i++) {
+      stagesWithProgress[i].is_unlocked = (i <= maxUnlockedIndex);
     }
 
     const completedStagesCount = stagesWithProgress.filter(s => s.is_completed).length;
@@ -263,18 +276,27 @@ exports.getStageDetails = async (req, res, next) => {
 
     // Sequential stage unlocking enforcement (Requirement 4)
     if (stage.stage_number > 1) {
-      const [prevStageRows] = await pool.query(
-        'SELECT id, stage_number FROM learning_stages WHERE module_id = ? AND stage_number = ? AND is_active = TRUE LIMIT 1',
-        [stage.module_id || 1, stage.stage_number - 1]
+      const [currentStageProg] = await pool.query(
+        'SELECT status, progress_percentage FROM learning_stage_progress WHERE user_id = ? AND stage_id = ?',
+        [userId, stageId]
       );
-      if (prevStageRows.length > 0) {
-        const prevProg = await getUserStageStatus(userId, prevStageRows[0].id, prevStageRows[0].stage_number);
-        if (prevProg.status !== 'COMPLETED' && !prevProg.isComplete) {
-          return res.status(403).json({
-            success: false,
-            isLocked: true,
-            message: `Stage ${stage.stage_number} is locked. You must complete Stage ${prevStageRows[0].stage_number} first.`
-          });
+      const isAlreadyUnlockedOrStarted = currentStageProg.length > 0 &&
+        (currentStageProg[0].status === 'IN PROGRESS' || currentStageProg[0].status === 'COMPLETED' || parseFloat(currentStageProg[0].progress_percentage || 0) > 0);
+
+      if (!isAlreadyUnlockedOrStarted) {
+        const [prevStageRows] = await pool.query(
+          'SELECT id, stage_number FROM learning_stages WHERE module_id = ? AND stage_number = ? AND is_active = TRUE LIMIT 1',
+          [stage.module_id || 1, stage.stage_number - 1]
+        );
+        if (prevStageRows.length > 0) {
+          const prevProg = await getUserStageStatus(userId, prevStageRows[0].id, prevStageRows[0].stage_number);
+          if (prevProg.status !== 'COMPLETED' && !prevProg.isComplete && (prevProg.progressPercentage || 0) < 100) {
+            return res.status(403).json({
+              success: false,
+              isLocked: true,
+              message: `Stage ${stage.stage_number} is locked. You must complete Stage ${prevStageRows[0].stage_number} first.`
+            });
+          }
         }
       }
     }
@@ -2644,6 +2666,19 @@ exports.completePartTab = async (req, res, next) => {
         VALUES (?, 3, 'song_practice_1', 'practice', 'COMPLETED', NOW())
         ON DUPLICATE KEY UPDATE status = 'COMPLETED', completed_at = NOW()
       `, [userId]).catch(() => {});
+
+      await pool.query(`
+        INSERT INTO learning_activity_progress (user_id, stage_id, activity_id, activity_type, status, completed_at)
+        VALUES (?, 3, 's3_song', 'practice', 'COMPLETED', NOW())
+        ON DUPLICATE KEY UPDATE status = 'COMPLETED', completed_at = NOW()
+      `, [userId]).catch(() => {});
+
+      // Unlock Stage 4 so user can proceed immediately
+      await pool.query(`
+        INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at)
+        VALUES (?, 4, 'IN PROGRESS', 10, NOW())
+        ON DUPLICATE KEY UPDATE started_at = COALESCE(started_at, NOW())
+      `, [userId]).catch(() => {});
     }
 
     res.status(200).json({
@@ -3403,6 +3438,13 @@ exports.completeSongSession = async (req, res, next) => {
       INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
       VALUES (?, 3, 'COMPLETED', 100, NOW(), NOW())
       ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+    `, [userId]).catch(() => {});
+
+    // Ensure Stage 4 is initialized so it is immediately unlocked
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at)
+      VALUES (?, 4, 'IN PROGRESS', 10, NOW())
+      ON DUPLICATE KEY UPDATE started_at = COALESCE(started_at, NOW())
     `, [userId]).catch(() => {});
 
     res.status(200).json({
