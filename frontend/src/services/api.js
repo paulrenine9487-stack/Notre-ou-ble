@@ -16,7 +16,9 @@ async function handleResponse(response) {
     if (response.status === 401) {
       // Gracefully clear invalid/expired token so user is cleanly redirected rather than hitting a loop
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-      if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
+      const isAuthPage = currentPath.includes('/login') || currentPath.includes('/register') || currentPath === '/';
+      const hasRefreshToken = typeof localStorage !== 'undefined' && !!localStorage.getItem('resonova_refresh_token');
+      if (!isAuthPage && !hasRefreshToken) {
         localStorage.removeItem('resonova_token');
         localStorage.removeItem('resonova_user');
       }
@@ -47,8 +49,12 @@ export const api = {
       body: JSON.stringify(credentials)
     });
     const data = await handleResponse(res);
-    if (data.token) {
-      localStorage.setItem('resonova_token', data.token);
+    const token = data.token || data.accessToken;
+    if (token) {
+      localStorage.setItem('resonova_token', token);
+      if (data.refreshToken) {
+        localStorage.setItem('resonova_refresh_token', data.refreshToken);
+      }
       localStorage.setItem('resonova_user', JSON.stringify(data.user));
     }
     return data;
@@ -61,11 +67,45 @@ export const api = {
       body: JSON.stringify(payload)
     });
     const data = await handleResponse(res);
-    if (data.token) {
-      localStorage.setItem('resonova_token', data.token);
+    const token = data.token || data.accessToken;
+    if (token) {
+      localStorage.setItem('resonova_token', token);
+      if (data.refreshToken) {
+        localStorage.setItem('resonova_refresh_token', data.refreshToken);
+      }
       localStorage.setItem('resonova_user', JSON.stringify(data.user));
     }
     return data;
+  },
+
+  async refreshAccessToken() {
+    const refreshToken = localStorage.getItem('resonova_refresh_token');
+    if (!refreshToken) return null;
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+      if (!res.ok) {
+        localStorage.removeItem('resonova_token');
+        localStorage.removeItem('resonova_refresh_token');
+        localStorage.removeItem('resonova_user');
+        return null;
+      }
+      const data = await res.json();
+      const newToken = data.token || data.accessToken;
+      if (newToken) {
+        localStorage.setItem('resonova_token', newToken);
+        if (data.refreshToken) {
+          localStorage.setItem('resonova_refresh_token', data.refreshToken);
+        }
+        return newToken;
+      }
+    } catch {
+      return null;
+    }
+    return null;
   },
 
   async getMfaSetup() {
@@ -120,14 +160,20 @@ export const api = {
 
   async logout() {
     try {
+      const refreshToken = localStorage.getItem('resonova_refresh_token');
       await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
-        headers: { ...getAuthHeader() }
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({ refreshToken })
       });
     } catch (e) {
       // Ignore network errors on logout
     } finally {
       localStorage.removeItem('resonova_token');
+      localStorage.removeItem('resonova_refresh_token');
       localStorage.removeItem('resonova_user');
     }
   },

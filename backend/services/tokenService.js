@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const pool = require('../config/db');
 const { logSecurityEvent } = require('../utils/securityLogger');
 
-const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || '15m'; // 15-minute short-lived access token
+const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DAYS = parseInt(process.env.REFRESH_TOKEN_DAYS || '7', 10); // 7-day refresh token
 const JWT_SECRET = process.env.JWT_SECRET || 'resonova_default_secret_key';
 

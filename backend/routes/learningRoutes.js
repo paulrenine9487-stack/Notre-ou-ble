@@ -13,6 +13,9 @@ const uploadAudio = require('../middleware/upload');
 // Secure authenticated streaming for student recordings (supports Authorization header or ?token= for audio elements)
 router.get('/recordings/:recordingId/audio', authenticateToken, fiveStageCtrl.streamRecordingAudio);
 
+// Public breathing exercise levels and timings (can be accessed for practice pacer)
+router.get('/breathing-levels', fiveStageCtrl.getBreathingLevels);
+
 router.use(authenticateToken);
 
 // ============================================================================

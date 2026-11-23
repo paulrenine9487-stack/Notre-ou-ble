@@ -158,15 +158,20 @@ export default function InteractiveBreathingTimer({
   const [savingSession, setSavingSession] = useState(false);
 
   const timerRef = useRef(null);
+  const isSavingRef = useRef(false);
 
   // 6. Master Play / Pause / Resume
   const handleTogglePlayPause = () => {
     if (isRunning) {
       setIsRunning(false);
-      clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     } else {
       setIsRunning(true);
       setSessionSuccess(false);
+      isSavingRef.current = false;
       if (currentPhase === 'idle') {
         setCurrentPhase('inhale');
         setPhaseSecondsLeft(customInhale);
@@ -177,7 +182,11 @@ export default function InteractiveBreathingTimer({
   // 7. Reset Timer
   const handleReset = () => {
     setIsRunning(false);
-    clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    isSavingRef.current = false;
     setCurrentPhase('idle');
     setPhaseSecondsLeft(customInhale);
     setCurrentCycle(1);
@@ -212,10 +221,17 @@ export default function InteractiveBreathingTimer({
           } else if (currentPhase === 'exhale') {
             // Cycle finished
             if (currentCycle >= selectedCycles) {
+              if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+              }
               setIsRunning(false);
               setCurrentPhase('idle');
               setSessionSuccess(true);
-              handleLogBreathingSession();
+              // Safely invoke logging outside pure state updater
+              setTimeout(() => {
+                handleLogBreathingSession();
+              }, 0);
               return customInhale;
             } else {
               setCurrentCycle((c) => c + 1);
@@ -228,20 +244,34 @@ export default function InteractiveBreathingTimer({
       });
     }, 100);
 
-    return () => clearInterval(timerRef.current);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [isRunning, currentPhase, currentCycle, selectedCycles, customInhale, customHold, customExhale]);
 
   // Log completed breathing session to MySQL
   const handleLogBreathingSession = async () => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setSavingSession(true);
+
+    const safeInhale = Number(customInhale) || 4.0;
+    const safeHold = Number(customHold) >= 0 ? Number(customHold) : 0.0;
+    const safeExhale = Number(customExhale) || 10.0;
+    const safeCycles = Number(selectedCycles) || 5;
+    const safeTotalDuration = Number(totalSessionDuration) || Math.round((safeInhale + safeHold + safeExhale) * safeCycles);
+
     const sessionPayload = {
-      level_key: selectedLevelKey,
-      inhale_duration: customInhale,
-      hold_duration: customHold,
-      exhale_duration: customExhale,
-      completed_cycles: selectedCycles,
-      target_cycles: selectedCycles,
-      total_duration_seconds: totalSessionDuration,
+      level_key: selectedLevelKey || 'beginner',
+      inhale_duration: safeInhale,
+      hold_duration: safeHold,
+      exhale_duration: safeExhale,
+      completed_cycles: safeCycles,
+      target_cycles: safeCycles,
+      total_duration_seconds: safeTotalDuration,
       completion_status: 'COMPLETED',
       notes: pulsedRhythm ? 'Completed with pulsed exhalation rhythm.' : 'Steady airflow exercise.'
     };

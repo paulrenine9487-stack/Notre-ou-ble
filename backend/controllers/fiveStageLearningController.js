@@ -2848,6 +2848,7 @@ exports.getBreathingLevels = async (req, res, next) => {
 exports.saveBreathingSession = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const partNumber = req.params.partNumber ? parseInt(req.params.partNumber, 10) : 2;
     const {
       level_key,
       inhale_duration,
@@ -2864,6 +2865,13 @@ exports.saveBreathingSession = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Missing session parameters.' });
     }
 
+    const safeInhale = Number(inhale_duration) || 4.0;
+    const safeHold = Number(hold_duration) >= 0 ? Number(hold_duration) : 0.0;
+    const safeExhale = Number(exhale_duration) || 10.0;
+    const safeCycles = parseInt(completed_cycles, 10) || 5;
+    const safeTargetCycles = parseInt(target_cycles, 10) || safeCycles;
+    const safeTotalSeconds = parseInt(total_duration_seconds, 10) || Math.round((safeInhale + safeHold + safeExhale) * safeCycles);
+
     // 1. Insert into student_breathing_sessions
     const [result] = await pool.query(`
       INSERT INTO student_breathing_sessions (
@@ -2871,14 +2879,14 @@ exports.saveBreathingSession = async (req, res, next) => {
         completed_cycles, target_cycles, total_duration_seconds, completion_status, notes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, 'COMPLETED'), ?)
     `, [
-      userId, level_key, inhale_duration, hold_duration, exhale_duration,
-      completed_cycles, target_cycles || completed_cycles, total_duration_seconds,
-      completion_status, notes || null
+      userId, String(level_key).slice(0, 50), safeInhale, safeHold, safeExhale,
+      safeCycles, safeTargetCycles, safeTotalSeconds,
+      completion_status || 'COMPLETED', notes || null
     ]);
 
     // 2. Log to practice_sessions for Dashboard & Practice Journal
-    const levelLabel = level_key.charAt(0).toUpperCase() + level_key.slice(1);
-    const durationMinutes = Math.max(1, Math.ceil(total_duration_seconds / 60));
+    const levelLabel = String(level_key).charAt(0).toUpperCase() + String(level_key).slice(1);
+    const durationMinutes = Math.max(1, Math.ceil(safeTotalSeconds / 60));
     await pool.query(`
       INSERT INTO practice_sessions (
         user_id, session_type, exercise_name, duration_minutes, duration_seconds,
@@ -2888,39 +2896,43 @@ exports.saveBreathingSession = async (req, res, next) => {
       userId,
       `Stage 03 Part 02 - Breathing Practice (${levelLabel})`,
       durationMinutes,
-      total_duration_seconds,
+      safeTotalSeconds,
       JSON.stringify({
         level_key,
-        inhale: inhale_duration,
-        hold: hold_duration,
-        exhale: exhale_duration,
-        cycles: completed_cycles
+        inhale: safeInhale,
+        hold: safeHold,
+        exhale: safeExhale,
+        cycles: safeCycles
       })
     ]);
 
-    // 3. Mark Step 2: Breathe as completed in student_part_progress
+    // 3. Mark Step 2: Breathe as completed in student_part_progress (atomic ON DUPLICATE KEY UPDATE)
     const [partRows] = await pool.query(
-      'SELECT id FROM learning_part_sections WHERE part_number = 2 LIMIT 1'
+      'SELECT id FROM learning_part_sections WHERE part_number = ? LIMIT 1',
+      [partNumber]
     );
     const partId = partRows[0]?.id || 1;
 
-    const [progRows] = await pool.query(
-      'SELECT id FROM student_part_progress WHERE user_id = ? AND part_id = ? AND tab_key = "breathe"',
-      [userId, partId]
-    );
+    await pool.query(`
+      INSERT INTO student_part_progress (
+        user_id, part_id, tab_key, status, progress_percentage, completed_at
+      ) VALUES (?, ?, 'breathe', 'COMPLETED', 100, NOW())
+      ON DUPLICATE KEY UPDATE
+        status = 'COMPLETED',
+        progress_percentage = 100,
+        completed_at = NOW(),
+        updated_at = NOW()
+    `, [userId, partId]);
 
-    if (progRows.length === 0) {
-      await pool.query(`
-        INSERT INTO student_part_progress (user_id, part_id, tab_key, status, progress_percentage, completed_at)
-        VALUES (?, ?, 'breathe', 'COMPLETED', 100, NOW())
-      `, [userId, partId]);
-    } else {
-      await pool.query(`
-        UPDATE student_part_progress
-        SET status = 'COMPLETED', progress_percentage = 100, completed_at = NOW()
-        WHERE id = ?
-      `, [progRows[0].id]);
-    }
+    // 4. Mark activity progress
+    await pool.query(`
+      INSERT INTO learning_activity_progress (
+        user_id, stage_id, activity_id, activity_type, status, completed_at
+      ) VALUES (?, 3, 's3_breathe', 'practice', 'COMPLETED', NOW())
+      ON DUPLICATE KEY UPDATE
+        status = 'COMPLETED',
+        completed_at = NOW()
+    `, [userId]).catch(() => {});
 
     res.status(201).json({
       success: true,
