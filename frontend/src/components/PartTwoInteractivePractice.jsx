@@ -18,7 +18,8 @@ import {
 
 export default function PartTwoInteractivePractice({
   stage,
-  onUpdate = () => { }
+  onUpdate = () => { },
+  onProceedToNextStage
 }) {
   // Navigation Tabs: 'posture' | 'breathe' | 'song' (persisted in sessionStorage)
   const [activeTab, setActiveTabState] = useState(() => {
@@ -696,6 +697,7 @@ export default function PartTwoInteractivePractice({
             setIsSongCompleted(true);
             if (onUpdate) onUpdate();
           }}
+          onProceedToNextStage={onProceedToNextStage}
         />
       )}
     </div>

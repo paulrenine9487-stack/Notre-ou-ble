@@ -133,7 +133,10 @@ export default function LearningPage() {
   const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
 
   const handleSelectStage = (stage) => {
-    if (stage.is_unlocked === false) {
+    const stageIdx = stages.findIndex(s => s.id === stage.id);
+    const prevSt = stageIdx > 0 ? stages[stageIdx - 1] : null;
+    const canAccess = stage.is_unlocked !== false || (prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed));
+    if (!canAccess) {
       alert(`Stage ${stage.stage_number} is locked. You must complete Stage ${stage.stage_number - 1} first.`);
       return;
     }
@@ -151,12 +154,41 @@ export default function LearningPage() {
     }
   };
 
+  const handleProceedToStage = (targetStageNumber) => {
+    setStages(prevStages =>
+      prevStages.map(s => {
+        if (s.stage_number < targetStageNumber) {
+          return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
+        }
+        if (s.stage_number === targetStageNumber) {
+          return { ...s, is_unlocked: true };
+        }
+        return s;
+      })
+    );
+    const targetStage = stages.find(s => s.stage_number === targetStageNumber);
+    if (targetStage) {
+      setSelectedStageId(targetStage.id);
+      window.scrollTo({ top: 80, behavior: 'smooth' });
+    }
+    loadStages(true);
+  };
+
   const handleNextStage = () => {
     if (nextStage) {
-      if (nextStage.is_unlocked === false) {
+      const isCurrentCompleted =
+        selectedStage?.status === 'COMPLETED' ||
+        selectedStage?.is_completed ||
+        stageDetails?.progress?.is_completed;
+
+      if (nextStage.is_unlocked === false && !isCurrentCompleted) {
         alert(`Stage ${nextStage.stage_number} is locked. Please complete all required activities in Stage ${selectedStage.stage_number} first.`);
         return;
       }
+
+      setStages(prevStages =>
+        prevStages.map(s => s.id === nextStage.id ? { ...s, is_unlocked: true } : s)
+      );
       setSelectedStageId(nextStage.id);
       window.scrollTo({ top: 80, behavior: 'smooth' });
     }
@@ -274,7 +306,8 @@ export default function LearningPage() {
                 const isSelected = st.id === (selectedStage ? selectedStage.id : selectedStageId);
                 const isCompleted = st.status === 'COMPLETED';
                 const isInProgress = st.status === 'IN_PROGRESS';
-                const isLocked = st.is_unlocked === false;
+                const prevSt = idx > 0 ? stages[idx - 1] : null;
+                const isLocked = st.is_unlocked === false && !(prevSt && (prevSt.status === 'COMPLETED' || prevSt.is_completed));
                 const isNotStarted = !isCompleted && !isInProgress && !isSelected && !isLocked;
                 const formattedNum = String(st.stage_number).padStart(2, '0');
                 const hasNext = idx < stages.length - 1;
@@ -377,7 +410,19 @@ export default function LearningPage() {
                   {selectedStage.stage_number === 3 && (
                     <StageThreePresentContent
                       stage={stageDetails || selectedStage}
+                      onProceedToNextStage={() => handleProceedToStage(4)}
                       onUpdate={() => {
+                        setStages(prev =>
+                          prev.map(s => {
+                            if (s.stage_number === 3) {
+                              return { ...s, status: 'COMPLETED', is_completed: true, progress_percentage: 100 };
+                            }
+                            if (s.stage_number === 4) {
+                              return { ...s, is_unlocked: true };
+                            }
+                            return s;
+                          })
+                        );
                         loadStages(true);
                         loadStageDetails(selectedStage.id, true);
                       }}
@@ -424,20 +469,29 @@ export default function LearningPage() {
                     </div>
 
                     {nextStage ? (
-                      <button
-                        type="button"
-                        onClick={handleNextStage}
-                        disabled={nextStage.is_unlocked === false}
-                        className={`stage-bottom-btn next ${nextStage.is_unlocked === false ? 'disabled' : ''}`}
-                        style={{
-                          cursor: nextStage.is_unlocked === false ? 'not-allowed' : 'pointer',
-                          opacity: nextStage.is_unlocked === false ? 0.6 : 1
-                        }}
-                        title={nextStage.is_unlocked === false ? `Complete Stage ${selectedStage.stage_number} to unlock` : ''}
-                      >
-                        <span>{nextStage.is_unlocked === false ? `Locked: ${nextStage.title}` : `Next: ${nextStage.title}`}</span>
-                        {nextStage.is_unlocked === false ? <Lock size={16} /> : <ChevronRight size={18} />}
-                      </button>
+                      (() => {
+                        const isCurrentStageCompleted =
+                          selectedStage?.status === 'COMPLETED' ||
+                          selectedStage?.is_completed ||
+                          stageDetails?.progress?.is_completed;
+                        const isUnlocked = nextStage.is_unlocked !== false || isCurrentStageCompleted;
+                        return (
+                          <button
+                            type="button"
+                            onClick={handleNextStage}
+                            disabled={!isUnlocked}
+                            className={`stage-bottom-btn next ${!isUnlocked ? 'disabled' : ''}`}
+                            style={{
+                              cursor: !isUnlocked ? 'not-allowed' : 'pointer',
+                              opacity: !isUnlocked ? 0.6 : 1
+                            }}
+                            title={!isUnlocked ? `Complete Stage ${selectedStage.stage_number} to unlock` : ''}
+                          >
+                            <span>{!isUnlocked ? `Locked: ${nextStage.title}` : `Next: ${nextStage.title}`}</span>
+                            {!isUnlocked ? <Lock size={16} /> : <ChevronRight size={18} />}
+                          </button>
+                        );
+                      })()
                     ) : (
                       <div style={{ minWidth: 140 }} />
                     )}
@@ -1086,7 +1140,7 @@ function StageTwoStimulateRecall({ stage, onUpdate }) {
 // ============================================================================
 // STAGE 03: PRESENT CONTENT (Subtitle: Understand)
 // ============================================================================
-function StageThreePresentContent({ stage, onUpdate }) {
+function StageThreePresentContent({ stage, onUpdate, onProceedToNextStage }) {
   const teachingVideo = stage.content?.find(c => c.content_type === 'teaching_video' || c.content_type === 'video');
   const tips = stage.breathingTips || [];
   const songs = stage.songs || [];
@@ -1176,7 +1230,7 @@ function StageThreePresentContent({ stage, onUpdate }) {
       </div>
 
       {/* SECTION B: PART 02 INTERACTIVE PRACTICE (Posture, Breathe, Song) */}
-      <PartTwoInteractivePractice stage={stage} onUpdate={onUpdate} />
+      <PartTwoInteractivePractice stage={stage} onUpdate={onUpdate} onProceedToNextStage={onProceedToNextStage} />
     </div>
   );
 }

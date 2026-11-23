@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function InteractiveSongPractice({ onBackToBreathe, onSessionComplete }) {
+export default function InteractiveSongPractice({ onBackToBreathe, onSessionComplete, onProceedToNextStage }) {
   // Practice Level State: 'beginner' | 'intermediate' | 'advanced'
   const [selectedLevelKey, setSelectedLevelKey] = useState('beginner');
 
@@ -105,6 +105,10 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
               }
             });
             setMarkedNotesByLevel(initialMarked);
+          }
+
+          if (res.has_completed_session || res.progress?.status === 'COMPLETED') {
+            setSessionCompleted(true);
           }
         }
       } catch (err) {
@@ -282,7 +286,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
       await api.completePartTab(2, { tab_key: 'song', duration_minutes: 5 });
 
       setSessionCompleted(true);
-      setToastMessage(`Practice session completed! Your progress in ${currentLevel.level_name} is saved to your Practice Journal ✓`);
+      setToastMessage(`Practice session completed! Stage 04: Let's Check Ourselves is unlocked ✓`);
       setTimeout(() => setToastMessage(null), 5000);
 
       if (onSessionComplete) onSessionComplete();
@@ -1090,7 +1094,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
 
               <button
                 type="button"
-                onClick={handleCompleteSession}
+                onClick={sessionCompleted && onProceedToNextStage ? onProceedToNextStage : handleCompleteSession}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1110,6 +1114,31 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                 <Check size={16} />
                 <span>{sessionCompleted ? 'Session Completed ✓' : 'Complete Practice Session ✓'}</span>
               </button>
+
+              {sessionCompleted && onProceedToNextStage && (
+                <button
+                  type="button"
+                  onClick={onProceedToNextStage}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '10px 24px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #0D9488, #059669)',
+                    color: '#FFFFFF',
+                    fontSize: '0.92rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(13, 148, 136, 0.38)',
+                    transition: 'all 0.18s ease'
+                  }}
+                >
+                  <span>Next: Stage 04 Let's Check Ourselves</span>
+                  <ArrowRight size={16} />
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -44,3 +44,6 @@ coverage/
 # Local Agent Workspace Caches
 .agents/
 */.agents/
+
+# Uploads
+backend/uploads/

@@ -55,14 +55,24 @@ async function getUserStageStatus(userId, stageId, stageNumber) {
   } else if (stageNumber === 3) {
     // Requirements: Learning video viewed, Song practice completed
     const hasVideo = actIds.includes('s3_video');
-    const [songPracticeCount] = await pool.query(
-      "SELECT COUNT(*) AS count FROM learning_activity_progress WHERE user_id = ? AND stage_id = ? AND activity_id LIKE 'song_practice_%'",
+    const [songSessions] = await pool.query(
+      "SELECT COUNT(*) AS count FROM student_song_sessions WHERE user_id = ? AND session_status = 'COMPLETED'",
+      [userId]
+    );
+    const [songPartProg] = await pool.query(
+      "SELECT COUNT(*) AS count FROM student_part_progress WHERE user_id = ? AND tab_key = 'song' AND status = 'COMPLETED'",
+      [userId]
+    );
+    const [songActivityCount] = await pool.query(
+      "SELECT COUNT(*) AS count FROM learning_activity_progress WHERE user_id = ? AND stage_id = ? AND (activity_id LIKE 'song_practice_%' OR activity_id = 's3_song')",
       [userId, stageId]
     );
-    const hasSong = (songPracticeCount[0].count || 0) > 0;
+
+    const hasSong = (songSessions[0]?.count || 0) > 0 || (songPartProg[0]?.count || 0) > 0 || (songActivityCount[0]?.count || 0) > 0 || actIds.includes('s3_song');
     let met = (hasVideo ? 1 : 0) + (hasSong ? 1 : 0);
-    computedPercent = Math.round((met / 2) * 100);
-    isComplete = hasVideo && hasSong;
+    computedPercent = hasSong ? 100 : Math.round((met / 2) * 100);
+    // Completing Song Practice (the culminating activity of Stage 3) completes Stage 3 and unlocks Stage 4
+    isComplete = hasSong || (hasVideo && met === 2);
   } else if (stageNumber === 4) {
     // Requirements: Challenge attempted (Myth/Fact), Personal Learning Reflection, Song recording submitted
     const [challengeAttempts] = await pool.query(
@@ -2436,12 +2446,21 @@ exports.getSongTab = async (req, res, next) => {
     }
 
     let partProg = { status: 'NOT_STARTED', progress_percentage: 0 };
+    let hasCompletedSession = false;
     if (userId) {
       const [pRows] = await pool.query(
         'SELECT * FROM student_part_progress WHERE user_id = ? AND part_id = ? AND tab_key = "song"',
         [userId, part.id]
       );
       if (pRows.length > 0) partProg = pRows[0];
+
+      const [sessRows] = await pool.query(
+        'SELECT id FROM student_song_sessions WHERE user_id = ? AND session_status = "COMPLETED" LIMIT 1',
+        [userId]
+      );
+      if (sessRows.length > 0 || partProg.status === 'COMPLETED') {
+        hasCompletedSession = true;
+      }
     }
 
     res.status(200).json({
@@ -2449,7 +2468,8 @@ exports.getSongTab = async (req, res, next) => {
       tab,
       song,
       levels: enhancedLevels,
-      progress: partProg
+      progress: partProg,
+      has_completed_session: hasCompletedSession
     });
   } catch (error) {
     next(error);
@@ -2591,6 +2611,21 @@ exports.completePartTab = async (req, res, next) => {
         VALUES 
           (?, 'Stage 3 Practice', ?, DATE_SUB(NOW(), INTERVAL ? MINUTE), NOW(), ?, ?, 'completed', ?, NOW())
       `, [userId, exName, minutes, minutes, minutes * 60, `Stage 03 Part 02 - ${key} practice completed.`]);
+    }
+
+    if (key === 'song') {
+      // Mark Stage 3 as COMPLETED in learning_stage_progress and activity progress
+      await pool.query(`
+        INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
+        VALUES (?, 3, 'COMPLETED', 100, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+      `, [userId]).catch(() => {});
+
+      await pool.query(`
+        INSERT INTO learning_activity_progress (user_id, stage_id, activity_id, activity_type, status, completed_at)
+        VALUES (?, 3, 'song_practice_1', 'practice', 'COMPLETED', NOW())
+        ON DUPLICATE KEY UPDATE status = 'COMPLETED', completed_at = NOW()
+      `, [userId]).catch(() => {});
     }
 
     res.status(200).json({
@@ -3326,6 +3361,31 @@ exports.completeSongSession = async (req, res, next) => {
       durationSec,
       `Song Practice: ${marked_notes_count || 0} notes marked, repeated ${repeat_count || 1} time(s).`
     ]);
+
+    // Mark song tab and Stage 3 complete to immediately unlock Stage 4
+    await pool.query(`
+      INSERT INTO student_part_progress (user_id, part_id, tab_key, status, progress_percentage, completed_at)
+      VALUES (?, 1, 'song', 'COMPLETED', 100, NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = NOW(), updated_at = NOW()
+    `, [userId]).catch(() => {});
+
+    await pool.query(`
+      INSERT INTO learning_activity_progress (user_id, stage_id, activity_id, activity_type, status, completed_at)
+      VALUES (?, 3, 's3_song', 'practice', 'COMPLETED', NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', completed_at = NOW()
+    `, [userId]).catch(() => {});
+
+    await pool.query(`
+      INSERT INTO learning_activity_progress (user_id, stage_id, activity_id, activity_type, status, completed_at)
+      VALUES (?, 3, 'song_practice_1', 'practice', 'COMPLETED', NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', completed_at = NOW()
+    `, [userId]).catch(() => {});
+
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
+      VALUES (?, 3, 'COMPLETED', 100, NOW(), NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = COALESCE(completed_at, NOW())
+    `, [userId]).catch(() => {});
 
     res.status(200).json({
       success: true,
