@@ -4264,3 +4264,56 @@ exports.adminResetStudentMythFact = async (req, res, next) => {
   }
 };
 
+// POST /api/learning/stages/:stageId/complete
+exports.completeStage = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const stageId = parseInt(req.params.stageId, 10);
+
+    const [stageRows] = await pool.query('SELECT stage_number, module_id FROM learning_stages WHERE id = ?', [stageId]);
+    if (stageRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Stage not found.' });
+    }
+
+    const { stage_number, module_id } = stageRows[0];
+
+    // Mark stage complete in learning_stage_progress
+    await pool.query(`
+      INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, completed_at, updated_at)
+      VALUES (?, ?, 'COMPLETED', 100, NOW(), NOW())
+      ON DUPLICATE KEY UPDATE status = 'COMPLETED', progress_percentage = 100, completed_at = NOW(), updated_at = NOW()
+    `, [userId, stageId]);
+
+    // Unlock next stage if exists
+    const [nextStageRows] = await pool.query(`
+      SELECT id FROM learning_stages 
+      WHERE (module_id = ? OR module_id IS NULL) AND stage_number = ?
+    `, [module_id, stage_number + 1]);
+
+    if (nextStageRows.length > 0) {
+      const nextStageId = nextStageRows[0].id;
+      await pool.query(`
+        INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, updated_at)
+        VALUES (?, ?, 'IN PROGRESS', 0, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE updated_at = NOW()
+      `, [userId, nextStageId]);
+    }
+
+    // Invalidate caches
+    if (cacheService && cacheService.del) {
+      await cacheService.del(`stages:progress:${userId}`);
+      await cacheService.del(`stage:${stageId}:${userId}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Stage ${stage_number} marked as complete.`,
+      stageId,
+      stageNumber: stage_number,
+      isCompleted: true
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

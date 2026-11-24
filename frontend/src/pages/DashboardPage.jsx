@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/useAuth';
 import { api } from '../services/api';
 import UserSidebar from '../components/UserSidebar';
@@ -16,27 +16,48 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
+  const activeAbortRef = useRef(null);
 
-  const fetchOverview = async () => {
+  const fetchOverview = async (signal) => {
+    // If a request is already running without an external signal, abort previous to prevent race conditions
+    if (activeAbortRef.current && !signal) {
+      activeAbortRef.current.abort();
+    }
+    const controller = signal ? null : new AbortController();
+    const effectiveSignal = signal || controller.signal;
+    if (controller) {
+      activeAbortRef.current = controller;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      const res = await api.getDashboardOverview();
+      const res = await api.getDashboardOverview({ signal: effectiveSignal });
       if (res.success) {
         setDashboardData(res.data);
       } else {
         setError(res.message || 'Failed to load dashboard overview.');
       }
     } catch (err) {
+      if (err.name === 'AbortError' || err.message?.includes('aborted') || effectiveSignal?.aborted) {
+        // Request cancelled cleanly on component unmount or fast re-render
+        return;
+      }
       console.error('Dashboard load error:', err);
       setError(err.message || 'Could not connect to server. Please ensure the backend is running.');
     } finally {
-      setLoading(false);
+      if (!effectiveSignal?.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchOverview();
+    const controller = new AbortController();
+    fetchOverview(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (

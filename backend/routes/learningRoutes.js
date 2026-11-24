@@ -16,6 +16,10 @@ router.get('/recordings/:recordingId/audio', authenticateToken, fiveStageCtrl.st
 // Public breathing exercise levels and timings (can be accessed for practice pacer)
 router.get('/breathing-levels', fiveStageCtrl.getBreathingLevels);
 
+// Public lesson video transcripts (curriculum educational material accessible to students and visitors)
+router.get('/stages/:stageId/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);
+router.get('/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);
+
 router.use(authenticateToken);
 
 // ============================================================================
@@ -24,6 +28,8 @@ router.use(authenticateToken);
 router.get('/stages/unlock-status', stageFivePracticeCtrl.getStagesUnlockStatus);
 router.get('/modules/:moduleId/completion-summary', stageFivePracticeCtrl.getModuleCompletionSummary);
 router.get('/modules/:moduleId/progress', stageFivePracticeCtrl.getModuleCompletionSummary);
+router.get('/:moduleId/completion-summary', stageFivePracticeCtrl.getModuleCompletionSummary);
+router.get('/:moduleId/progress', stageFivePracticeCtrl.getModuleCompletionSummary);
 router.get('/1/completion-summary', stageFivePracticeCtrl.getModuleCompletionSummary);
 router.get('/1/progress', stageFivePracticeCtrl.getModuleCompletionSummary);
 
@@ -46,7 +52,9 @@ router.get('/stages', fiveStageCtrl.getStages);
 router.get('/stages/:stageId', fiveStageCtrl.getStageDetails);
 router.get('/stages/:stageId/content', fiveStageCtrl.getStageDetails);
 router.post('/stages/:stageId/start', fiveStageCtrl.startStage);
+router.post('/stages/:stageId/complete', fiveStageCtrl.completeStage);
 router.post('/activity-progress', fiveStageCtrl.recordActivityProgress);
+router.post('/progress', fiveStageCtrl.recordActivityProgress);
 
 // Stage Objectives (Interactive 3D Flip Cards & Acknowledgement)
 router.get('/stages/:stageId/objectives', fiveStageCtrl.getStageObjectives);
@@ -67,8 +75,6 @@ router.get('/recall/peer-board/:questionId', fiveStageCtrl.getPeerPinBoard);
 
 // 3. Stage 03 - Present Content & Part 02 Interactive Practice (Posture, Breathe, Song)
 router.get('/videos', fiveStageCtrl.getVideos);
-router.get('/stages/:stageId/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);
-router.get('/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);
 router.get('/tips', fiveStageCtrl.getBreathingTips);
 router.get('/songs', fiveStageCtrl.getSongs);
 router.post('/songs/:songId/practice', fiveStageCtrl.recordSongPractice);

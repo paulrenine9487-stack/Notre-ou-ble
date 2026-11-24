@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronUp, FileText, Music, Clock, Copy, Check, Volume2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, FileText, Music, Clock, Copy, Check } from 'lucide-react';
 import { api } from '../services/api';
 
 /**
@@ -13,44 +13,40 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const fetchedKeyRef = useRef(null);
+  const fetchTranscript = async () => {
+    try {
+      setLoading(true);
+      const res = await api.getVideoTranscript(stageId, videoId);
+      if (res && res.success && res.transcript) {
+        setTranscript(res.transcript);
+      } else {
+        setTranscript(null);
+      }
+    } catch (err) {
+      console.warn('[VideoTranscriptSection] Could not load transcript:', err.message);
+      setTranscript(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const requestKey = `${stageId}_${videoId}`;
-
-    async function fetchTranscript() {
-      if (!videoId || !stageId) return;
-      try {
-        setLoading(true);
-        const res = await api.getVideoTranscript(stageId, videoId);
-        if (isMounted && res.success && res.transcript) {
-          setTranscript(res.transcript);
-        } else if (isMounted) {
-          setTranscript(null);
-        }
-      } catch (err) {
-        console.warn('[VideoTranscriptSection] Could not load transcript:', err.message);
-        if (isMounted) setTranscript(null);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    if (autoLoad && fetchedKeyRef.current !== requestKey) {
-      fetchedKeyRef.current = requestKey;
+    if (autoLoad) {
       fetchTranscript();
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [videoId, stageId, autoLoad]);
 
-  // If no transcript exists or not published, do not render an empty container
+  // If no transcript exists, do not render an empty container
   if (!loading && !transcript) {
     return null;
   }
+
+  const handleToggle = () => {
+    if (!isExpanded && !transcript && !loading) {
+      fetchTranscript();
+    }
+    setIsExpanded(prev => !prev);
+  };
 
   const handleCopy = () => {
     if (!transcript?.transcript_content) return;
@@ -61,11 +57,11 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
 
   const hasNoSpokenDialogue = transcript?.has_spoken_dialogue === 0;
 
-  // Simple Markdown & Timestamp Parser
+  // Markdown, Timestamp, and Section Parser
   const renderFormattedTranscript = (content) => {
     if (!content) return null;
 
-    const lines = content.split('\n');
+    const lines = content.replace(/\r\n/g, '\n').split('\n');
     const elements = [];
     let currentList = [];
 
@@ -92,7 +88,7 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
         return;
       }
 
-      // Headings (### or ##)
+      // Explicit Markdown Headings (###, ##, #)
       if (trimmed.startsWith('### ')) {
         flushList();
         elements.push(
@@ -100,9 +96,9 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
             key={`h3-${index}`}
             style={{
               fontSize: '1.05rem',
-              fontWeight: 700,
+              fontWeight: 800,
               color: '#1E1B4B',
-              margin: '18px 0 8px 0',
+              margin: '22px 0 8px 0',
               display: 'flex',
               alignItems: 'center',
               gap: 8
@@ -111,20 +107,45 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
             {trimmed.replace(/^###\s+/, '')}
           </h4>
         );
-      } else if (trimmed.startsWith('## ')) {
+      } else if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
         flushList();
         elements.push(
           <h3
             key={`h2-${index}`}
             style={{
-              fontSize: '1.15rem',
+              fontSize: '1.18rem',
               fontWeight: 800,
               color: '#1E1B4B',
-              margin: '20px 0 10px 0'
+              margin: '24px 0 10px 0'
             }}
           >
-            {trimmed.replace(/^##\s+/, '')}
+            {trimmed.replace(/^#+\s+/, '')}
           </h3>
+        );
+      }
+      // Section Titles in All-Caps (e.g. "THE SCIENCE OF BREATHING", "INHALE & EXHALE")
+      else if (
+        /^[A-Z0-9\s&"—:"]{4,50}$/.test(trimmed) &&
+        !trimmed.startsWith('[') &&
+        !trimmed.includes('.') &&
+        trimmed.length < 50
+      ) {
+        flushList();
+        elements.push(
+          <h4
+            key={`sec-${index}`}
+            style={{
+              fontSize: '1.02rem',
+              fontWeight: 800,
+              color: '#4C1D95',
+              letterSpacing: '0.02em',
+              margin: '20px 0 8px 0',
+              paddingBottom: 4,
+              borderBottom: '1px solid #F3E8FF'
+            }}
+          >
+            {trimmed}
+          </h4>
         );
       }
       // List items (- or *)
@@ -138,8 +159,8 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
           <p
             key={`p-${index}`}
             style={{
-              margin: '0 0 12px 0',
-              fontSize: '0.95rem',
+              margin: '0 0 10px 0',
+              fontSize: '0.94rem',
               lineHeight: 1.68,
               color: '#334155'
             }}
@@ -154,10 +175,10 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
     return elements;
   };
 
-  // Parses [00:00] timestamps, **bold** text, and inline tags
+  // Parses [00:00] timestamps, **bold** text, and bracketed notes
   const parseInlineFormatting = (text) => {
-    // Regex matches [MM:SS] timestamps and **bold** tokens
-    const tokens = text.split(/(\[\d{1,2}:\d{2}\]|\*\*.*?\*\*)/g);
+    // Regex matches timestamps [MM:SS], bold **text**, and bracketed notes [Note]
+    const tokens = text.split(/(\[\d{1,2}:\d{2}\]|\*\*.*?\*\*|\[.*?\])/g);
 
     return tokens.map((token, i) => {
       if (/^\[\d{1,2}:\d{2}\]$/.test(token)) {
@@ -190,6 +211,23 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
           <strong key={i} style={{ fontWeight: 700, color: '#0F172A' }}>
             {token.slice(2, -2)}
           </strong>
+        );
+      }
+      if (token.startsWith('[') && token.endsWith(']')) {
+        return (
+          <span
+            key={i}
+            style={{
+              color: '#6B7280',
+              fontStyle: 'italic',
+              background: '#F8FAFC',
+              padding: '1px 5px',
+              borderRadius: 4,
+              fontSize: '0.9em'
+            }}
+          >
+            {token}
+          </span>
         );
       }
       return token;
@@ -251,7 +289,7 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
               >
                 Video Transcript
               </h4>
-              {hasNoSpokenDialogue ? (
+              {hasNoSpokenDialogue && (
                 <span
                   style={{
                     display: 'inline-flex',
@@ -267,22 +305,6 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
                 >
                   <Music size={11} /> Instrumental / Demonstration
                 </span>
-              ) : (
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    color: '#059669',
-                    background: '#ECFDF5',
-                    padding: '3px 8px',
-                    borderRadius: 9999
-                  }}
-                >
-                  <Volume2 size={11} /> Spoken Content
-                </span>
               )}
             </div>
             <p
@@ -293,7 +315,7 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
                 lineHeight: 1.4
               }}
             >
-              Read along with the spoken content to understand the lesson more clearly.
+              Read along to understand the lesson more clearly.
             </p>
           </div>
         </div>
@@ -301,7 +323,7 @@ export default function VideoTranscriptSection({ videoId = 5, stageId = 3, autoL
         {/* Toggle Button */}
         <button
           type="button"
-          onClick={() => setIsExpanded(prev => !prev)}
+          onClick={handleToggle}
           aria-expanded={isExpanded}
           aria-controls="video-transcript-content"
           style={{

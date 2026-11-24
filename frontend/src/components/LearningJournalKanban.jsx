@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function LearningJournalKanban({ onSessionsUpdated }) {
+export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigger }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -58,6 +58,18 @@ export default function LearningJournalKanban({ onSessionsUpdated }) {
 
   useEffect(() => {
     loadSessions();
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    const handleCommitmentSaved = (e) => {
+      if (e.detail?.sessions && Array.isArray(e.detail.sessions)) {
+        setSessions(e.detail.sessions);
+      } else {
+        loadSessions();
+      }
+    };
+    window.addEventListener('resonova_commitment_saved', handleCommitmentSaved);
+    return () => window.removeEventListener('resonova_commitment_saved', handleCommitmentSaved);
   }, []);
 
   const showNotification = (msg) => {

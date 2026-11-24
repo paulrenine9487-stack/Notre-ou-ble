@@ -52,6 +52,27 @@ const DEFAULT_PRACTICE_ACTIVITIES = [
   }
 ];
 
+// Helper: Calculate ISO Week Identifier e.g. "2026-W48"
+function getCurrentWeekIdentifier(d = new Date()) {
+  const date = new Date(d.getTime());
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  return `${date.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+// Helper: Calculate scheduled date for a session in the week
+function getScheduledDateForSession(dayOffsetIndex, totalSessions) {
+  const now = new Date();
+  const dayOffset = Math.floor((dayOffsetIndex * 7) / Math.max(1, totalSessions));
+  const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
+  const yyyy = targetDate.getFullYear();
+  const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(targetDate.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // ============================================================================
 // 1. PRACTICE COMMITMENT (Section 1)
 // ============================================================================
@@ -122,8 +143,17 @@ exports.getCommitment = async (req, res, next) => {
 
 // POST /api/practice/commitment & PUT /api/practice/commitment
 exports.saveCommitment = async (req, res, next) => {
+  const connection = await pool.getConnection();
+  const userId = req.user.id;
+  const lockKey = `commitment_user_${userId}`;
+  let lockAcquired = false;
+
   try {
-    const userId = req.user.id;
+    const [lockRes] = await connection.query('SELECT GET_LOCK(?, 10) AS acquired', [lockKey]);
+    lockAcquired = lockRes[0]?.acquired === 1;
+
+    await connection.beginTransaction();
+
     const moduleId = 1;
     let { minutes_per_session, sessions_per_week, selected_activities } = req.body;
 
@@ -140,23 +170,24 @@ exports.saveCommitment = async (req, res, next) => {
       selectedKeys = [];
     }
 
-    // Check existing active commitment
-    const [existing] = await pool.query(`
-      SELECT id FROM student_practice_commitments
+    // Check existing active commitment with row lock
+    const [existing] = await connection.query(`
+      SELECT id, minutes_per_session, sessions_per_week, weekly_minutes
+      FROM student_practice_commitments
       WHERE user_id = ? AND module_id = ? AND is_active = TRUE
-      LIMIT 1
+      LIMIT 1 FOR UPDATE
     `, [userId, moduleId]);
 
     let commitmentId;
     if (existing.length > 0) {
       commitmentId = existing[0].id;
-      await pool.query(`
+      await connection.query(`
         UPDATE student_practice_commitments
         SET minutes_per_session = ?, sessions_per_week = ?, weekly_minutes = ?, updated_at = NOW()
         WHERE id = ?
       `, [minPerSession, sessPerWeek, weeklyMinutes, commitmentId]);
     } else {
-      const [insertRes] = await pool.query(`
+      const [insertRes] = await connection.query(`
         INSERT INTO student_practice_commitments (user_id, module_id, minutes_per_session, sessions_per_week, weekly_minutes, is_active)
         VALUES (?, ?, ?, ?, ?, TRUE)
       `, [userId, moduleId, minPerSession, sessPerWeek, weeklyMinutes]);
@@ -164,77 +195,150 @@ exports.saveCommitment = async (req, res, next) => {
     }
 
     // Sync with user_practice_goals for Dashboard integration
-    await pool.query(`
+    await connection.query(`
       INSERT INTO user_practice_goals (user_id, weekly_target_minutes, updated_at)
       VALUES (?, ?, NOW())
       ON DUPLICATE KEY UPDATE weekly_target_minutes = VALUES(weekly_target_minutes), updated_at = NOW()
     `, [userId, weeklyMinutes]);
 
     // Save checklist items in student_commitment_activities
-    await pool.query('DELETE FROM student_commitment_activities WHERE commitment_id = ?', [commitmentId]);
+    await connection.query('DELETE FROM student_commitment_activities WHERE commitment_id = ?', [commitmentId]);
     for (const act of DEFAULT_PRACTICE_ACTIVITIES) {
       const isSelected = selectedKeys.includes(act.key);
-      await pool.query(`
+      await connection.query(`
         INSERT INTO student_commitment_activities (commitment_id, user_id, activity_key, activity_title, duration_label, repetitions_label, is_selected)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [commitmentId, userId, act.key, act.title, act.durationLabel, act.repsLabel, isSelected]);
+      `, [commitmentId, userId, act.key, act.title, act.durationLabel, act.repsLabel, isSelected ? 1 : 0]);
     }
 
     // =========================================================================
-    // AUTOMATIC SESSION GENERATION IN LEARNING JOURNAL (Requirement 2.A)
+    // AUTOMATIC SESSION GENERATION IN LEARNING JOURNAL (Sections 4 & 5)
     // =========================================================================
-    // Generate planned sessions matching sessions_per_week without duplicating or deleting completed/practising sessions.
-    const [existingSessions] = await pool.query(`
-      SELECT id, session_number, status, planned_duration, session_title
+    // Build descriptive activity text and instructions from student's selected checklist items
+    const selectedActs = DEFAULT_PRACTICE_ACTIVITIES.filter(a => selectedKeys.includes(a.key));
+    const effectiveActs = selectedActs.length > 0 ? selectedActs : DEFAULT_PRACTICE_ACTIVITIES;
+    const activityTitleSummary = effectiveActs.map(a => a.title).join(', ');
+    const activityInstructionsNotes = effectiveActs.map(a => `${a.title}: ${a.durationLabel} (${a.repsLabel})`).join(' • ');
+    const currentWeekIdentifier = getCurrentWeekIdentifier();
+
+    // Query existing student sessions with row lock
+    const [existingSessions] = await connection.query(`
+      SELECT id, user_id, commitment_id, session_number, session_title, activity,
+             planned_duration, actual_duration, scheduled_date, week_identifier,
+             status, notes, started_at, completed_at
+      FROM student_practice_sessions
+      WHERE user_id = ?
+      ORDER BY session_number ASC, id ASC
+      FOR UPDATE
+    `, [userId]);
+
+    const doneSessions = existingSessions.filter(s => s.status === 'done');
+    const practisingSessions = existingSessions.filter(s => s.status === 'practising');
+    const plannedSessions = existingSessions.filter(s => s.status === 'planned');
+
+    // Active or completed sessions in the current week cycle that count toward the target
+    const currentWeekDone = doneSessions.filter(s => !s.week_identifier || s.week_identifier === currentWeekIdentifier);
+    const activeInCycleCount = currentWeekDone.length + practisingSessions.length;
+
+    // Calculate planned sessions needed to satisfy the weekly commitment (sessPerWeek)
+    let targetPlannedCount;
+    if (activeInCycleCount < sessPerWeek) {
+      targetPlannedCount = sessPerWeek - activeInCycleCount;
+    } else {
+      // If student already fulfilled or exceeded weekly target, keep existing planned if any, or 0
+      targetPlannedCount = plannedSessions.length > 0 ? Math.min(plannedSessions.length, sessPerWeek) : 0;
+    }
+
+    // Max session number across all historical and current sessions to ensure continuous numbering
+    const maxExistingSessionNum = existingSessions.length > 0
+      ? Math.max(...existingSessions.map(s => s.session_number || 0))
+      : 0;
+
+    // 1. Reconcile existing planned sessions (update up to targetPlannedCount)
+    const countToUpdate = Math.min(plannedSessions.length, targetPlannedCount);
+    for (let i = 0; i < countToUpdate; i++) {
+      const sess = plannedSessions[i];
+      const sessionTitle = `Session ${sess.session_number} – ${minPerSession} min`;
+      const scheduledDate = getScheduledDateForSession(i, sessPerWeek);
+      await connection.query(`
+        UPDATE student_practice_sessions
+        SET commitment_id = ?,
+            session_title = ?,
+            activity = ?,
+            planned_duration = ?,
+            scheduled_date = COALESCE(scheduled_date, ?),
+            week_identifier = COALESCE(week_identifier, ?),
+            notes = COALESCE(?, notes),
+            updated_at = NOW()
+        WHERE id = ? AND user_id = ? AND status = 'planned'
+      `, [
+        commitmentId,
+        sessionTitle,
+        activityTitleSummary,
+        minPerSession,
+        scheduledDate,
+        currentWeekIdentifier,
+        activityInstructionsNotes,
+        sess.id,
+        userId
+      ]);
+    }
+
+    // 2. If student reduced sessions_per_week, remove only excess unstarted planned sessions
+    if (plannedSessions.length > targetPlannedCount) {
+      const excessPlanned = plannedSessions.slice(targetPlannedCount);
+      for (const ex of excessPlanned) {
+        await connection.query(`
+          DELETE FROM student_practice_sessions
+          WHERE id = ? AND user_id = ? AND status = 'planned'
+        `, [ex.id, userId]);
+      }
+    }
+
+    // 3. If more planned sessions are needed, generate them safely
+    if (plannedSessions.length < targetPlannedCount) {
+      const toCreateCount = targetPlannedCount - plannedSessions.length;
+      let nextSessionNum = maxExistingSessionNum;
+
+      for (let k = 1; k <= toCreateCount; k++) {
+        nextSessionNum += 1;
+        const sessionIndex = plannedSessions.length + k - 1;
+        const sessionTitle = `Session ${nextSessionNum} – ${minPerSession} min`;
+        const scheduledDate = getScheduledDateForSession(sessionIndex, sessPerWeek);
+
+        await connection.query(`
+          INSERT INTO student_practice_sessions (
+            user_id, commitment_id, session_number, session_title, activity,
+            planned_duration, scheduled_date, week_identifier, status, notes
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'planned', ?)
+        `, [
+          userId,
+          commitmentId,
+          nextSessionNum,
+          sessionTitle,
+          activityTitleSummary,
+          minPerSession,
+          scheduledDate,
+          currentWeekIdentifier,
+          activityInstructionsNotes
+        ]);
+      }
+    }
+
+    // Update Stage 5 and Module progress within transaction
+    await updateStageFiveProgress(userId, connection);
+
+    // Fetch all current sessions (planned, practising, done) to return immediately to frontend
+    const [allSessions] = await connection.query(`
+      SELECT id, user_id, commitment_id, session_number, session_title, activity,
+             planned_duration, actual_duration, scheduled_date, week_identifier,
+             status, notes, started_at, completed_at, created_at, updated_at
       FROM student_practice_sessions
       WHERE user_id = ?
       ORDER BY session_number ASC, id ASC
     `, [userId]);
 
-    const completedOrPractising = existingSessions.filter(s => s.status === 'done' || s.status === 'practising');
-    const existingPlanned = existingSessions.filter(s => s.status === 'planned');
-
-    const activeCount = completedOrPractising.length;
-    const neededPlannedCount = Math.max(0, sessPerWeek - activeCount);
-
-    // Update existing planned sessions to new duration
-    for (let i = 0; i < existingPlanned.length; i++) {
-      if (i < neededPlannedCount) {
-        // Keep and update duration
-        await pool.query(`
-          UPDATE student_practice_sessions
-          SET planned_duration = ?, session_title = ?
-          WHERE id = ?
-        `, [minPerSession, `Session ${existingPlanned[i].session_number} – ${minPerSession} min`, existingPlanned[i].id]);
-      } else {
-        // Excess planned sessions above updated commitment limit: remove safely
-        await pool.query('DELETE FROM student_practice_sessions WHERE id = ?', [existingPlanned[i].id]);
-      }
-    }
-
-    // If more planned sessions are needed, generate them
-    const currentPlannedCount = Math.min(existingPlanned.length, neededPlannedCount);
-    const toCreateCount = neededPlannedCount - currentPlannedCount;
-
-    if (toCreateCount > 0) {
-      // Find highest existing session number
-      const maxSessionNum = existingSessions.length > 0
-        ? Math.max(...existingSessions.map(s => s.session_number || 0))
-        : 0;
-
-      for (let k = 1; k <= toCreateCount; k++) {
-        const sessionNum = maxSessionNum + k;
-        const sessionTitle = `Session ${sessionNum} – ${minPerSession} min`;
-        await pool.query(`
-          INSERT INTO student_practice_sessions (
-            user_id, commitment_id, session_number, session_title, activity, planned_duration, status
-          ) VALUES (?, ?, ?, ?, 'Breath Routine & Song Vocalization', ?, 'planned')
-        `, [userId, commitmentId, sessionNum, sessionTitle, minPerSession]);
-      }
-    }
-
-    // Check Stage 5 progress update
-    await updateStageFiveProgress(userId);
+    await connection.commit();
 
     res.status(200).json({
       success: true,
@@ -245,11 +349,19 @@ exports.saveCommitment = async (req, res, next) => {
         module_id: moduleId,
         minutes_per_session: minPerSession,
         sessions_per_week: sessPerWeek,
-        weekly_minutes: weeklyMinutes
-      }
+        weekly_minutes: weeklyMinutes,
+        is_active: 1
+      },
+      sessions: allSessions
     });
   } catch (err) {
+    await connection.rollback();
     next(err);
+  } finally {
+    if (lockAcquired) {
+      await connection.query('SELECT RELEASE_LOCK(?)', [lockKey]).catch(() => {});
+    }
+    connection.release();
   }
 };
 
@@ -627,15 +739,15 @@ exports.getAdminPracticeCommitments = async (req, res, next) => {
 // HELPER FUNCTIONS
 // ============================================================================
 
-async function updateStageFiveProgress(userId) {
+async function updateStageFiveProgress(userId, dbClient = pool) {
   try {
-    const [commitments] = await pool.query(
+    const [commitments] = await dbClient.query(
       'SELECT id FROM student_practice_commitments WHERE user_id = ? AND is_active = TRUE LIMIT 1',
       [userId]
     );
     const hasCommitment = commitments.length > 0;
 
-    const [doneSessions] = await pool.query(
+    const [doneSessions] = await dbClient.query(
       "SELECT id FROM student_practice_sessions WHERE user_id = ? AND status = 'done' LIMIT 1",
       [userId]
     );
@@ -645,7 +757,7 @@ async function updateStageFiveProgress(userId) {
     const percent = Math.round((met / 2) * 100);
     const status = percent === 100 ? 'COMPLETED' : percent > 0 ? 'IN PROGRESS' : 'NOT STARTED';
 
-    await pool.query(`
+    await dbClient.query(`
       INSERT INTO learning_stage_progress (user_id, stage_id, status, progress_percentage, started_at, completed_at)
       VALUES (?, 5, ?, ?, IF(? IN ('IN PROGRESS', 'COMPLETED'), NOW(), NULL), IF(? = 'COMPLETED', NOW(), NULL))
       ON DUPLICATE KEY UPDATE

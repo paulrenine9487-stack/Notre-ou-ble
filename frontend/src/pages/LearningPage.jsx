@@ -1683,6 +1683,8 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage, onR
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 12,
                     padding: '10px 14px',
                     background: '#F8F7FC',
                     border: '1px solid #EAE5F3',
@@ -1708,6 +1710,30 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage, onR
                   />
                 </div>
               ))}
+            </div>
+
+            {/* Awaiting Feedback text under audio history */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginTop: 12,
+                padding: '9px 14px',
+                background: '#FFFBEB',
+                border: '1px solid #FDE68A',
+                borderRadius: 8,
+                fontSize: '0.82rem',
+                color: '#92400E'
+              }}
+            >
+              <Clock size={15} color="#D97706" style={{ flexShrink: 0 }} />
+              <div>
+                <span style={{ fontWeight: 750, color: '#B45309' }}>Awaiting Feedback</span>
+                <span style={{ color: '#78350F', marginLeft: 6 }}>
+                  — Your performance recording has been submitted. Instructor evaluation and feedback will be posted here once reviewed.
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -1767,7 +1793,7 @@ function StageFiveProvideFeedback({ stage, onUpdate }) {
       <YourPracticeCommitment onCommitmentSaved={handleCommitmentSaved} />
 
       {/* SECTION 2: LEARNING JOURNAL */}
-      <LearningJournalKanban onSessionsUpdated={handleSessionsUpdated} />
+      <LearningJournalKanban onSessionsUpdated={handleSessionsUpdated} refreshTrigger={refreshTrigger} />
 
       {/* SECTION 3: MODULE 1 COMPLETE! */}
       <ModuleCompleteCard refreshTrigger={refreshTrigger} />

@@ -8,7 +8,7 @@ const compression = require('compression');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const pool = require('./config/db');
-const { isRedisAvailable, getRedisClient } = require('./utils/redisClient');
+const { isRedisAvailable, getRedisClient, initRedis, getRedisStatus, closeRedis } = require('./utils/redisClient');
 const { getBreakersHealth } = require('./services/circuitBreakerService');
 const gatewayMiddleware = require('./middleware/gatewayMiddleware');
 const {
@@ -83,6 +83,19 @@ app.use(compression({
 // API Gateway telemetry, request ID correlation, and 30s execution timeout
 app.use(gatewayMiddleware());
 
+// Process Lifecycle & Readiness Flags
+let isServerReady = false;
+let initError = null;
+
+// Global Process Resilience (OWASP Top 10 A05 - Prevent Crash Loops)
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[No Tre(ou)ble Unhandled Rejection]:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[No Tre(ou)ble Uncaught Exception]:', err.message);
+});
+
 // 2. Strict CORS Configuration (OWASP API Security API8)
 const allowedOrigins = [
   'http://localhost:5173',
@@ -115,6 +128,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
+// Enterprise Readiness Gate: Gently pauses requests during the 1-2s DB initialization window
+app.use(async (req, res, next) => {
+  if (req.path === '/api/health' || req.path === '/api/health/live') {
+    return next();
+  }
+  if (!isServerReady && !initError) {
+    let attempts = 0;
+    while (!isServerReady && !initError && attempts < 30) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+  }
+  next();
+});
+
 // 3. Distributed Redis Rate Limiting Protection (Brute-force / Credential Stuffing / DoS Defense)
 app.use('/api', generalApiLimiter);
 app.use('/api/admin', adminApiLimiter);
@@ -137,7 +165,6 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/health/ready', async (req, res) => {
   let dbReady = false;
-  let redisReady = false;
 
   try {
     await pool.query('SELECT 1');
@@ -146,15 +173,31 @@ app.get('/api/health/ready', async (req, res) => {
     console.error('[Health Probe] MySQL connection check failed:', e.message);
   }
 
-  redisReady = isRedisAvailable();
-  const isReady = dbReady; // Core requirement is MySQL; Redis operates with in-memory fallback
+  const redisStatus = getRedisStatus();
+  const isReady = dbReady; // Core operational requirement is MySQL; Redis operates in distributed or safe fallback mode
   const statusCode = isReady ? 200 : 503;
 
   res.status(statusCode).json({
     status: isReady ? 'READY' : 'DEGRADED',
     checks: {
-      database: dbReady ? 'CONNECTED' : 'DISCONNECTED',
-      redis: redisReady ? 'CONNECTED' : 'FALLBACK_LOCAL_CACHE'
+      database: {
+        status: dbReady ? 'CONNECTED' : 'DISCONNECTED',
+        type: 'MySQL',
+        name: process.env.DB_NAME || 'resonova_db'
+      },
+      redis: {
+        status: redisStatus.state,
+        mode: redisStatus.mode,
+        target: `${redisStatus.host}:${redisStatus.port}/${redisStatus.db}`
+      },
+      rateLimiting: {
+        status: 'RATE_LIMITING_ENABLED',
+        mode: redisStatus.connected ? 'DISTRIBUTED_REDIS' : 'LOCAL_IN_MEMORY'
+      },
+      cache: {
+        status: 'CACHE_ENABLED',
+        mode: redisStatus.connected ? 'DISTRIBUTED_REDIS' : 'LOCAL_IN_MEMORY'
+      }
     },
     timestamp: new Date().toISOString()
   });
@@ -265,23 +308,24 @@ app.get('*', (req, res) => {
 // Error Handling Middleware
 app.use(errorHandler);
 
-// Initialize Database and Start Server
 async function startServer() {
   try {
-    console.log('[No Tre(ou)ble Server] Initializing MySQL database connection & security baseline...');
-    await initDatabase();
-    console.log('[No Tre(ou)ble Server] Database verified.');
+    console.log('====================================================');
+    console.log('  No Tre(ou)ble - BREATH MANAGEMENT PORTAL BACKEND   ');
+    console.log('  Enterprise Zero Trust Cybersecurity Hardened      ');
+    console.log('====================================================');
 
+    // 1. Start HTTP server early to bind port and eliminate proxy 503 connection refused
+    let redisStatus = getRedisStatus();
     const server = app.listen(PORT, () => {
-      console.log(`====================================================`);
-      console.log(`  No Tre(ou)ble - BREATH MANAGEMENT PORTAL BACKEND   `);
-      console.log(`  Enterprise Zero Trust Cybersecurity Hardened      `);
+      console.log(`----------------------------------------------------`);
       console.log(`  Server running on http://localhost:${PORT}        `);
-      console.log(`  API Health: http://localhost:${PORT}/api/health   `);
-      console.log(`====================================================`);
+      console.log(`  API Health : http://localhost:${PORT}/api/health   `);
+      console.log(`  API Ready  : http://localhost:${PORT}/api/health/ready`);
+      console.log(`  Database   : MySQL (${process.env.DB_NAME || 'resonova_db'}) [CONNECTING...]`);
+      console.log(`----------------------------------------------------`);
     });
 
-    // Prevent ERR_CONNECTION_RESET by aligning keep-alive timeouts with client proxies
     server.keepAliveTimeout = 65000;
     server.headersTimeout = 66000;
 
@@ -294,6 +338,33 @@ async function startServer() {
       }
     });
 
+    // 2. Verify MySQL database connectivity
+    console.log('[No Tre(ou)ble Server] Verifying MySQL connection...');
+    await pool.query('SELECT 1');
+    console.log('[No Tre(ou)ble Server] MySQL database connection established.');
+
+    // 3. Check and apply pending migrations only
+    await initDatabase();
+
+    // 4. Initialize Redis connection
+    const redisConnected = await initRedis();
+    redisStatus = getRedisStatus();
+
+    if (redisConnected) {
+      console.log(`[Cache] Redis cache enabled [${redisStatus.mode}]`);
+      console.log(`[Rate Limit] Redis-backed rate limiting enabled [${redisStatus.mode}]`);
+    } else {
+      console.log(`[Cache] Local in-memory cache active [${redisStatus.mode}]`);
+      console.log(`[Rate Limit] Local in-memory rate limiting active [${redisStatus.mode}]`);
+    }
+
+    isServerReady = true;
+    console.log(`  Database   : MySQL (${process.env.DB_NAME || 'resonova_db'}) [READY]`);
+    console.log(`  Redis State: ${redisStatus.state} (${redisStatus.host}:${redisStatus.port}/${redisStatus.db})`);
+    console.log(`  Rate Limit : RATE_LIMITING_ENABLED [${redisStatus.mode}]`);
+    console.log(`  Cache State: CACHE_ENABLED [${redisStatus.mode}]`);
+    console.log(`====================================================`);
+
     // Graceful Shutdown handling for Kubernetes / Docker horizontal scale
     const gracefulShutdown = (signal) => {
       console.log(`\n[No Tre(ou)ble Server] Received ${signal}. Starting graceful shutdown...`);
@@ -302,11 +373,8 @@ async function startServer() {
         try {
           await pool.end();
           console.log('[No Tre(ou)ble Server] MySQL connection pool closed.');
-          if (isRedisAvailable()) {
-            const redis = getRedisClient();
-            if (redis) await redis.quit();
-            console.log('[No Tre(ou)ble Server] Redis connection closed.');
-          }
+          await closeRedis();
+          console.log('[No Tre(ou)ble Server] Redis connection closed.');
         } catch (err) {
           console.error('[No Tre(ou)ble Server] Error during shutdown:', err.message);
         }
@@ -325,7 +393,7 @@ async function startServer() {
   } catch (err) {
     console.error('[No Tre(ou)ble Server Startup Error]:', err.message);
     const fallbackServer = app.listen(PORT, () => {
-      console.log(`[No Tre(ou)ble Server] Running with DB initialization warning on port ${PORT}`);
+      console.log(`[No Tre(ou)ble Server] Running in degraded mode on port ${PORT}`);
     });
     fallbackServer.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {

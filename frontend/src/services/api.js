@@ -1,4 +1,4 @@
-// No Tre(ou)ble API Client Service
+// No Tre(ou)ble API Client Service - Enterprise Resilient Architecture
 
 const rawBase = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '';
 const API_BASE = rawBase
@@ -6,9 +6,164 @@ const API_BASE = rawBase
   : '/api';
 
 function getAuthHeader() {
-  const token = localStorage.getItem('resonova_token');
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('resonova_token') : null;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
+// ----------------------------------------------------------------------------
+// Enterprise Token Refresh Concurrency Queue (Zero Race Conditions)
+// ----------------------------------------------------------------------------
+let activeRefreshPromise = null;
+
+async function renewAccessToken() {
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
+  activeRefreshPromise = (async () => {
+    try {
+      const refreshToken = typeof localStorage !== 'undefined' ? localStorage.getItem('resonova_refresh_token') : null;
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const nativeFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : globalThis.fetch;
+      const res = await nativeFetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Token refresh rejected (${res.status})`);
+      }
+
+      const data = await res.json();
+      const newToken = data.token || data.accessToken;
+      if (!newToken) {
+        throw new Error('New access token missing in refresh response');
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('resonova_token', newToken);
+        if (data.refreshToken) {
+          localStorage.setItem('resonova_refresh_token', data.refreshToken);
+        }
+      }
+      return newToken;
+    } catch (err) {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('resonova_token');
+        localStorage.removeItem('resonova_refresh_token');
+        localStorage.removeItem('resonova_user');
+      }
+      return null;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
+}
+
+// ----------------------------------------------------------------------------
+// Enterprise Resilient Fetch Wrapper (Retry, Timeout, Token Refresh, Trace ID)
+// ----------------------------------------------------------------------------
+const nativeFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : globalThis.fetch;
+
+async function resilientFetch(url, options = {}, attempt = 0) {
+  const isStringUrl = typeof url === 'string';
+  const urlStr = isStringUrl ? url : (url.url || '');
+  const method = (options.method || 'GET').toUpperCase();
+  const isIdempotent = ['GET', 'HEAD', 'OPTIONS', 'PUT'].includes(method);
+  const isAuthEndpoint = urlStr.includes('/auth/login') ||
+    urlStr.includes('/auth/register') ||
+    urlStr.includes('/auth/refresh') ||
+    urlStr.includes('/auth/verify-otp') ||
+    urlStr.includes('/auth/verify-mfa');
+
+  // Adaptive Timeout Configuration
+  const isUploadOrAudio = urlStr.includes('/recordings') ||
+    urlStr.includes('/audio') ||
+    urlStr.includes('/media') ||
+    urlStr.includes('/upload');
+  const timeoutMs = options.timeout || (isUploadOrAudio ? 120000 : 25000);
+
+  // Setup AbortController for timeout & client cancellation
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(new Error(`Request timeout after ${timeoutMs}ms`)), timeoutMs);
+
+  let mergedSignal = controller.signal;
+  if (options.signal) {
+    if (options.signal.aborted) {
+      clearTimeout(timeoutId);
+      controller.abort();
+    } else {
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        controller.abort();
+      });
+    }
+  }
+
+  // Correlation ID Tracking
+  const headers = new Headers(options.headers || {});
+  if (!headers.has('X-Request-Id')) {
+    const traceId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `req-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    headers.set('X-Request-Id', traceId);
+  }
+
+  const fetchOptions = {
+    ...options,
+    headers,
+    signal: mergedSignal
+  };
+
+  try {
+    const response = await nativeFetch(url, fetchOptions);
+    clearTimeout(timeoutId);
+
+    // 1. Automatic Token Refresh on 401 with Token Queue
+    if (response.status === 401 && !options._isRetry && !isAuthEndpoint) {
+      const newToken = await renewAccessToken();
+      if (newToken) {
+        const retryHeaders = new Headers(options.headers || {});
+        retryHeaders.set('Authorization', `Bearer ${newToken}`);
+        return resilientFetch(url, {
+          ...options,
+          headers: retryHeaders,
+          _isRetry: true
+        }, attempt);
+      }
+    }
+
+    // 2. Gateway Error Resilient Retry (502, 503, 504) for Idempotent Requests
+    if (isIdempotent && [502, 503, 504].includes(response.status) && attempt < 2) {
+      const backoffMs = Math.min(500 * Math.pow(2, attempt) + Math.random() * 200, 3000);
+      await new Promise(r => setTimeout(r, backoffMs));
+      return resilientFetch(url, options, attempt + 1);
+    }
+
+    return response;
+  } catch (err) {
+    clearTimeout(timeoutId);
+
+    // Retry transient network failures for idempotent requests
+    const isNetworkError = err.name === 'TypeError' || err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError');
+    if (isIdempotent && isNetworkError && attempt < 2) {
+      const backoffMs = Math.min(600 * Math.pow(2, attempt) + Math.random() * 200, 3500);
+      await new Promise(r => setTimeout(r, backoffMs));
+      return resilientFetch(url, options, attempt + 1);
+    }
+
+    throw err;
+  }
+}
+
+// Lexical Fetch Override: All 216 calls to fetch() inside this module route through resilientFetch
+const fetch = resilientFetch;
 
 async function handleResponse(response) {
   const data = await response.json().catch(() => ({}));
@@ -23,8 +178,14 @@ async function handleResponse(response) {
         localStorage.removeItem('resonova_user');
       }
     }
-    const error = new Error(data.message || `Request failed with status ${response.status}`);
+    const message = data.message ||
+      data.error?.message ||
+      (typeof data.error === 'string' ? data.error : null) ||
+      `Request failed with status ${response.status}`;
+    const error = new Error(message);
     error.status = response.status;
+    error.code = data.error?.code || `HTTP_${response.status}`;
+    error.requestId = data.error?.requestId || response.headers?.get('X-Request-Id');
     error.data = data;
     throw error;
   }
@@ -199,9 +360,10 @@ export const api = {
   },
 
   // Dashboard Overview (Live MySQL Statistics)
-  async getDashboardOverview() {
+  async getDashboardOverview(options = {}) {
     const res = await fetch(`${API_BASE}/dashboard/overview`, {
-      headers: { ...getAuthHeader() }
+      headers: { ...getAuthHeader(), ...(options.headers || {}) },
+      signal: options.signal
     });
     return handleResponse(res);
   },

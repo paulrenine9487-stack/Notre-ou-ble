@@ -85,26 +85,28 @@ async function runFlipObjectivesMigration() {
       }
     ];
 
-    // Delete existing Stage 01 objectives and replace with exactly these 4
-    await conn.query("DELETE FROM learning_objectives WHERE stage_id = ?", [stage1Id]);
-
-    for (const card of targetCards) {
-      await conn.query(`
-        INSERT INTO learning_objectives (stage_id, title, title_line_1, title_line_2, description, icon, display_order, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        card.stage_id,
-        card.title,
-        card.title_line_1,
-        card.title_line_2,
-        card.description,
-        card.icon,
-        card.display_order,
-        card.is_active
-      ]);
+    // Ensure Stage 01 objectives exist without destroying customized entries
+    const [existingCards] = await conn.query("SELECT COUNT(*) AS count FROM learning_objectives WHERE stage_id = ?", [stage1Id]);
+    if (existingCards[0].count === 0) {
+      for (const card of targetCards) {
+        await conn.query(`
+          INSERT INTO learning_objectives (stage_id, title, title_line_1, title_line_2, description, icon, display_order, is_active)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          card.stage_id,
+          card.title,
+          card.title_line_1,
+          card.title_line_2,
+          card.description,
+          card.icon,
+          card.display_order,
+          card.is_active
+        ]);
+      }
+      console.log('[Flip Objectives Migration] Successfully seeded exactly 4 interactive 3D flip card objectives for Stage 01.');
+    } else {
+      console.log(`[Flip Objectives Migration] Stage 01 objectives already present (${existingCards[0].count} items found); preserving existing records.`);
     }
-
-    console.log('[Flip Objectives Migration] Successfully seeded exactly 4 interactive 3D flip card objectives for Stage 01.');
     return true;
   } catch (err) {
     console.error('[Flip Objectives Migration Error]:', err.message);

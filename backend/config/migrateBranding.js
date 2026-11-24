@@ -17,12 +17,7 @@ async function migrateBranding() {
   await pool.query(`
     INSERT INTO branding_settings (id, theme_name, primary_color, secondary_color, accent_bg_color, main_bg_color)
     VALUES (1, 'Official No Tre(ou)ble', '#241442', '#7C3AED', '#F4F0FF', '#F8F7FC')
-    ON DUPLICATE KEY UPDATE
-      theme_name = 'Official No Tre(ou)ble',
-      primary_color = '#241442',
-      secondary_color = '#7C3AED',
-      accent_bg_color = '#F4F0FF',
-      main_bg_color = '#F8F7FC'
+    ON DUPLICATE KEY UPDATE id=id
   `);
 
   console.log('[Migration] Branding settings table initialized successfully with official No Tre(ou)ble palette.');

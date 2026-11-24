@@ -124,7 +124,10 @@ export default function YourPracticeCommitment({ onCommitmentSaved }) {
       if (res && res.success) {
         setSuccessMsg('Your practice commitment has been saved to the database and your Learning Journal sessions have been generated!');
         if (onCommitmentSaved) {
-          onCommitmentSaved(res.commitment);
+          onCommitmentSaved(res.commitment, res.sessions);
+        }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('resonova_commitment_saved', { detail: res }));
         }
       } else {
         setErrorMsg(res?.message || 'Could not save commitment.');

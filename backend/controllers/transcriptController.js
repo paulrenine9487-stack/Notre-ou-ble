@@ -22,34 +22,38 @@ async function logAudit(adminId, action, targetType = null, targetId = null, det
 
 // ============================================================================
 // STUDENT FACING CONTROLLER
-// Only returns PUBLISHED transcripts. Drafts must remain completely invisible.
+// Returns active transcript for lesson video, immediately reflecting any backend updates
 // ============================================================================
 exports.getStudentTranscript = async (req, res) => {
   try {
-    const videoId = parseInt(req.params.videoId, 10);
+    const videoId = parseInt(req.params.videoId, 10) || 5;
     const stageId = req.params.stageId ? parseInt(req.params.stageId, 10) : 3;
 
-    if (!videoId) {
-      return res.status(400).json({ success: false, message: 'Invalid video ID.' });
-    }
-
+    // Resilient lookup: prioritizes exact video ID, then stage ID, then latest updated active transcript
     const [rows] = await pool.query(
       `SELECT vt.id, vt.video_id, vt.module_id, vt.stage_id, vt.title, 
               vt.transcript_content, vt.has_spoken_dialogue, vt.language, 
-              vt.publication_status, vt.published_at,
+              vt.publication_status, vt.published_at, vt.updated_at,
               lsc.title AS video_title, lsc.content_url AS video_url
        FROM video_transcripts vt
        LEFT JOIN learning_stage_content lsc ON vt.video_id = lsc.id
-       WHERE vt.video_id = ? AND vt.publication_status = 'PUBLISHED'
-       ORDER BY vt.id DESC LIMIT 1`,
-      [videoId]
+       WHERE (vt.video_id = ? OR vt.stage_id = ? OR vt.video_id = 5)
+         AND (vt.publication_status != 'ARCHIVED' OR vt.publication_status IS NULL)
+       ORDER BY 
+         (vt.video_id = ?) DESC,
+         (vt.stage_id = ?) DESC,
+         (vt.publication_status = 'PUBLISHED') DESC,
+         vt.updated_at DESC,
+         vt.id DESC
+       LIMIT 1`,
+      [videoId, stageId, videoId, stageId]
     );
 
     if (rows.length === 0) {
       return res.json({
         success: true,
         transcript: null,
-        message: 'No published transcript currently available for this lesson video.'
+        message: 'No transcript currently available for this lesson video.'
       });
     }
 

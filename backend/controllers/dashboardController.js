@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const cacheService = require('../services/cacheService');
 
 // Helper: Professional time-of-day greeting:
 // - Good morning:   12:00 AM - 12:00 PM (00:00 - 11:59)
@@ -42,81 +43,152 @@ exports.getOverview = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const now = new Date();
+    const cacheKey = `dashboard:overview:${userId}`;
 
-    // 1. Fetch user data
-    const [users] = await pool.query(
-      'SELECT id, username, email, role, selected_musical_goal FROM users WHERE id = ?',
-      [userId]
-    );
-    if (users.length === 0) {
+    // Fast-path: Check Redis / In-Memory cache (10s TTL)
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    const safeQuery = async (sql, params = []) => {
+      try {
+        return await pool.query(sql, params);
+      } catch (err) {
+        console.warn(`[Dashboard Warning] Safe query failed: ${err.message}`);
+        return [[]];
+      }
+    };
+
+    // Parallelize all independent dashboard metric queries to eliminate waterfall latency
+    const [
+      [users],
+      [weeklyStatsRows],
+      [goalRows],
+      [breathModuleRows],
+      [stagesRows],
+      [completedStagesRows],
+      [currentStageRows],
+      [challengeAttempts],
+      [mfAttempts],
+      [writtenStats],
+      [recordingsStats],
+      [diaryCounts],
+      [reflectionRows],
+      [commitmentRows],
+      [journalSessionCounts],
+      [pathwayRows],
+      moduleSummaryResult
+    ] = await Promise.all([
+      // 1. User profile
+      safeQuery('SELECT id, username, email, role, selected_musical_goal FROM users WHERE id = ?', [userId]),
+      // 2. Weekly Practice Statistics (Monday to Sunday calendar week)
+      safeQuery(
+        `SELECT 
+           COALESCE(SUM(duration_minutes), 0) AS total_minutes,
+           COUNT(*) AS sessions_count
+         FROM practice_sessions 
+         WHERE user_id = ?
+           AND completion_status = 'completed'
+           AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+           AND completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)`,
+        [userId]
+      ),
+      // 3. User Practice Goal (from user_practice_goals)
+      safeQuery('SELECT weekly_target_minutes FROM user_practice_goals WHERE user_id = ? LIMIT 1', [userId]),
+      // 4. Module 01 (Vocal Foundations)
+      safeQuery("SELECT id, title, description, status FROM learning_modules WHERE module_order = 1 LIMIT 1"),
+      // 5. 5-Stage Breath Management Learning Module
+      safeQuery('SELECT id, stage_number, COALESCE(title, stage_title) AS stage_title, COALESCE(subtitle, stage_subtitle) AS stage_subtitle FROM learning_stages WHERE module_id = 1 AND is_active = TRUE ORDER BY stage_number ASC LIMIT 5'),
+      // 6. User completed stages
+      safeQuery(`
+        SELECT COUNT(DISTINCT ls.id) AS completed 
+        FROM learning_stages ls
+        LEFT JOIN learning_stage_progress lsp ON ls.id = lsp.stage_id AND lsp.user_id = ?
+        LEFT JOIN user_stage_progress usp ON ls.id = usp.stage_id AND usp.user_id = ?
+        WHERE ls.module_id = 1 AND ls.is_active = TRUE 
+          AND (lsp.status = 'COMPLETED' OR usp.completion_status = 'COMPLETED')
+      `, [userId, userId]),
+      // 7. Current active stage
+      safeQuery(`
+        SELECT ls.stage_number, COALESCE(ls.title, ls.stage_title) AS stage_title, COALESCE(ls.subtitle, ls.stage_subtitle) AS stage_subtitle
+        FROM learning_stages ls
+        LEFT JOIN learning_stage_progress lsp ON ls.id = lsp.stage_id AND lsp.user_id = ?
+        LEFT JOIN user_stage_progress usp ON ls.id = usp.stage_id AND usp.user_id = ?
+        WHERE ls.module_id = 1 AND ls.is_active = TRUE 
+          AND COALESCE(lsp.status, usp.completion_status, 'NOT STARTED') != 'COMPLETED'
+        ORDER BY ls.stage_number ASC LIMIT 1
+      `, [userId, userId]),
+      // 8. Challenge attempts
+      safeQuery('SELECT score, total_marks, percentage FROM challenge_attempts WHERE user_id = ? ORDER BY completed_at DESC', [userId]),
+      // 9. Myth or Fact challenge metrics
+      safeQuery('SELECT score, total_marks, percentage, status, completed_at FROM challenge_attempts WHERE user_id = ? AND challenge_id = 1 ORDER BY completed_at DESC', [userId]),
+      // 10. Written assessments
+      safeQuery('SELECT COUNT(*) AS count FROM written_assessments WHERE user_id = ?', [userId]),
+      // 11. Student recordings
+      safeQuery('SELECT COUNT(*) AS count FROM student_recordings WHERE user_id = ?', [userId]),
+      // 12. Practice Diary Counts
+      safeQuery(`
+        SELECT 
+          COUNT(*) AS total_tasks,
+          SUM(CASE WHEN status = 'TODO' THEN 1 ELSE 0 END) AS todo_count,
+          SUM(CASE WHEN status = 'DOING' THEN 1 ELSE 0 END) AS doing_count,
+          SUM(CASE WHEN status = 'DONE' THEN 1 ELSE 0 END) AS done_count,
+          SUM(CASE WHEN status = 'DONE' AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) THEN 1 ELSE 0 END) AS done_this_week
+        FROM practice_diary_tasks
+        WHERE user_id = ?
+      `, [userId]),
+      // 13. Student Learning Reflection Status (Stage 04 Pinboard)
+      safeQuery('SELECT id, status, question_1_answer, question_2_answer, question_3_answer, submitted_at, updated_at FROM student_learning_reflections WHERE user_id = ? AND module_id = 1 AND stage_id = 4 LIMIT 1', [userId]),
+      // 14. Stage 05 Practice Commitment
+      safeQuery('SELECT minutes_per_session, sessions_per_week, weekly_minutes FROM student_practice_commitments WHERE user_id = ? AND module_id = 1 AND is_active = TRUE LIMIT 1', [userId]),
+      // 15. Learning Journal Kanban sessions
+      safeQuery(`
+        SELECT 
+          COUNT(*) AS total,
+          SUM(CASE WHEN status = 'planned' THEN 1 ELSE 0 END) AS planned,
+          SUM(CASE WHEN status = 'practising' THEN 1 ELSE 0 END) AS practising,
+          SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS done
+        FROM student_practice_sessions
+        WHERE user_id = ?
+      `, [userId]),
+      // 16. Learning Pathway (3 modules in row)
+      safeQuery('SELECT id, title, description, module_order, status FROM learning_modules ORDER BY module_order ASC LIMIT 3'),
+      // 17. Safe module summary calculation
+      (async () => {
+        try {
+          const stageFivePracticeCtrl = require('./stageFivePracticeController');
+          if (typeof stageFivePracticeCtrl.calculateModuleCompletion === 'function') {
+            return await stageFivePracticeCtrl.calculateModuleCompletion(userId, 1);
+          }
+        } catch (e) {
+          return null;
+        }
+        return null;
+      })()
+    ]);
+
+    if (!users || users.length === 0) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
     const user = users[0];
 
-    // 2. Weekly Practice Statistics (Monday to Sunday calendar week)
-    const [weeklyStatsRows] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(duration_minutes), 0) AS total_minutes,
-         COUNT(*) AS sessions_count
-       FROM practice_sessions 
-       WHERE user_id = ?
-         AND completion_status = 'completed'
-         AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-         AND completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)`,
-      [userId]
-    );
     const weeklyMinutes = parseInt(weeklyStatsRows?.[0]?.total_minutes || 0, 10);
     const weeklySessionsCount = parseInt(weeklyStatsRows?.[0]?.sessions_count || 0, 10);
-
-    // 3. User Practice Goal (from user_practice_goals)
-    const [goalRows] = await pool.query(
-      'SELECT weekly_target_minutes FROM user_practice_goals WHERE user_id = ? LIMIT 1',
-      [userId]
-    );
     const weeklyGoalTarget = (goalRows && goalRows.length > 0) ? (goalRows[0].weekly_target_minutes || 60) : 60;
     const weeklyGoalPercent = weeklyGoalTarget > 0 
       ? Math.min(100, Math.round((weeklyMinutes / weeklyGoalTarget) * 100))
       : 0;
 
-    // 4. Module 01 (Vocal Foundations) Gagné 9-Stage Progress
-    const [breathModuleRows] = await pool.query(
-      "SELECT id, title, description, status FROM learning_modules WHERE module_order = 1 LIMIT 1"
-    );
-    const breathModule = breathModuleRows.length > 0 ? breathModuleRows[0] : {
+    const breathModule = (breathModuleRows && breathModuleRows.length > 0) ? breathModuleRows[0] : {
       id: 1,
       title: 'Breathe. Support. Sing.',
       description: 'Breath management isn\'t about taking the biggest breath or holding a note for the longest time. It\'s about coordinating comfortable breathing with the musical phrase.',
       status: 'IN_PROGRESS'
     };
 
-    // 5-Stage Breath Management Learning Module
-    const [stagesRows] = await pool.query(
-      'SELECT id, stage_number, COALESCE(title, stage_title) AS stage_title, COALESCE(subtitle, stage_subtitle) AS stage_subtitle FROM learning_stages WHERE module_id = ? AND is_active = TRUE ORDER BY stage_number ASC LIMIT 5',
-      [breathModule.id]
-    );
     const totalStages = (stagesRows && stagesRows.length > 0) ? stagesRows.length : 5;
-
-    // User completed stages from learning_stage_progress (and user_stage_progress fallback)
-    const [completedStagesRows] = await pool.query(`
-      SELECT COUNT(DISTINCT ls.id) AS completed 
-      FROM learning_stages ls
-      LEFT JOIN learning_stage_progress lsp ON ls.id = lsp.stage_id AND lsp.user_id = ?
-      LEFT JOIN user_stage_progress usp ON ls.id = usp.stage_id AND usp.user_id = ?
-      WHERE ls.module_id = ? AND ls.is_active = TRUE 
-        AND (lsp.status = 'COMPLETED' OR usp.completion_status = 'COMPLETED')
-    `, [userId, userId, breathModule.id]);
     const completedStages = completedStagesRows?.[0]?.completed || 0;
-
-    // Current active stage
-    const [currentStageRows] = await pool.query(`
-      SELECT ls.stage_number, COALESCE(ls.title, ls.stage_title) AS stage_title, COALESCE(ls.subtitle, ls.stage_subtitle) AS stage_subtitle
-      FROM learning_stages ls
-      LEFT JOIN learning_stage_progress lsp ON ls.id = lsp.stage_id AND lsp.user_id = ?
-      LEFT JOIN user_stage_progress usp ON ls.id = usp.stage_id AND usp.user_id = ?
-      WHERE ls.module_id = ? AND ls.is_active = TRUE 
-        AND COALESCE(lsp.status, usp.completion_status, 'NOT STARTED') != 'COMPLETED'
-      ORDER BY ls.stage_number ASC LIMIT 1
-    `, [userId, userId, breathModule.id]);
 
     const currentStage = (currentStageRows && currentStageRows.length > 0)
       ? currentStageRows[0]
@@ -130,11 +202,6 @@ exports.getOverview = async (req, res, next) => {
       ? Math.round((completedStages / totalStages) * 100) 
       : 0;
 
-    // Challenge Scores and Activity Metrics from live MySQL
-    const [challengeAttempts] = await pool.query(
-      'SELECT score, total_marks, percentage FROM challenge_attempts WHERE user_id = ? ORDER BY completed_at DESC',
-      [userId]
-    );
     const totalChallengesCompleted = challengeAttempts ? challengeAttempts.length : 0;
     const latestChallengeScore = (challengeAttempts && challengeAttempts.length > 0) ? (challengeAttempts[0].score || 0) : 0;
     const latestChallengePercentage = (challengeAttempts && challengeAttempts.length > 0) ? (challengeAttempts[0].percentage || 0) : 0;
@@ -146,11 +213,6 @@ exports.getOverview = async (req, res, next) => {
       bestChallengePercentage = best?.percentage || 0;
     }
 
-    // Specific Stage 4: Myth or Fact Challenge Metrics from live MySQL
-    const [mfAttempts] = await pool.query(
-      'SELECT score, total_marks, percentage, status, completed_at FROM challenge_attempts WHERE user_id = ? AND challenge_id = 1 ORDER BY completed_at DESC',
-      [userId]
-    );
     const mythFactTotalAttempts = mfAttempts ? mfAttempts.length : 0;
     const mythFactCompleted = mythFactTotalAttempts > 0;
     const mythFactLatestScore = (mfAttempts && mfAttempts.length > 0) ? (mfAttempts[0].score || 0) : 0;
@@ -164,34 +226,12 @@ exports.getOverview = async (req, res, next) => {
       mythFactBestPercentage = parseFloat(bestMf?.percentage || 0);
     }
 
-    const [writtenStats] = await pool.query(
-      'SELECT COUNT(*) AS count FROM written_assessments WHERE user_id = ?',
-      [userId]
-    );
     const writtenAssessmentsCount = writtenStats?.[0]?.count || 0;
-
-    const [recordingsStats] = await pool.query(
-      'SELECT COUNT(*) AS count FROM student_recordings WHERE user_id = ?',
-      [userId]
-    );
     const recordingsCount = recordingsStats?.[0]?.count || 0;
 
-    // Total Marks and Scores (combining challenges & assessments)
     const totalAwarded = latestChallengeScore;
     const totalPossible = (challengeAttempts && challengeAttempts.length > 0) ? (challengeAttempts[0].total_marks || 100) : 100;
     const provisionalScorePercent = totalPossible > 0 ? Math.round((totalAwarded / totalPossible) * 100) : 0;
-
-    // 5b. Practice Diary Counts
-    const [diaryCounts] = await pool.query(`
-      SELECT 
-        COUNT(*) AS total_tasks,
-        SUM(CASE WHEN status = 'TODO' THEN 1 ELSE 0 END) AS todo_count,
-        SUM(CASE WHEN status = 'DOING' THEN 1 ELSE 0 END) AS doing_count,
-        SUM(CASE WHEN status = 'DONE' THEN 1 ELSE 0 END) AS done_count,
-        SUM(CASE WHEN status = 'DONE' AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) THEN 1 ELSE 0 END) AS done_this_week
-      FROM practice_diary_tasks
-      WHERE user_id = ?
-    `, [userId]);
 
     const diaryStats = {
       total: parseInt(diaryCounts?.[0]?.total_tasks || 0, 10),
@@ -201,14 +241,9 @@ exports.getOverview = async (req, res, next) => {
       completedThisWeek: parseInt(diaryCounts?.[0]?.done_this_week || 0, 10)
     };
 
-    // 5b. Student Learning Reflection Status (Stage 04 Pinboard)
-    const [reflectionRows] = await pool.query(
-      'SELECT id, status, question_1_answer, question_2_answer, question_3_answer, submitted_at, updated_at FROM student_learning_reflections WHERE user_id = ? AND module_id = ? AND stage_id = ? LIMIT 1',
-      [userId, breathModule.id, 4]
-    );
     let learningReflectionStatus = 'Not started';
     let learningReflectionData = null;
-    if (reflectionRows.length > 0) {
+    if (reflectionRows && reflectionRows.length > 0) {
       const r = reflectionRows[0];
       const hasAllThree = Boolean(r.question_1_answer?.trim() && r.question_2_answer?.trim() && r.question_3_answer?.trim());
       learningReflectionStatus = hasAllThree ? 'Completed' : 'In progress';
@@ -220,44 +255,19 @@ exports.getOverview = async (req, res, next) => {
       };
     }
 
-    // 5c. Stage 05 Practice Commitment & Learning Journal Kanban
-    const [commitmentRows] = await pool.query(
-      'SELECT minutes_per_session, sessions_per_week, weekly_minutes FROM student_practice_commitments WHERE user_id = ? AND module_id = ? AND is_active = TRUE LIMIT 1',
-      [userId, breathModule.id]
-    );
-    const activeCommitment = commitmentRows.length > 0 ? commitmentRows[0] : null;
-
-    const [journalSessionCounts] = await pool.query(`
-      SELECT 
-        COUNT(*) AS total,
-        SUM(CASE WHEN status = 'planned' THEN 1 ELSE 0 END) AS planned,
-        SUM(CASE WHEN status = 'practising' THEN 1 ELSE 0 END) AS practising,
-        SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS done
-      FROM student_practice_sessions
-      WHERE user_id = ?
-    `, [userId]);
+    const activeCommitment = (commitmentRows && commitmentRows.length > 0) ? commitmentRows[0] : null;
 
     const journalStats = {
-      total: parseInt(journalSessionCounts[0]?.total || 0, 10),
-      planned: parseInt(journalSessionCounts[0]?.planned || 0, 10),
-      practising: parseInt(journalSessionCounts[0]?.practising || 0, 10),
-      done: parseInt(journalSessionCounts[0]?.done || 0, 10)
+      total: parseInt(journalSessionCounts?.[0]?.total || 0, 10),
+      planned: parseInt(journalSessionCounts?.[0]?.planned || 0, 10),
+      practising: parseInt(journalSessionCounts?.[0]?.practising || 0, 10),
+      done: parseInt(journalSessionCounts?.[0]?.done || 0, 10)
     };
 
-    let moduleSummary = null;
-    try {
-      const stageFivePracticeCtrl = require('./stageFivePracticeController');
-      if (typeof stageFivePracticeCtrl.calculateModuleCompletion === 'function') {
-        moduleSummary = await stageFivePracticeCtrl.calculateModuleCompletion(userId, 1);
-      }
-    } catch (e) {
-      console.error('Error calculating module summary in dashboard:', e);
-    }
+    const moduleSummary = moduleSummaryResult || null;
 
     // 6. Learning Pathway (3 modules in row)
-    const [pathwayRows] = await pool.query(
-      'SELECT id, title, description, module_order, status FROM learning_modules ORDER BY module_order ASC LIMIT 3'
-    );
+    const pathwayList = (pathwayRows && pathwayRows.length > 0) ? pathwayRows : [];
 
     const defaultPathway = [
       {
@@ -286,7 +296,7 @@ exports.getOverview = async (req, res, next) => {
       }
     ];
 
-    const pathwayCards = pathwayRows.length > 0 ? pathwayRows.map(m => {
+    const pathwayCards = pathwayList.length > 0 ? pathwayList.map(m => {
       let icon = 'wind';
       if (m.module_order === 2) icon = 'music';
       if (m.module_order === 3) icon = 'volume-2';
@@ -398,10 +408,15 @@ exports.getOverview = async (req, res, next) => {
       }
     };
 
-    res.status(200).json({
+    const responsePayload = {
       success: true,
       data: dashboardData
-    });
+    };
+
+    // Cache for 10 seconds to eliminate repeated waterfall bursts while preserving live updates
+    await cacheService.set(cacheKey, responsePayload, 10).catch(() => {});
+
+    res.status(200).json(responsePayload);
   } catch (error) {
     next(error);
   }

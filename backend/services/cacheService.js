@@ -1,7 +1,18 @@
 const { redisClient, isRedisAvailable } = require('../utils/redisClient');
 
 const KEY_PREFIX = 'notreoble:cache:';
-const memoryFallbackCache = new Map(); // fallback when Redis is offline
+const memoryFallbackCache = new Map();
+
+// Periodic eviction to keep memory cache footprint lean and prevent memory leaks
+const cleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [k, item] of memoryFallbackCache.entries()) {
+    if (item && item.expiresAt <= now) {
+      memoryFallbackCache.delete(k);
+    }
+  }
+}, 60000);
+if (cleanupTimer.unref) cleanupTimer.unref();
 
 // In-flight request deduplication to prevent cache stampedes
 const inFlightRequests = new Map();
@@ -13,7 +24,7 @@ const cacheService = {
   async get(key) {
     const fullKey = KEY_PREFIX + key;
     try {
-      if (isRedisAvailable()) {
+      if (isRedisAvailable() && redisClient) {
         const data = await redisClient.get(fullKey);
         if (data) {
           try {
@@ -23,7 +34,7 @@ const cacheService = {
           }
         }
       } else {
-        // In-memory fallback
+        // High-performance in-memory fallback
         const item = memoryFallbackCache.get(fullKey);
         if (item && item.expiresAt > Date.now()) {
           return item.data;
@@ -44,10 +55,10 @@ const cacheService = {
     const fullKey = KEY_PREFIX + key;
     try {
       const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-      if (isRedisAvailable()) {
+      if (isRedisAvailable() && redisClient) {
         await redisClient.set(fullKey, serialized, 'EX', ttlSeconds);
       } else {
-        // In-memory fallback
+        // High-performance in-memory fallback
         memoryFallbackCache.set(fullKey, {
           data: value,
           expiresAt: Date.now() + ttlSeconds * 1000
@@ -64,7 +75,7 @@ const cacheService = {
   async del(patternOrKey) {
     const fullPattern = KEY_PREFIX + patternOrKey;
     try {
-      if (isRedisAvailable()) {
+      if (isRedisAvailable() && redisClient) {
         if (patternOrKey.includes('*')) {
           const keys = await redisClient.keys(fullPattern);
           if (keys.length > 0) {
@@ -145,7 +156,18 @@ const cacheService = {
    */
   async invalidateTag(tag) {
     await this.del(`${tag}*`);
-    console.log(`[CacheService] Invalidation triggered for tag: ${tag}`);
+  },
+
+  /**
+   * Diagnostic state of caching subsystem
+   */
+  getStatus() {
+    const isRedis = isRedisAvailable();
+    return {
+      status: 'CACHE_ENABLED',
+      mode: isRedis ? 'DISTRIBUTED_REDIS' : 'LOCAL_IN_MEMORY',
+      memoryKeysCount: memoryFallbackCache.size
+    };
   }
 };
 

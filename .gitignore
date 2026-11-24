@@ -47,3 +47,8 @@ coverage/
 
 # Uploads
 backend/uploads/
+
+# Redis snapshots
+dump.rdb
+*.rdb
+backend/dump.rdb

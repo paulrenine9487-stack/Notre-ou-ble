@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2,
-  Play
+  CheckCircle2
 } from 'lucide-react';
-import PostureInstructionalVideoPlayer from './PostureInstructionalVideoPlayer';
 
 // Single Character Clean Studio Model (Side silhouettes & 360 bar removed)
 import postureCharacterImg from '../assets/images/posture_character_clean.jpg';
@@ -40,8 +38,6 @@ export default function PostureViewer3D({
   onSelectIndicator = () => { },
   modelAssetUrl = null
 }) {
-  const [viewMode, setViewMode] = useState('3d-model'); // '3d-model' | 'instructional-video'
-
   // Fallback default indicators matching database schema
   const defaultIndicators = [
     {
@@ -197,61 +193,8 @@ export default function PostureViewer3D({
         }
       `}</style>
 
-      {/* Top Mode Selector Tabs */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-        <button
-          type="button"
-          onClick={() => setViewMode('3d-model')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 9999,
-            border: viewMode === '3d-model' ? '2px solid #0D9488' : '1.5px solid #E2E8F0',
-            backgroundColor: viewMode === '3d-model' ? '#0D9488' : '#FFFFFF',
-            color: viewMode === '3d-model' ? '#FFFFFF' : '#334155',
-            fontSize: '0.82rem',
-            fontWeight: 750,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            boxShadow: viewMode === '3d-model' ? '0 2px 8px rgba(13, 148, 136, 0.25)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Sparkles size={14} />
-          <span>Interactive 3D Posture Model</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setViewMode('instructional-video')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 9999,
-            border: viewMode === 'instructional-video' ? '2px solid #7C3AED' : '1.5px solid #E2E8F0',
-            backgroundColor: viewMode === 'instructional-video' ? '#7C3AED' : '#FFFFFF',
-            color: viewMode === 'instructional-video' ? '#FFFFFF' : '#334155',
-            fontSize: '0.82rem',
-            fontWeight: 750,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            boxShadow: viewMode === 'instructional-video' ? '0 2px 8px rgba(124, 58, 237, 0.25)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Play size={14} />
-          <span>7-Step Mirror Masterclass Video</span>
-        </button>
-      </div>
-
-      {viewMode === 'instructional-video' ? (
-        <PostureInstructionalVideoPlayer />
-      ) : (
-        <>
-          {/* Main Posture Visualization Stage: Native Pill Cards on Left + Single Character on Right */}
-          <div className="posture-main-stage">
+      {/* Main Posture Visualization Stage: Native Pill Cards on Left + Single Character on Right */}
+      <div className="posture-main-stage">
         {/* Left Column: 5 Native Responsive Pill Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, zIndex: 10 }}>
           {activeIndicators.map((ind) => {
@@ -564,8 +507,6 @@ export default function PostureViewer3D({
             )}
           </div>
         </div>
-      )}
-        </>
       )}
     </div>
   );

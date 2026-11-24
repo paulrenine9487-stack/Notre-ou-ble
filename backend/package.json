@@ -5,8 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "init-db": "node config/initDb.js"
+    "dev": "node --watch --watch-path=controllers --watch-path=routes --watch-path=middleware --watch-path=services --watch-path=config --watch-path=utils --watch-path=server.js server.js",
+    "init-db": "node config/initDb.js",
+    "migrate": "node scripts/runMigrations.js migrate",
+    "migrate:status": "node scripts/runMigrations.js status",
+    "redis:start": "node scripts/startRedis.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

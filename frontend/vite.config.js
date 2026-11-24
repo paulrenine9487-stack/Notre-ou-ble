@@ -41,7 +41,11 @@ export default defineConfig({
               res.writeHead(503, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({
                 success: false,
-                message: 'Backend server is temporarily unreachable on port 5000. Please ensure node server.js is running.'
+                message: 'Backend server is temporarily unreachable on port 5000. Please ensure node server.js is running.',
+                error: {
+                  code: 'SERVICE_UNAVAILABLE',
+                  message: 'Backend server is temporarily unreachable on port 5000.'
+                }
               }));
             }
           });

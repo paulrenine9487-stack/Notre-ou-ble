@@ -11,7 +11,8 @@ const crypto = require('crypto');
  * Generates unique X-Request-Id, attaches start time, and instruments response.
  */
 function gatewayMiddleware(options = {}) {
-  const timeoutMs = options.timeoutMs || 30000; // 30 seconds default timeout
+  const defaultTimeoutMs = options.timeoutMs || 30000; // 30 seconds default
+  const uploadTimeoutMs = options.uploadTimeoutMs || 120000; // 120 seconds for media & uploads
 
   return (req, res, next) => {
     // 1. Generate or forward correlation ID
@@ -33,19 +34,28 @@ function gatewayMiddleware(options = {}) {
       return origWriteHead.apply(this, args);
     };
 
-    // 3. Request timeout handler (OWASP API Gateway protection against hung connections)
+    // 3. Adaptive Request timeout handler
+    const isUploadOrStream = req.path.includes('/recordings') ||
+      req.path.includes('/audio') ||
+      req.path.includes('/media') ||
+      req.path.includes('/upload') ||
+      req.path.includes('/stream');
+    const effectiveTimeoutMs = isUploadOrStream ? uploadTimeoutMs : defaultTimeoutMs;
+
     const timer = setTimeout(() => {
       if (!res.headersSent) {
+        const timeoutSeconds = Math.round(effectiveTimeoutMs / 1000);
         res.status(504).json({
           success: false,
+          message: `The requested operation exceeded the gateway execution threshold (${timeoutSeconds}s).`,
           error: {
             code: 'GATEWAY_TIMEOUT',
-            message: 'The requested operation exceeded the gateway execution threshold (30s).',
+            message: `The requested operation exceeded the gateway execution threshold (${timeoutSeconds}s).`,
             requestId: correlationId
           }
         });
       }
-    }, timeoutMs);
+    }, effectiveTimeoutMs);
 
     // Logging on completion
     res.on('finish', () => {

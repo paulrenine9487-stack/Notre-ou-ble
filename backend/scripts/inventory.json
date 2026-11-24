@@ -1,0 +1,1986 @@
+[
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/public-theme",
+    "fullPath": "/api/admin/public-theme",
+    "line": 14,
+    "raw": "router.get('/public-theme', adminController.getBrandingTheme);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/overview",
+    "fullPath": "/api/admin/overview",
+    "line": 22,
+    "raw": "router.get('/overview', adminController.getOverview);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/practice-reports",
+    "fullPath": "/api/admin/practice-reports",
+    "line": 23,
+    "raw": "router.get('/practice-reports', adminController.getPracticeReports);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/practice-commitments",
+    "fullPath": "/api/admin/practice-commitments",
+    "line": 24,
+    "raw": "router.get('/practice-commitments', stageFivePracticeCtrl.getAdminPracticeCommitments);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/modules",
+    "fullPath": "/api/admin/modules",
+    "line": 25,
+    "raw": "router.get('/modules', adminController.getModules);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/modules/:id",
+    "fullPath": "/api/admin/modules/:id",
+    "line": 26,
+    "raw": "router.put('/modules/:id', adminController.updateModule);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/modules",
+    "fullPath": "/api/admin/modules",
+    "line": 27,
+    "raw": "router.post('/modules', adminController.createModule);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/activities",
+    "fullPath": "/api/admin/activities",
+    "line": 28,
+    "raw": "router.post('/activities', adminController.createActivity);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/theme",
+    "fullPath": "/api/admin/theme",
+    "line": 29,
+    "raw": "router.get('/theme', adminController.getBrandingTheme);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/theme",
+    "fullPath": "/api/admin/theme",
+    "line": 30,
+    "raw": "router.put('/theme', adminController.updateBrandingTheme);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/curriculum",
+    "fullPath": "/api/admin/learning/curriculum",
+    "line": 33,
+    "raw": "router.get('/learning/curriculum', fiveStageCtrl.getCurriculumForAdmin);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/stages/:stageId",
+    "fullPath": "/api/admin/learning/stages/:stageId",
+    "line": 34,
+    "raw": "router.put('/learning/stages/:stageId', fiveStageCtrl.updateStageForAdmin);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/content",
+    "fullPath": "/api/admin/learning/content",
+    "line": 35,
+    "raw": "router.post('/learning/content', fiveStageCtrl.createStageContent);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/content/:id",
+    "fullPath": "/api/admin/learning/content/:id",
+    "line": 36,
+    "raw": "router.put('/learning/content/:id', fiveStageCtrl.updateStageContent);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/objectives",
+    "fullPath": "/api/admin/learning/objectives",
+    "line": 39,
+    "raw": "router.get('/learning/objectives', fiveStageCtrl.getAdminStageObjectives);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/stages/:stageId/objectives",
+    "fullPath": "/api/admin/learning/stages/:stageId/objectives",
+    "line": 40,
+    "raw": "router.get('/learning/stages/:stageId/objectives', fiveStageCtrl.getAdminStageObjectives);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/objectives",
+    "fullPath": "/api/admin/learning/objectives",
+    "line": 41,
+    "raw": "router.post('/learning/objectives', fiveStageCtrl.createObjective);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/objectives/:id",
+    "fullPath": "/api/admin/learning/objectives/:id",
+    "line": 42,
+    "raw": "router.put('/learning/objectives/:id', fiveStageCtrl.updateObjective);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/objectives/:id",
+    "fullPath": "/api/admin/learning/objectives/:id",
+    "line": 43,
+    "raw": "router.delete('/learning/objectives/:id', fiveStageCtrl.deleteObjective);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/recall/questions",
+    "fullPath": "/api/admin/learning/recall/questions",
+    "line": 46,
+    "raw": "router.post('/learning/recall/questions', fiveStageCtrl.createRecallQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/recall/questions/:id",
+    "fullPath": "/api/admin/learning/recall/questions/:id",
+    "line": 47,
+    "raw": "router.put('/learning/recall/questions/:id', fiveStageCtrl.updateRecallQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/recall/questions/:id",
+    "fullPath": "/api/admin/learning/recall/questions/:id",
+    "line": 48,
+    "raw": "router.delete('/learning/recall/questions/:id', fiveStageCtrl.deleteRecallQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/tips",
+    "fullPath": "/api/admin/learning/tips",
+    "line": 51,
+    "raw": "router.post('/learning/tips', fiveStageCtrl.createTip);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/tips/:id",
+    "fullPath": "/api/admin/learning/tips/:id",
+    "line": 52,
+    "raw": "router.put('/learning/tips/:id', fiveStageCtrl.updateTip);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/tips/:id",
+    "fullPath": "/api/admin/learning/tips/:id",
+    "line": 53,
+    "raw": "router.delete('/learning/tips/:id', fiveStageCtrl.deleteTip);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/songs",
+    "fullPath": "/api/admin/learning/songs",
+    "line": 56,
+    "raw": "router.post('/learning/songs', fiveStageCtrl.createSong);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/songs/:id",
+    "fullPath": "/api/admin/learning/songs/:id",
+    "line": 57,
+    "raw": "router.put('/learning/songs/:id', fiveStageCtrl.updateSong);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/songs/:id",
+    "fullPath": "/api/admin/learning/songs/:id",
+    "line": 58,
+    "raw": "router.delete('/learning/songs/:id', fiveStageCtrl.deleteSong);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/challenges",
+    "fullPath": "/api/admin/learning/challenges",
+    "line": 61,
+    "raw": "router.post('/learning/challenges', fiveStageCtrl.createChallenge);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/challenges/:id",
+    "fullPath": "/api/admin/learning/challenges/:id",
+    "line": 62,
+    "raw": "router.put('/learning/challenges/:id', fiveStageCtrl.updateChallenge);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/challenges/:id",
+    "fullPath": "/api/admin/learning/challenges/:id",
+    "line": 63,
+    "raw": "router.delete('/learning/challenges/:id', fiveStageCtrl.deleteChallenge);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/student-submissions",
+    "fullPath": "/api/admin/learning/student-submissions",
+    "line": 66,
+    "raw": "router.get('/learning/student-submissions', fiveStageCtrl.getStudentSubmissionsForAdmin);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/assessments/:id/grade",
+    "fullPath": "/api/admin/learning/assessments/:id/grade",
+    "line": 67,
+    "raw": "router.post('/learning/assessments/:id/grade', fiveStageCtrl.gradeWrittenAssessment);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/parts/:partId",
+    "fullPath": "/api/admin/learning/parts/:partId",
+    "line": 70,
+    "raw": "router.get('/learning/parts/:partId', fiveStageCtrl.adminGetPartSection);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/parts/:partId",
+    "fullPath": "/api/admin/learning/parts/:partId",
+    "line": 71,
+    "raw": "router.put('/learning/parts/:partId', fiveStageCtrl.adminUpdatePartSection);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/parts/:partId/tabs/:tabKey",
+    "fullPath": "/api/admin/learning/parts/:partId/tabs/:tabKey",
+    "line": 72,
+    "raw": "router.put('/learning/parts/:partId/tabs/:tabKey', fiveStageCtrl.adminUpdatePartTab);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/parts/:partId/indicators",
+    "fullPath": "/api/admin/learning/parts/:partId/indicators",
+    "line": 73,
+    "raw": "router.post('/learning/parts/:partId/indicators', fiveStageCtrl.adminCreatePostureIndicator);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/indicators/:id",
+    "fullPath": "/api/admin/learning/indicators/:id",
+    "line": 74,
+    "raw": "router.put('/learning/indicators/:id', fiveStageCtrl.adminUpdatePostureIndicator);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/indicators/:id",
+    "fullPath": "/api/admin/learning/indicators/:id",
+    "line": 75,
+    "raw": "router.delete('/learning/indicators/:id', fiveStageCtrl.adminDeletePostureIndicator);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/learning/parts/:partId/checklist",
+    "fullPath": "/api/admin/learning/parts/:partId/checklist",
+    "line": 76,
+    "raw": "router.post('/learning/parts/:partId/checklist', fiveStageCtrl.adminCreatePostureChecklistItem);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/checklist/:id",
+    "fullPath": "/api/admin/learning/checklist/:id",
+    "line": 77,
+    "raw": "router.put('/learning/checklist/:id', fiveStageCtrl.adminUpdatePostureChecklistItem);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning/checklist/:id",
+    "fullPath": "/api/admin/learning/checklist/:id",
+    "line": 78,
+    "raw": "router.delete('/learning/checklist/:id', fiveStageCtrl.adminDeletePostureChecklistItem);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning/breathing-levels",
+    "fullPath": "/api/admin/learning/breathing-levels",
+    "line": 81,
+    "raw": "router.get('/learning/breathing-levels', fiveStageCtrl.adminGetBreathingLevels);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/learning/breathing-levels/:level_key",
+    "fullPath": "/api/admin/learning/breathing-levels/:level_key",
+    "line": 82,
+    "raw": "router.put('/learning/breathing-levels/:level_key', fiveStageCtrl.adminUpdateBreathingLevel);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/song-practice",
+    "fullPath": "/api/admin/song-practice",
+    "line": 85,
+    "raw": "router.get('/song-practice', fiveStageCtrl.adminGetSongPractice);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/song-practice",
+    "fullPath": "/api/admin/song-practice",
+    "line": 86,
+    "raw": "router.post('/song-practice', fiveStageCtrl.adminUpdateSongPractice);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/song-practice",
+    "fullPath": "/api/admin/song-practice",
+    "line": 87,
+    "raw": "router.put('/song-practice', fiveStageCtrl.adminUpdateSongPractice);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/song-practice/audio",
+    "fullPath": "/api/admin/song-practice/audio",
+    "line": 88,
+    "raw": "router.post('/song-practice/audio', uploadAudio.single('audio'), fiveStageCtrl.adminUploadSongAudio);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/song-practice/levels/:levelId/score",
+    "fullPath": "/api/admin/song-practice/levels/:levelId/score",
+    "line": 89,
+    "raw": "router.post('/song-practice/levels/:levelId/score', cmsUpload.single('score_file'), fiveStageCtrl.adminUploadSongScore);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/song-practice/levels/:levelId/score",
+    "fullPath": "/api/admin/song-practice/levels/:levelId/score",
+    "line": 90,
+    "raw": "router.put('/song-practice/levels/:levelId/score', cmsUpload.single('score_file'), fiveStageCtrl.adminUploadSongScore);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/song-practice/levels/:levelId/markers",
+    "fullPath": "/api/admin/song-practice/levels/:levelId/markers",
+    "line": 91,
+    "raw": "router.put('/song-practice/levels/:levelId/markers', fiveStageCtrl.adminUpdateSongMarkers);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/song-practice/students",
+    "fullPath": "/api/admin/song-practice/students",
+    "line": 92,
+    "raw": "router.get('/song-practice/students', fiveStageCtrl.adminGetStudentSongProgressList);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/song-practice/students/:userId",
+    "fullPath": "/api/admin/song-practice/students/:userId",
+    "line": 93,
+    "raw": "router.delete('/song-practice/students/:userId', fiveStageCtrl.adminResetStudentSongProgress);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/myth-fact/questions",
+    "fullPath": "/api/admin/myth-fact/questions",
+    "line": 96,
+    "raw": "router.get('/myth-fact/questions', fiveStageCtrl.adminGetMythFactQuestions);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/myth-fact/questions/:id",
+    "fullPath": "/api/admin/myth-fact/questions/:id",
+    "line": 97,
+    "raw": "router.put('/myth-fact/questions/:id', fiveStageCtrl.adminUpdateMythFactQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/myth-fact/questions",
+    "fullPath": "/api/admin/myth-fact/questions",
+    "line": 98,
+    "raw": "router.post('/myth-fact/questions', fiveStageCtrl.adminCreateMythFactQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/myth-fact/questions/:id",
+    "fullPath": "/api/admin/myth-fact/questions/:id",
+    "line": 99,
+    "raw": "router.delete('/myth-fact/questions/:id', fiveStageCtrl.adminDeleteMythFactQuestion);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/myth-fact/student-results",
+    "fullPath": "/api/admin/myth-fact/student-results",
+    "line": 100,
+    "raw": "router.get('/myth-fact/student-results', fiveStageCtrl.adminGetMythFactStudentResults);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/myth-fact/student-results/:userId",
+    "fullPath": "/api/admin/myth-fact/student-results/:userId",
+    "line": 101,
+    "raw": "router.delete('/myth-fact/student-results/:userId', fiveStageCtrl.adminResetStudentMythFact);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/learning-reflections",
+    "fullPath": "/api/admin/learning-reflections",
+    "line": 104,
+    "raw": "router.get('/learning-reflections', reflectionCtrl.adminGetReflections);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/learning-reflections/:userId",
+    "fullPath": "/api/admin/learning-reflections/:userId",
+    "line": 105,
+    "raw": "router.delete('/learning-reflections/:userId', reflectionCtrl.adminResetStudentReflection);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/transcripts/videos",
+    "fullPath": "/api/admin/transcripts/videos",
+    "line": 108,
+    "raw": "router.get('/transcripts/videos', transcriptCtrl.adminGetVideos);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/transcripts/by-video/:videoId",
+    "fullPath": "/api/admin/transcripts/by-video/:videoId",
+    "line": 109,
+    "raw": "router.get('/transcripts/by-video/:videoId', transcriptCtrl.adminGetTranscriptByVideo);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/transcripts/generate-draft",
+    "fullPath": "/api/admin/transcripts/generate-draft",
+    "line": 110,
+    "raw": "router.post('/transcripts/generate-draft', transcriptCtrl.adminGenerateDraftTranscript);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/transcripts",
+    "fullPath": "/api/admin/transcripts",
+    "line": 111,
+    "raw": "router.get('/transcripts', transcriptCtrl.adminGetTranscripts);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/transcripts/:id",
+    "fullPath": "/api/admin/transcripts/:id",
+    "line": 112,
+    "raw": "router.get('/transcripts/:id', transcriptCtrl.adminGetTranscriptById);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/transcripts",
+    "fullPath": "/api/admin/transcripts",
+    "line": 113,
+    "raw": "router.post('/transcripts', transcriptCtrl.adminCreateTranscript);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/transcripts/:id",
+    "fullPath": "/api/admin/transcripts/:id",
+    "line": 114,
+    "raw": "router.put('/transcripts/:id', transcriptCtrl.adminUpdateTranscript);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "DELETE",
+    "subPath": "/transcripts/:id",
+    "fullPath": "/api/admin/transcripts/:id",
+    "line": 115,
+    "raw": "router.delete('/transcripts/:id', transcriptCtrl.adminDeleteTranscript);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/users",
+    "fullPath": "/api/admin/users",
+    "line": 118,
+    "raw": "router.get('/users', requireSuperAdmin, adminController.getUsers);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "POST",
+    "subPath": "/users",
+    "fullPath": "/api/admin/users",
+    "line": 119,
+    "raw": "router.post('/users', requireSuperAdmin, adminController.createAdminUser);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "PUT",
+    "subPath": "/users/:id/role",
+    "fullPath": "/api/admin/users/:id/role",
+    "line": 120,
+    "raw": "router.put('/users/:id/role', requireSuperAdmin, adminController.updateUserRole);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/audit-logs",
+    "fullPath": "/api/admin/audit-logs",
+    "line": 121,
+    "raw": "router.get('/audit-logs', requireSuperAdmin, adminController.getAuditLogs);"
+  },
+  {
+    "file": "adminRoutes.js",
+    "method": "GET",
+    "subPath": "/security-logs",
+    "fullPath": "/api/admin/security-logs",
+    "line": 122,
+    "raw": "router.get('/security-logs', requireSuperAdmin, adminController.getSecurityAuditLogs);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/register",
+    "fullPath": "/api/auth/register",
+    "line": 7,
+    "raw": "router.post('/register', registerLimiter, authController.register);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/login",
+    "fullPath": "/api/auth/login",
+    "line": 8,
+    "raw": "router.post('/login', authLimiter, authController.login);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/verify-mfa",
+    "fullPath": "/api/auth/verify-mfa",
+    "line": 9,
+    "raw": "router.post('/verify-mfa', authLimiter, authController.verifyMfa);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/refresh",
+    "fullPath": "/api/auth/refresh",
+    "line": 10,
+    "raw": "router.post('/refresh', refreshLimiter, authController.refreshToken);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "GET",
+    "subPath": "/mfa-setup",
+    "fullPath": "/api/auth/mfa-setup",
+    "line": 11,
+    "raw": "router.get('/mfa-setup', authenticateToken, authController.getMfaSetup);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/forgot-password",
+    "fullPath": "/api/auth/forgot-password",
+    "line": 12,
+    "raw": "router.post('/forgot-password', otpLimiter, authController.forgotPassword);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/verify-otp",
+    "fullPath": "/api/auth/verify-otp",
+    "line": 13,
+    "raw": "router.post('/verify-otp', otpLimiter, authController.verifyOtp);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/resend-otp",
+    "fullPath": "/api/auth/resend-otp",
+    "line": 14,
+    "raw": "router.post('/resend-otp', otpLimiter, authController.resendOtp);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/reset-password",
+    "fullPath": "/api/auth/reset-password",
+    "line": 15,
+    "raw": "router.post('/reset-password', otpLimiter, authController.resetPassword);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "GET",
+    "subPath": "/me",
+    "fullPath": "/api/auth/me",
+    "line": 16,
+    "raw": "router.get('/me', authenticateToken, authController.getCurrentUser);"
+  },
+  {
+    "file": "authRoutes.js",
+    "method": "POST",
+    "subPath": "/logout",
+    "fullPath": "/api/auth/logout",
+    "line": 17,
+    "raw": "router.post('/logout', authController.logout);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact",
+    "fullPath": "/api/breath-management/challenges/myth-fact",
+    "line": 11,
+    "raw": "router.get('/challenges/myth-fact', fiveStageCtrl.getMythFactChallenge);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "POST",
+    "subPath": "/challenges/myth-fact/submit-answer",
+    "fullPath": "/api/breath-management/challenges/myth-fact/submit-answer",
+    "line": 12,
+    "raw": "router.post('/challenges/myth-fact/submit-answer', fiveStageCtrl.submitMythFactAnswer);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "POST",
+    "subPath": "/challenges/myth-fact/complete",
+    "fullPath": "/api/breath-management/challenges/myth-fact/complete",
+    "line": 13,
+    "raw": "router.post('/challenges/myth-fact/complete', fiveStageCtrl.completeMythFactChallenge);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact/progress",
+    "fullPath": "/api/breath-management/challenges/myth-fact/progress",
+    "line": 14,
+    "raw": "router.get('/challenges/myth-fact/progress', fiveStageCtrl.getMythFactProgress);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact/results",
+    "fullPath": "/api/breath-management/challenges/myth-fact/results",
+    "line": 15,
+    "raw": "router.get('/challenges/myth-fact/results', fiveStageCtrl.getMythFactResults);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "GET",
+    "subPath": "/reflections",
+    "fullPath": "/api/breath-management/reflections",
+    "line": 18,
+    "raw": "router.get('/reflections', reflectionCtrl.getStudentReflection);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "POST",
+    "subPath": "/reflections",
+    "fullPath": "/api/breath-management/reflections",
+    "line": 19,
+    "raw": "router.post('/reflections', reflectionCtrl.submitStudentReflection);"
+  },
+  {
+    "file": "breathManagementRoutes.js",
+    "method": "PUT",
+    "subPath": "/reflections",
+    "fullPath": "/api/breath-management/reflections",
+    "line": 20,
+    "raw": "router.put('/reflections', reflectionCtrl.updateStudentReflection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/public/:pageSlug",
+    "fullPath": "/api/cms/public/:pageSlug",
+    "line": 9,
+    "raw": "router.get('/public/:pageSlug', cmsController.getPublicPageSections);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/stats",
+    "fullPath": "/api/cms/stats",
+    "line": 16,
+    "raw": "router.get('/stats', cmsController.getCmsDashboardStats);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/sections",
+    "fullPath": "/api/cms/sections",
+    "line": 19,
+    "raw": "router.get('/sections', cmsController.getAllSections);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/sections/:id",
+    "fullPath": "/api/cms/sections/:id",
+    "line": 20,
+    "raw": "router.get('/sections/:id', cmsController.getSectionById);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "POST",
+    "subPath": "/sections",
+    "fullPath": "/api/cms/sections",
+    "line": 21,
+    "raw": "router.post('/sections', cmsController.createSection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "PUT",
+    "subPath": "/sections/:id",
+    "fullPath": "/api/cms/sections/:id",
+    "line": 22,
+    "raw": "router.put('/sections/:id', cmsController.updateSection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "DELETE",
+    "subPath": "/sections/:id",
+    "fullPath": "/api/cms/sections/:id",
+    "line": 23,
+    "raw": "router.delete('/sections/:id', cmsController.deleteSection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "POST",
+    "subPath": "/sections/:id/publish",
+    "fullPath": "/api/cms/sections/:id/publish",
+    "line": 24,
+    "raw": "router.post('/sections/:id/publish', cmsController.publishSection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "POST",
+    "subPath": "/sections/:id/unpublish",
+    "fullPath": "/api/cms/sections/:id/unpublish",
+    "line": 25,
+    "raw": "router.post('/sections/:id/unpublish', cmsController.unpublishSection);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/media",
+    "fullPath": "/api/cms/media",
+    "line": 28,
+    "raw": "router.get('/media', cmsController.getMediaAssets);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "POST",
+    "subPath": "/media",
+    "fullPath": "/api/cms/media",
+    "line": 29,
+    "raw": "router.post('/media', cmsUpload.single('file'), cmsController.uploadMediaAsset);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "PUT",
+    "subPath": "/media/:id",
+    "fullPath": "/api/cms/media/:id",
+    "line": 30,
+    "raw": "router.put('/media/:id', cmsController.updateMediaAsset);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "DELETE",
+    "subPath": "/media/:id",
+    "fullPath": "/api/cms/media/:id",
+    "line": 31,
+    "raw": "router.delete('/media/:id', cmsController.deleteMediaAsset);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/modules",
+    "fullPath": "/api/cms/modules",
+    "line": 34,
+    "raw": "router.get('/modules', cmsController.getCmsModules);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "PUT",
+    "subPath": "/modules/:id",
+    "fullPath": "/api/cms/modules/:id",
+    "line": 35,
+    "raw": "router.put('/modules/:id', cmsController.updateCmsModule);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/stages",
+    "fullPath": "/api/cms/stages",
+    "line": 38,
+    "raw": "router.get('/stages', cmsController.getCmsStages);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "PUT",
+    "subPath": "/stages/:id",
+    "fullPath": "/api/cms/stages/:id",
+    "line": 39,
+    "raw": "router.put('/stages/:id', cmsController.updateCmsStage);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "GET",
+    "subPath": "/revisions",
+    "fullPath": "/api/cms/revisions",
+    "line": 42,
+    "raw": "router.get('/revisions', cmsController.getCmsRevisions);"
+  },
+  {
+    "file": "cmsRoutes.js",
+    "method": "POST",
+    "subPath": "/revisions/:id/rollback",
+    "fullPath": "/api/cms/revisions/:id/rollback",
+    "line": 43,
+    "raw": "router.post('/revisions/:id/rollback', cmsController.rollbackRevision);"
+  },
+  {
+    "file": "dashboardRoutes.js",
+    "method": "GET",
+    "subPath": "/overview",
+    "fullPath": "/api/dashboard/overview",
+    "line": 8,
+    "raw": "router.get('/overview', dashboardController.getOverview);"
+  },
+  {
+    "file": "dashboardRoutes.js",
+    "method": "GET",
+    "subPath": "/practice-summary",
+    "fullPath": "/api/dashboard/practice-summary",
+    "line": 9,
+    "raw": "router.get('/practice-summary', dashboardController.getPracticeSummary);"
+  },
+  {
+    "file": "dashboardRoutes.js",
+    "method": "GET",
+    "subPath": "/learning-summary",
+    "fullPath": "/api/dashboard/learning-summary",
+    "line": 10,
+    "raw": "router.get('/learning-summary', dashboardController.getLearningSummary);"
+  },
+  {
+    "file": "dashboardRoutes.js",
+    "method": "GET",
+    "subPath": "/task-performance",
+    "fullPath": "/api/dashboard/task-performance",
+    "line": 11,
+    "raw": "router.get('/task-performance', dashboardController.getTaskPerformance);"
+  },
+  {
+    "file": "dashboardRoutes.js",
+    "method": "GET",
+    "subPath": "/recent-activity",
+    "fullPath": "/api/dashboard/recent-activity",
+    "line": 12,
+    "raw": "router.get('/recent-activity', dashboardController.getRecentActivity);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recordings/:recordingId/audio",
+    "fullPath": "/api/learning/recordings/:recordingId/audio",
+    "line": 14,
+    "raw": "router.get('/recordings/:recordingId/audio', authenticateToken, fiveStageCtrl.streamRecordingAudio);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/breathing-levels",
+    "fullPath": "/api/learning/breathing-levels",
+    "line": 17,
+    "raw": "router.get('/breathing-levels', fiveStageCtrl.getBreathingLevels);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/:stageId/videos/:videoId/transcript",
+    "fullPath": "/api/learning/stages/:stageId/videos/:videoId/transcript",
+    "line": 20,
+    "raw": "router.get('/stages/:stageId/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/videos/:videoId/transcript",
+    "fullPath": "/api/learning/videos/:videoId/transcript",
+    "line": 21,
+    "raw": "router.get('/videos/:videoId/transcript', transcriptCtrl.getStudentTranscript);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/unlock-status",
+    "fullPath": "/api/learning/stages/unlock-status",
+    "line": 28,
+    "raw": "router.get('/stages/unlock-status', stageFivePracticeCtrl.getStagesUnlockStatus);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules/:moduleId/completion-summary",
+    "fullPath": "/api/learning/modules/:moduleId/completion-summary",
+    "line": 29,
+    "raw": "router.get('/modules/:moduleId/completion-summary', stageFivePracticeCtrl.getModuleCompletionSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules/:moduleId/progress",
+    "fullPath": "/api/learning/modules/:moduleId/progress",
+    "line": 30,
+    "raw": "router.get('/modules/:moduleId/progress', stageFivePracticeCtrl.getModuleCompletionSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/1/completion-summary",
+    "fullPath": "/api/learning/1/completion-summary",
+    "line": 31,
+    "raw": "router.get('/1/completion-summary', stageFivePracticeCtrl.getModuleCompletionSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/1/progress",
+    "fullPath": "/api/learning/1/progress",
+    "line": 32,
+    "raw": "router.get('/1/progress', stageFivePracticeCtrl.getModuleCompletionSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/reflections/breath-management",
+    "fullPath": "/api/learning/reflections/breath-management",
+    "line": 37,
+    "raw": "router.get('/reflections/breath-management', reflectionCtrl.getStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/reflections/breath-management",
+    "fullPath": "/api/learning/reflections/breath-management",
+    "line": 38,
+    "raw": "router.post('/reflections/breath-management', reflectionCtrl.submitStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "PUT",
+    "subPath": "/reflections/breath-management",
+    "fullPath": "/api/learning/reflections/breath-management",
+    "line": 39,
+    "raw": "router.put('/reflections/breath-management', reflectionCtrl.updateStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/reflections",
+    "fullPath": "/api/learning/reflections",
+    "line": 40,
+    "raw": "router.get('/reflections', reflectionCtrl.getStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/reflections",
+    "fullPath": "/api/learning/reflections",
+    "line": 41,
+    "raw": "router.post('/reflections', reflectionCtrl.submitStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "PUT",
+    "subPath": "/reflections",
+    "fullPath": "/api/learning/reflections",
+    "line": 42,
+    "raw": "router.put('/reflections', reflectionCtrl.updateStudentReflection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages",
+    "fullPath": "/api/learning/stages",
+    "line": 49,
+    "raw": "router.get('/stages', fiveStageCtrl.getStages);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/:stageId",
+    "fullPath": "/api/learning/stages/:stageId",
+    "line": 50,
+    "raw": "router.get('/stages/:stageId', fiveStageCtrl.getStageDetails);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/:stageId/content",
+    "fullPath": "/api/learning/stages/:stageId/content",
+    "line": 51,
+    "raw": "router.get('/stages/:stageId/content', fiveStageCtrl.getStageDetails);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/stages/:stageId/start",
+    "fullPath": "/api/learning/stages/:stageId/start",
+    "line": 52,
+    "raw": "router.post('/stages/:stageId/start', fiveStageCtrl.startStage);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/activity-progress",
+    "fullPath": "/api/learning/activity-progress",
+    "line": 53,
+    "raw": "router.post('/activity-progress', fiveStageCtrl.recordActivityProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/:stageId/objectives",
+    "fullPath": "/api/learning/stages/:stageId/objectives",
+    "line": 56,
+    "raw": "router.get('/stages/:stageId/objectives', fiveStageCtrl.getStageObjectives);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/stages/:stageId/objectives/acknowledge",
+    "fullPath": "/api/learning/stages/:stageId/objectives/acknowledge",
+    "line": 57,
+    "raw": "router.post('/stages/:stageId/objectives/acknowledge', fiveStageCtrl.acknowledgeStageObjectives);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules",
+    "fullPath": "/api/learning/modules",
+    "line": 60,
+    "raw": "router.get('/modules', fiveStageCtrl.getLearningModules);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules/:moduleId",
+    "fullPath": "/api/learning/modules/:moduleId",
+    "line": 61,
+    "raw": "router.get('/modules/:moduleId', fiveStageCtrl.getLearningModuleById);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules/:moduleId/progress",
+    "fullPath": "/api/learning/modules/:moduleId/progress",
+    "line": 62,
+    "raw": "router.get('/modules/:moduleId/progress', fiveStageCtrl.getLearningModuleProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/modules/:moduleId/stages",
+    "fullPath": "/api/learning/modules/:moduleId/stages",
+    "line": 63,
+    "raw": "router.get('/modules/:moduleId/stages', fiveStageCtrl.getStages);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recall/questions",
+    "fullPath": "/api/learning/recall/questions",
+    "line": 66,
+    "raw": "router.get('/recall/questions', fiveStageCtrl.getRecallQuestions);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/recall/answers",
+    "fullPath": "/api/learning/recall/answers",
+    "line": 67,
+    "raw": "router.post('/recall/answers', fiveStageCtrl.saveRecallAnswers);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recall/answers",
+    "fullPath": "/api/learning/recall/answers",
+    "line": 68,
+    "raw": "router.get('/recall/answers', fiveStageCtrl.getRecallAnswers);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recall/peer-board",
+    "fullPath": "/api/learning/recall/peer-board",
+    "line": 69,
+    "raw": "router.get('/recall/peer-board', fiveStageCtrl.getPeerPinBoard);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recall/peer-board/:questionId",
+    "fullPath": "/api/learning/recall/peer-board/:questionId",
+    "line": 70,
+    "raw": "router.get('/recall/peer-board/:questionId', fiveStageCtrl.getPeerPinBoard);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/videos",
+    "fullPath": "/api/learning/videos",
+    "line": 73,
+    "raw": "router.get('/videos', fiveStageCtrl.getVideos);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/tips",
+    "fullPath": "/api/learning/tips",
+    "line": 74,
+    "raw": "router.get('/tips', fiveStageCtrl.getBreathingTips);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/songs",
+    "fullPath": "/api/learning/songs",
+    "line": 75,
+    "raw": "router.get('/songs', fiveStageCtrl.getSongs);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/songs/:songId/practice",
+    "fullPath": "/api/learning/songs/:songId/practice",
+    "line": 76,
+    "raw": "router.post('/songs/:songId/practice', fiveStageCtrl.recordSongPractice);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/stages/:stageId/parts/:partNumber",
+    "fullPath": "/api/learning/stages/:stageId/parts/:partNumber",
+    "line": 78,
+    "raw": "router.get('/stages/:stageId/parts/:partNumber', fiveStageCtrl.getPartSection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber",
+    "fullPath": "/api/learning/parts/:partNumber",
+    "line": 79,
+    "raw": "router.get('/parts/:partNumber', fiveStageCtrl.getPartSection);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/posture",
+    "fullPath": "/api/learning/parts/:partNumber/posture",
+    "line": 80,
+    "raw": "router.get('/parts/:partNumber/posture', fiveStageCtrl.getPostureTab);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/breathe",
+    "fullPath": "/api/learning/parts/:partNumber/breathe",
+    "line": 81,
+    "raw": "router.get('/parts/:partNumber/breathe', fiveStageCtrl.getBreatheTab);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/song",
+    "fullPath": "/api/learning/parts/:partNumber/song",
+    "line": 82,
+    "raw": "router.get('/parts/:partNumber/song', fiveStageCtrl.getSongTab);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/song/levels",
+    "fullPath": "/api/learning/parts/:partNumber/song/levels",
+    "line": 83,
+    "raw": "router.get('/parts/:partNumber/song/levels', fiveStageCtrl.getSongLevels);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/song/levels/:levelId/score",
+    "fullPath": "/api/learning/parts/:partNumber/song/levels/:levelId/score",
+    "line": 84,
+    "raw": "router.get('/parts/:partNumber/song/levels/:levelId/score', fiveStageCtrl.getSongScore);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/song/progress",
+    "fullPath": "/api/learning/parts/:partNumber/song/progress",
+    "line": 85,
+    "raw": "router.post('/parts/:partNumber/song/progress', fiveStageCtrl.saveSongProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/song/session/start",
+    "fullPath": "/api/learning/parts/:partNumber/song/session/start",
+    "line": 86,
+    "raw": "router.post('/parts/:partNumber/song/session/start', fiveStageCtrl.startSongSession);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/song/session/complete",
+    "fullPath": "/api/learning/parts/:partNumber/song/session/complete",
+    "line": 87,
+    "raw": "router.post('/parts/:partNumber/song/session/complete', fiveStageCtrl.completeSongSession);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/song/progress",
+    "fullPath": "/api/learning/parts/:partNumber/song/progress",
+    "line": 88,
+    "raw": "router.get('/parts/:partNumber/song/progress', fiveStageCtrl.getSongProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/posture/progress",
+    "fullPath": "/api/learning/parts/:partNumber/posture/progress",
+    "line": 90,
+    "raw": "router.post('/parts/:partNumber/posture/progress', fiveStageCtrl.savePostureProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/complete",
+    "fullPath": "/api/learning/parts/:partNumber/complete",
+    "line": 91,
+    "raw": "router.post('/parts/:partNumber/complete', fiveStageCtrl.completePartTab);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/progress",
+    "fullPath": "/api/learning/parts/:partNumber/progress",
+    "line": 92,
+    "raw": "router.get('/parts/:partNumber/progress', fiveStageCtrl.getPartProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/breathing-levels",
+    "fullPath": "/api/learning/breathing-levels",
+    "line": 95,
+    "raw": "router.get('/breathing-levels', fiveStageCtrl.getBreathingLevels);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/parts/:partNumber/breathe/session",
+    "fullPath": "/api/learning/parts/:partNumber/breathe/session",
+    "line": 96,
+    "raw": "router.post('/parts/:partNumber/breathe/session', fiveStageCtrl.saveBreathingSession);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/parts/:partNumber/breathe/sessions",
+    "fullPath": "/api/learning/parts/:partNumber/breathe/sessions",
+    "line": 97,
+    "raw": "router.get('/parts/:partNumber/breathe/sessions', fiveStageCtrl.getBreathingSessions);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact",
+    "fullPath": "/api/learning/challenges/myth-fact",
+    "line": 100,
+    "raw": "router.get('/challenges/myth-fact', fiveStageCtrl.getMythFactChallenge);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/challenges/myth-fact/submit-answer",
+    "fullPath": "/api/learning/challenges/myth-fact/submit-answer",
+    "line": 101,
+    "raw": "router.post('/challenges/myth-fact/submit-answer', fiveStageCtrl.submitMythFactAnswer);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/challenges/myth-fact/complete",
+    "fullPath": "/api/learning/challenges/myth-fact/complete",
+    "line": 102,
+    "raw": "router.post('/challenges/myth-fact/complete', fiveStageCtrl.completeMythFactChallenge);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact/progress",
+    "fullPath": "/api/learning/challenges/myth-fact/progress",
+    "line": 103,
+    "raw": "router.get('/challenges/myth-fact/progress', fiveStageCtrl.getMythFactProgress);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/myth-fact/results",
+    "fullPath": "/api/learning/challenges/myth-fact/results",
+    "line": 104,
+    "raw": "router.get('/challenges/myth-fact/results', fiveStageCtrl.getMythFactResults);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges",
+    "fullPath": "/api/learning/challenges",
+    "line": 106,
+    "raw": "router.get('/challenges', fiveStageCtrl.getChallenges);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/:challengeId",
+    "fullPath": "/api/learning/challenges/:challengeId",
+    "line": 107,
+    "raw": "router.get('/challenges/:challengeId', fiveStageCtrl.getChallenges);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/challenges/:challengeId/attempts",
+    "fullPath": "/api/learning/challenges/:challengeId/attempts",
+    "line": 108,
+    "raw": "router.post('/challenges/:challengeId/attempts', fiveStageCtrl.submitChallengeAttempt);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/challenges/:challengeId/attempts",
+    "fullPath": "/api/learning/challenges/:challengeId/attempts",
+    "line": 109,
+    "raw": "router.get('/challenges/:challengeId/attempts', fiveStageCtrl.getChallenges);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/assessments",
+    "fullPath": "/api/learning/assessments",
+    "line": 111,
+    "raw": "router.post('/assessments', fiveStageCtrl.submitWrittenAssessment);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/assessments",
+    "fullPath": "/api/learning/assessments",
+    "line": 112,
+    "raw": "router.get('/assessments', fiveStageCtrl.getWrittenAssessments);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/recordings",
+    "fullPath": "/api/learning/recordings",
+    "line": 114,
+    "raw": "router.post('/recordings', uploadAudio.single('audio'), fiveStageCtrl.uploadRecording);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/recordings",
+    "fullPath": "/api/learning/recordings",
+    "line": 115,
+    "raw": "router.get('/recordings', fiveStageCtrl.getRecordings);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/feedback",
+    "fullPath": "/api/learning/feedback",
+    "line": 118,
+    "raw": "router.post('/feedback', fiveStageCtrl.submitFeedback);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/feedback",
+    "fullPath": "/api/learning/feedback",
+    "line": 119,
+    "raw": "router.get('/feedback', fiveStageCtrl.getFeedback);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/practice-summary",
+    "fullPath": "/api/learning/practice-summary",
+    "line": 121,
+    "raw": "router.post('/practice-summary', fiveStageCtrl.submitPracticeSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/practice-summary",
+    "fullPath": "/api/learning/practice-summary",
+    "line": 122,
+    "raw": "router.get('/practice-summary', fiveStageCtrl.getPracticeSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/progress/summary",
+    "fullPath": "/api/learning/progress/summary",
+    "line": 125,
+    "raw": "router.get('/progress/summary', fiveStageCtrl.getProgressSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/progress",
+    "fullPath": "/api/learning/progress",
+    "line": 126,
+    "raw": "router.get('/progress', fiveStageCtrl.getProgressSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/progress/:moduleId",
+    "fullPath": "/api/learning/progress/:moduleId",
+    "line": 127,
+    "raw": "router.get('/progress/:moduleId', fiveStageCtrl.getProgressSummary);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/tasks/:taskId",
+    "fullPath": "/api/learning/tasks/:taskId",
+    "line": 130,
+    "raw": "router.get('/tasks/:taskId', learningController.getTaskById);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/tasks/:taskId/start",
+    "fullPath": "/api/learning/tasks/:taskId/start",
+    "line": 131,
+    "raw": "router.post('/tasks/:taskId/start', learningController.startTask);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/tasks/:taskId/submit",
+    "fullPath": "/api/learning/tasks/:taskId/submit",
+    "line": 132,
+    "raw": "router.post('/tasks/:taskId/submit', learningController.submitTask);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/tasks/:taskId/audio",
+    "fullPath": "/api/learning/tasks/:taskId/audio",
+    "line": 133,
+    "raw": "router.post('/tasks/:taskId/audio', uploadAudio.single('audio'), learningController.uploadAudioTask);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/tasks/:taskId/submissions",
+    "fullPath": "/api/learning/tasks/:taskId/submissions",
+    "line": 134,
+    "raw": "router.get('/tasks/:taskId/submissions', learningController.getTaskSubmissions);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/tasks/:taskId/score",
+    "fullPath": "/api/learning/tasks/:taskId/score",
+    "line": 135,
+    "raw": "router.get('/tasks/:taskId/score', learningController.getTaskScore);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/submissions/:submissionId/audio",
+    "fullPath": "/api/learning/submissions/:submissionId/audio",
+    "line": 136,
+    "raw": "router.get('/submissions/:submissionId/audio', learningController.streamSubmissionAudio);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "GET",
+    "subPath": "/lessons",
+    "fullPath": "/api/learning/lessons",
+    "line": 137,
+    "raw": "router.get('/lessons', learningController.getLessons);"
+  },
+  {
+    "file": "learningRoutes.js",
+    "method": "POST",
+    "subPath": "/complete",
+    "fullPath": "/api/learning/complete",
+    "line": 138,
+    "raw": "router.post('/complete', learningController.toggleLessonComplete);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/commitment",
+    "fullPath": "/api/practice/commitment",
+    "line": 12,
+    "raw": "router.get('/commitment', stageFivePracticeCtrl.getCommitment);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/commitment",
+    "fullPath": "/api/practice/commitment",
+    "line": 13,
+    "raw": "router.post('/commitment', stageFivePracticeCtrl.saveCommitment);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PUT",
+    "subPath": "/commitment",
+    "fullPath": "/api/practice/commitment",
+    "line": 14,
+    "raw": "router.put('/commitment', stageFivePracticeCtrl.saveCommitment);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/sessions",
+    "fullPath": "/api/practice/sessions",
+    "line": 16,
+    "raw": "router.get('/sessions', stageFivePracticeCtrl.getPracticeSessions);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/sessions",
+    "fullPath": "/api/practice/sessions",
+    "line": 17,
+    "raw": "router.post('/sessions', stageFivePracticeCtrl.addManualSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PUT",
+    "subPath": "/sessions/:id/status",
+    "fullPath": "/api/practice/sessions/:id/status",
+    "line": 18,
+    "raw": "router.put('/sessions/:id/status', stageFivePracticeCtrl.updateSessionStatus);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PUT",
+    "subPath": "/sessions/:id",
+    "fullPath": "/api/practice/sessions/:id",
+    "line": 19,
+    "raw": "router.put('/sessions/:id', stageFivePracticeCtrl.updateSessionDetails);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/activities/:activityKey/complete",
+    "fullPath": "/api/practice/activities/:activityKey/complete",
+    "line": 21,
+    "raw": "router.post('/activities/:activityKey/complete', stageFivePracticeCtrl.completePracticeActivity);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/start",
+    "fullPath": "/api/practice/start",
+    "line": 26,
+    "raw": "router.post('/start', practiceController.startSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/pause",
+    "fullPath": "/api/practice/pause",
+    "line": 27,
+    "raw": "router.post('/pause', practiceController.pauseSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/resume",
+    "fullPath": "/api/practice/resume",
+    "line": 28,
+    "raw": "router.post('/resume', practiceController.resumeSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/complete",
+    "fullPath": "/api/practice/complete",
+    "line": 29,
+    "raw": "router.post('/complete', practiceController.recordSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/record",
+    "fullPath": "/api/practice/record",
+    "line": 30,
+    "raw": "router.post('/record', practiceController.recordSession);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/history",
+    "fullPath": "/api/practice/history",
+    "line": 31,
+    "raw": "router.get('/history', practiceController.getSessions);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/weekly-stats",
+    "fullPath": "/api/practice/weekly-stats",
+    "line": 34,
+    "raw": "router.get('/weekly-stats', practiceController.getWeeklyStats);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/weekly-summary",
+    "fullPath": "/api/practice/weekly-summary",
+    "line": 35,
+    "raw": "router.get('/weekly-summary', practiceController.getWeeklyStats);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/goals",
+    "fullPath": "/api/practice/goals",
+    "line": 36,
+    "raw": "router.get('/goals', practiceController.getGoal);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/goals",
+    "fullPath": "/api/practice/goals",
+    "line": 37,
+    "raw": "router.post('/goals', practiceController.setGoal);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/reflections",
+    "fullPath": "/api/practice/reflections",
+    "line": 42,
+    "raw": "router.post('/reflections', practiceController.createReflection);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/reflections",
+    "fullPath": "/api/practice/reflections",
+    "line": 43,
+    "raw": "router.get('/reflections', practiceController.getReflections);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/reflections/:id",
+    "fullPath": "/api/practice/reflections/:id",
+    "line": 44,
+    "raw": "router.get('/reflections/:id', practiceController.getReflectionById);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PUT",
+    "subPath": "/reflections/:id",
+    "fullPath": "/api/practice/reflections/:id",
+    "line": 45,
+    "raw": "router.put('/reflections/:id', practiceController.updateReflection);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "DELETE",
+    "subPath": "/reflections/:id",
+    "fullPath": "/api/practice/reflections/:id",
+    "line": 46,
+    "raw": "router.delete('/reflections/:id', practiceController.deleteReflection);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/diary/tasks",
+    "fullPath": "/api/practice/diary/tasks",
+    "line": 51,
+    "raw": "router.post('/diary/tasks', practiceController.createDiaryTask);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/diary/tasks",
+    "fullPath": "/api/practice/diary/tasks",
+    "line": 52,
+    "raw": "router.get('/diary/tasks', practiceController.getDiaryTasks);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PATCH",
+    "subPath": "/diary/tasks/reorder",
+    "fullPath": "/api/practice/diary/tasks/reorder",
+    "line": 53,
+    "raw": "router.patch('/diary/tasks/reorder', practiceController.reorderDiaryTasks);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/diary/tasks/linked-learning",
+    "fullPath": "/api/practice/diary/tasks/linked-learning",
+    "line": 54,
+    "raw": "router.get('/diary/tasks/linked-learning', practiceController.getLinkedLearningTasks);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "POST",
+    "subPath": "/diary/tasks/from-learning",
+    "fullPath": "/api/practice/diary/tasks/from-learning",
+    "line": 55,
+    "raw": "router.post('/diary/tasks/from-learning', practiceController.createFromLearningTask);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/diary/tasks/:id",
+    "fullPath": "/api/practice/diary/tasks/:id",
+    "line": 56,
+    "raw": "router.get('/diary/tasks/:id', practiceController.getDiaryTaskById);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PUT",
+    "subPath": "/diary/tasks/:id",
+    "fullPath": "/api/practice/diary/tasks/:id",
+    "line": 57,
+    "raw": "router.put('/diary/tasks/:id', practiceController.updateDiaryTask);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "PATCH",
+    "subPath": "/diary/tasks/:id/status",
+    "fullPath": "/api/practice/diary/tasks/:id/status",
+    "line": 58,
+    "raw": "router.patch('/diary/tasks/:id/status', practiceController.updateDiaryTaskStatus);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "DELETE",
+    "subPath": "/diary/tasks/:id",
+    "fullPath": "/api/practice/diary/tasks/:id",
+    "line": 59,
+    "raw": "router.delete('/diary/tasks/:id', practiceController.deleteDiaryTask);"
+  },
+  {
+    "file": "practiceRoutes.js",
+    "method": "GET",
+    "subPath": "/analytics",
+    "fullPath": "/api/practice/analytics",
+    "line": 64,
+    "raw": "router.get('/analytics', practiceController.getAnalytics);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "GET",
+    "subPath": "/",
+    "fullPath": "/api/songs",
+    "line": 9,
+    "raw": "router.get('/', songController.getSongs);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "POST",
+    "subPath": "/",
+    "fullPath": "/api/songs",
+    "line": 10,
+    "raw": "router.post('/', songController.createSong);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "DELETE",
+    "subPath": "/:id",
+    "fullPath": "/api/songs/:id",
+    "line": 11,
+    "raw": "router.delete('/:id', songController.deleteSong);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "GET",
+    "subPath": "/:songId/phrases",
+    "fullPath": "/api/songs/:songId/phrases",
+    "line": 14,
+    "raw": "router.get('/:songId/phrases', songController.getSongPhrases);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "POST",
+    "subPath": "/:songId/phrases",
+    "fullPath": "/api/songs/:songId/phrases",
+    "line": 15,
+    "raw": "router.post('/:songId/phrases', songController.addPhrase);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "PUT",
+    "subPath": "/phrases/:phraseId",
+    "fullPath": "/api/songs/phrases/:phraseId",
+    "line": 16,
+    "raw": "router.put('/phrases/:phraseId', songController.updatePhrase);"
+  },
+  {
+    "file": "songRoutes.js",
+    "method": "DELETE",
+    "subPath": "/phrases/:phraseId",
+    "fullPath": "/api/songs/phrases/:phraseId",
+    "line": 17,
+    "raw": "router.delete('/phrases/:phraseId', songController.deletePhrase);"
+  },
+  {
+    "file": "teacherRoutes.js",
+    "method": "GET",
+    "subPath": "/submissions",
+    "fullPath": "/api/teacher/submissions",
+    "line": 11,
+    "raw": "router.get('/submissions', teacherController.getSubmissions);"
+  },
+  {
+    "file": "teacherRoutes.js",
+    "method": "GET",
+    "subPath": "/submissions/:submissionId",
+    "fullPath": "/api/teacher/submissions/:submissionId",
+    "line": 12,
+    "raw": "router.get('/submissions/:submissionId', teacherController.getSubmissionById);"
+  },
+  {
+    "file": "teacherRoutes.js",
+    "method": "POST",
+    "subPath": "/submissions/:submissionId/assess",
+    "fullPath": "/api/teacher/submissions/:submissionId/assess",
+    "line": 13,
+    "raw": "router.post('/submissions/:submissionId/assess', teacherController.assessSubmission);"
+  },
+  {
+    "file": "teacherRoutes.js",
+    "method": "POST",
+    "subPath": "/submissions/:submissionId/request-revision",
+    "fullPath": "/api/teacher/submissions/:submissionId/request-revision",
+    "line": 14,
+    "raw": "router.post('/submissions/:submissionId/request-revision', teacherController.requestRevision);"
+  },
+  {
+    "file": "userRoutes.js",
+    "method": "GET",
+    "subPath": "/profile",
+    "fullPath": "/api/users/profile",
+    "line": 8,
+    "raw": "router.get('/profile', userController.getProfile);"
+  },
+  {
+    "file": "userRoutes.js",
+    "method": "PUT",
+    "subPath": "/profile",
+    "fullPath": "/api/users/profile",
+    "line": 9,
+    "raw": "router.put('/profile', userController.updateProfile);"
+  },
+  {
+    "file": "server.js",
+    "method": "GET",
+    "subPath": "/api/health",
+    "fullPath": "/api/health",
+    "line": 127,
+    "raw": "app.get('/api/health')"
+  },
+  {
+    "file": "server.js",
+    "method": "GET",
+    "subPath": "/api/health/ready",
+    "fullPath": "/api/health/ready",
+    "line": 138,
+    "raw": "app.get('/api/health/ready')"
+  },
+  {
+    "file": "server.js",
+    "method": "GET",
+    "subPath": "/api/health/live",
+    "fullPath": "/api/health/live",
+    "line": 178,
+    "raw": "app.get('/api/health/live')"
+  },
+  {
+    "file": "server.js",
+    "method": "GET",
+    "subPath": "/api/health/circuits",
+    "fullPath": "/api/health/circuits",
+    "line": 192,
+    "raw": "app.get('/api/health/circuits')"
+  }
+]

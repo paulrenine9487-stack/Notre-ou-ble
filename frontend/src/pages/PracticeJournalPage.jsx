@@ -87,7 +87,7 @@ export default function PracticeJournalPage() {
           <YourPracticeCommitment onCommitmentSaved={handleCommitmentSaved} />
 
           {/* SECTION 2: LEARNING JOURNAL KANBAN */}
-          <LearningJournalKanban onSessionsUpdated={handleSessionsUpdated} />
+          <LearningJournalKanban onSessionsUpdated={handleSessionsUpdated} refreshTrigger={refreshTrigger} />
 
           {/* SECTION 3: MODULE 1 COMPLETE! */}
           <ModuleCompleteCard refreshTrigger={refreshTrigger} />

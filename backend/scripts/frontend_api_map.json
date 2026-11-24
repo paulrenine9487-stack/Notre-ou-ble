@@ -1,0 +1,1803 @@
+[
+  {
+    "methodName": "register",
+    "params": "userData",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/register",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "login",
+    "params": "credentials",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/login",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "verifyMfa",
+    "params": "payload",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/verify-mfa",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "refreshAccessToken",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/apiUNKNOWN",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getMfaSetup",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/auth/mfa-setup",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getMe",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/auth/me",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "forgotPassword",
+    "params": "email",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/forgot-password",
+    "usedInPages": [
+      "pages/LoginPage.jsx"
+    ]
+  },
+  {
+    "methodName": "verifyResetOtp",
+    "params": "{ email, otp }",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/verify-otp",
+    "usedInPages": [
+      "pages/LoginPage.jsx"
+    ]
+  },
+  {
+    "methodName": "resendResetOtp",
+    "params": "email",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/resend-otp",
+    "usedInPages": [
+      "pages/LoginPage.jsx"
+    ]
+  },
+  {
+    "methodName": "resetPassword",
+    "params": "{ token, newPassword, confirmPassword }",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/reset-password",
+    "usedInPages": [
+      "pages/LoginPage.jsx"
+    ]
+  },
+  {
+    "methodName": "logout",
+    "params": "",
+    "httpMethod": "POST",
+    "endpoint": "/api/auth/logout",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "getProfile",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/users/profile",
+    "usedInPages": []
+  },
+  {
+    "methodName": "updateProfile",
+    "params": "updates",
+    "httpMethod": "PUT",
+    "endpoint": "/api/users/profile",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getDashboardOverview",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/dashboard/overview",
+    "usedInPages": [
+      "pages/DashboardPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningModules",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/modules",
+    "usedInPages": [
+      "pages/ModuleSelectionPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getModuleStages",
+    "params": "moduleId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/modules/${moduleId}/stages",
+    "usedInPages": [
+      "components/CreatePracticeTaskModal.jsx"
+    ]
+  },
+  {
+    "methodName": "getStageById",
+    "params": "stageId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages/${stageId}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "startStage",
+    "params": "stageId",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/stages/${stageId}/start",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "completeStage",
+    "params": "stageId",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/stages/${stageId}/complete",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getTaskById",
+    "params": "taskId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/tasks/${taskId}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "startTask",
+    "params": "taskId",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/tasks/${taskId}/start",
+    "usedInPages": []
+  },
+  {
+    "methodName": "submitTask",
+    "params": "taskId, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/tasks/${taskId}/submit",
+    "usedInPages": [
+      "components/TaskRunner.jsx"
+    ]
+  },
+  {
+    "methodName": "uploadTaskAudio",
+    "params": "taskId, formData",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/tasks/${taskId}/audio",
+    "usedInPages": [
+      "components/TaskRunner.jsx"
+    ]
+  },
+  {
+    "methodName": "getTaskSubmissions",
+    "params": "taskId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/tasks/${taskId}/submissions",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getTaskScore",
+    "params": "taskId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/tasks/${taskId}/score",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningProgress",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningSummary",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/dashboard/learning-summary",
+    "usedInPages": []
+  },
+  {
+    "methodName": "updateLearningProgress",
+    "params": "activity_id, completion_status = 'completed'",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLessons",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/lessons",
+    "usedInPages": []
+  },
+  {
+    "methodName": "toggleLessonComplete",
+    "params": "lessonId",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/complete",
+    "usedInPages": []
+  },
+  {
+    "methodName": "startPracticeSession",
+    "params": "data = {}",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/start",
+    "usedInPages": []
+  },
+  {
+    "methodName": "completePracticeSession",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/complete",
+    "usedInPages": [
+      "components/PracticeTimer.jsx",
+      "components/SongPhraseMapper.jsx",
+      "components/TaskRunner.jsx"
+    ]
+  },
+  {
+    "methodName": "getPracticeSessions",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/sessions",
+    "usedInPages": []
+  },
+  {
+    "methodName": "recordPracticeSession",
+    "params": "{ session_type, duration_minutes, exercise_name, notes }",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/sessions",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getWeeklyStats",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/weekly-stats",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPracticeGoal",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/goals",
+    "usedInPages": []
+  },
+  {
+    "methodName": "setPracticeGoal",
+    "params": "weekly_target_minutes",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/goals",
+    "usedInPages": [
+      "components/PracticeStatistics.jsx"
+    ]
+  },
+  {
+    "methodName": "createPracticeReflection",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/reflections",
+    "usedInPages": [
+      "components/PracticeReflectionForm.jsx"
+    ]
+  },
+  {
+    "methodName": "getPracticeReflections",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/reflections${query ? ",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPracticeReflectionById",
+    "params": "id",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/reflections/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "updatePracticeReflection",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/practice/reflections/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "deletePracticeReflection",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/practice/reflections/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getDiaryTasks",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/diary/tasks",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getDiaryTaskById",
+    "params": "id",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/diary/tasks/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "createDiaryTask",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/diary/tasks",
+    "usedInPages": [
+      "components/CreatePracticeTaskModal.jsx"
+    ]
+  },
+  {
+    "methodName": "updateDiaryTask",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/practice/diary/tasks/${id}",
+    "usedInPages": [
+      "components/PracticeDiaryBoard.jsx"
+    ]
+  },
+  {
+    "methodName": "updateDiaryTaskStatus",
+    "params": "id, status, position",
+    "httpMethod": "PATCH",
+    "endpoint": "/api/practice/diary/tasks/${id}/status",
+    "usedInPages": []
+  },
+  {
+    "methodName": "reorderDiaryTasks",
+    "params": "items",
+    "httpMethod": "PATCH",
+    "endpoint": "/api/practice/diary/tasks/reorder",
+    "usedInPages": []
+  },
+  {
+    "methodName": "deleteDiaryTask",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/practice/diary/tasks/${id}",
+    "usedInPages": [
+      "components/PracticeDiaryBoard.jsx"
+    ]
+  },
+  {
+    "methodName": "createDiaryTaskFromLearning",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/diary/tasks/from-learning",
+    "usedInPages": [
+      "components/TaskRunner.jsx"
+    ]
+  },
+  {
+    "methodName": "getLinkedLearningTasks",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/diary/tasks/linked-learning",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPracticeAnalytics",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/analytics",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPracticeSummary",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/dashboard/practice-summary",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getRecentActivity",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/dashboard/recent-activity",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getSongs",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/songs",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "createSong",
+    "params": "songData",
+    "httpMethod": "POST",
+    "endpoint": "/api/songs",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteSong",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/songs/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getSongPhrases",
+    "params": "songId",
+    "httpMethod": "GET",
+    "endpoint": "/api/songs/${songId}/phrases",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "addSongPhrase",
+    "params": "songId, phraseData",
+    "httpMethod": "POST",
+    "endpoint": "/api/songs/${songId}/phrases",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "updateSongPhrase",
+    "params": "phraseId, phraseData",
+    "httpMethod": "PUT",
+    "endpoint": "/api/songs/phrases/${phraseId}",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteSongPhrase",
+    "params": "phraseId",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/songs/phrases/${phraseId}",
+    "usedInPages": [
+      "components/SongPhraseMapper.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminOverview",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/overview",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminUsers",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/users",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminUser",
+    "params": "userData",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/users",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "updateUserRole",
+    "params": "userId, role",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/users/${userId}/role",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminPracticeReports",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/practice-reports",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminAuditLogs",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/audit-logs",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getTeacherSubmissions",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/teacher/submissions${query ? ",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getTeacherSubmissionById",
+    "params": "submissionId",
+    "httpMethod": "GET",
+    "endpoint": "/api/teacher/submissions/${submissionId}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "assessSubmission",
+    "params": "submissionId, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/teacher/submissions/${submissionId}/assess",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "requestRevision",
+    "params": "submissionId, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/teacher/submissions/${submissionId}/request-revision",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getBrandingTheme",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/theme",
+    "usedInPages": [
+      "components/ColorPaletteWheel.jsx"
+    ]
+  },
+  {
+    "methodName": "updateBrandingTheme",
+    "params": "themeData",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/theme",
+    "usedInPages": [
+      "components/ColorPaletteWheel.jsx"
+    ]
+  },
+  {
+    "methodName": "getPublicTheme",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/public-theme",
+    "usedInPages": [
+      "context/AuthContext.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningModules",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/modules",
+    "usedInPages": [
+      "pages/ModuleSelectionPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningModuleById",
+    "params": "moduleId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/modules/${moduleId}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningModuleProgress",
+    "params": "moduleId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/modules/${moduleId}/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getFiveStages",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getStageDetails",
+    "params": "stageId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages/${stageId}",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getStageObjectives",
+    "params": "stageId = 1",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages/${stageId}/objectives",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "acknowledgeStageObjectives",
+    "params": "stageId = 1",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/stages/${stageId}/objectives/acknowledge",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "startLearningStage",
+    "params": "stageId",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/stages/${stageId}/start",
+    "usedInPages": []
+  },
+  {
+    "methodName": "recordActivityProgress",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/activity-progress",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getRecallQuestions",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/recall/questions",
+    "usedInPages": []
+  },
+  {
+    "methodName": "saveRecallAnswers",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/recall/answers",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getRecallAnswers",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/recall/answers",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPeerPinBoard",
+    "params": "stageId = 2, questionId = null",
+    "httpMethod": "GET",
+    "endpoint": "/apiUNKNOWN",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningVideos",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/videos",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getBreathingTips",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/tips",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningSongs",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/songs",
+    "usedInPages": []
+  },
+  {
+    "methodName": "recordSongPractice",
+    "params": "songId, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/songs/${songId}/practice",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getPartSection",
+    "params": "stageId = 3, partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages/${stageId}/parts/${partNumber}",
+    "usedInPages": [
+      "components/PartTwoInteractivePractice.jsx"
+    ]
+  },
+  {
+    "methodName": "getPostureTab",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/posture",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getBreatheTab",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/breathe",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getSongTab",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/song",
+    "usedInPages": []
+  },
+  {
+    "methodName": "savePostureProgress",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/posture/progress",
+    "usedInPages": [
+      "components/PartTwoInteractivePractice.jsx"
+    ]
+  },
+  {
+    "methodName": "completePartTab",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/complete",
+    "usedInPages": [
+      "components/InteractiveSongPractice.jsx",
+      "components/PartTwoInteractivePractice.jsx"
+    ]
+  },
+  {
+    "methodName": "getPartProgress",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getBreathingLevels",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/breathing-levels",
+    "usedInPages": [
+      "components/InteractiveBreathingTimer.jsx",
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "saveBreathingSession",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/breathe/session",
+    "usedInPages": [
+      "components/InteractiveBreathingTimer.jsx"
+    ]
+  },
+  {
+    "methodName": "getBreathingSessions",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/breathe/sessions",
+    "usedInPages": []
+  },
+  {
+    "methodName": "adminGetBreathingLevels",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning/breathing-levels",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdateBreathingLevel",
+    "params": "levelKey, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/breathing-levels/${levelKey}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getSongPractice",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/song",
+    "usedInPages": [
+      "components/InteractiveSongPractice.jsx"
+    ]
+  },
+  {
+    "methodName": "getSongLevels",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/song/levels",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getSongScore",
+    "params": "partNumber = 2, levelId",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/song/levels/${levelId}/score",
+    "usedInPages": []
+  },
+  {
+    "methodName": "saveSongProgress",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/song/progress",
+    "usedInPages": [
+      "components/InteractiveSongPractice.jsx"
+    ]
+  },
+  {
+    "methodName": "startSongSession",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/song/session/start",
+    "usedInPages": [
+      "components/InteractiveSongPractice.jsx"
+    ]
+  },
+  {
+    "methodName": "completeSongSession",
+    "params": "partNumber = 2, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/parts/${partNumber}/song/session/complete",
+    "usedInPages": [
+      "components/InteractiveSongPractice.jsx"
+    ]
+  },
+  {
+    "methodName": "getSongProgress",
+    "params": "partNumber = 2",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/parts/${partNumber}/song/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "adminGetSongPractice",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/song-practice",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdateSongPractice",
+    "params": "data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/song-practice",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUploadSongAudio",
+    "params": "formData",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/song-practice/audio",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUploadSongScore",
+    "params": "levelId, dataOrFormData",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/song-practice/levels/${levelId}/score",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdateSongMarkers",
+    "params": "levelId, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/song-practice/levels/${levelId}/markers",
+    "usedInPages": []
+  },
+  {
+    "methodName": "adminGetSongStudents",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/song-practice/students",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminResetStudentSongProgress",
+    "params": "userId",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/song-practice/students/${userId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetMythFactQuestions",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/myth-fact/questions",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx",
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdateMythFactQuestion",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/myth-fact/questions/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminCreateMythFactQuestion",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/myth-fact/questions",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminDeleteMythFactQuestion",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/myth-fact/questions/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetMythFactStudentResults",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/myth-fact/student-results",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx",
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "adminResetStudentMythFact",
+    "params": "userId",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/myth-fact/student-results/${userId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetPartSection",
+    "params": "partId = 1",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning/parts/${partId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdatePartSection",
+    "params": "partId = 1, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/parts/${partId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdatePartTab",
+    "params": "partId = 1, tabKey, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/parts/${partId}/tabs/${tabKey}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "adminCreatePostureIndicator",
+    "params": "partId = 1, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/parts/${partId}/indicators",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdatePostureIndicator",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/indicators/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminDeletePostureIndicator",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/indicators/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminCreatePostureChecklistItem",
+    "params": "partId = 1, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/parts/${partId}/checklist",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdatePostureChecklistItem",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/checklist/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminDeletePostureChecklistItem",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/checklist/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningChallenges",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/challenges",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getMythFactChallenge",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/breath-management/challenges/myth-fact",
+    "usedInPages": [
+      "components/MythOrFactChallenge.jsx"
+    ]
+  },
+  {
+    "methodName": "submitMythFactAnswer",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/breath-management/challenges/myth-fact/submit-answer",
+    "usedInPages": [
+      "components/MythOrFactChallenge.jsx"
+    ]
+  },
+  {
+    "methodName": "completeMythFactChallenge",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/breath-management/challenges/myth-fact/complete",
+    "usedInPages": [
+      "components/MythOrFactChallenge.jsx"
+    ]
+  },
+  {
+    "methodName": "getMythFactProgress",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/breath-management/challenges/myth-fact/progress",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getMythFactResults",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/breath-management/challenges/myth-fact/results",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getStudentReflection",
+    "params": "moduleId = 1, stageId = 4",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/reflections/breath-management?moduleId=${moduleId}&stageId=${stageId}",
+    "usedInPages": [
+      "components/PersonalLearningPinboard.jsx"
+    ]
+  },
+  {
+    "methodName": "submitStudentReflection",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/reflections/breath-management",
+    "usedInPages": [
+      "components/PersonalLearningPinboard.jsx"
+    ]
+  },
+  {
+    "methodName": "updateStudentReflection",
+    "params": "data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/learning/reflections/breath-management",
+    "usedInPages": [
+      "components/PersonalLearningPinboard.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetLearningReflections",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning-reflections?${query}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx",
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "adminResetStudentReflection",
+    "params": "userId",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning-reflections/${userId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "submitChallengeAttempt",
+    "params": "challengeId, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/challenges/${challengeId}/attempts",
+    "usedInPages": []
+  },
+  {
+    "methodName": "submitWrittenAssessment",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/assessments",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getWrittenAssessments",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/assessments",
+    "usedInPages": []
+  },
+  {
+    "methodName": "uploadStudentRecording",
+    "params": "formData",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/recordings",
+    "usedInPages": [
+      "pages/LearningPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getStudentRecordings",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/recordings",
+    "usedInPages": []
+  },
+  {
+    "methodName": "submitLearningFeedback",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/feedback",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningFeedback",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/feedback",
+    "usedInPages": []
+  },
+  {
+    "methodName": "submitPracticeSummary",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/learning/practice-summary",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getPracticeSummary",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/practice-summary",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getLearningProgressSummary",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/progress/summary",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getAdminModules",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/modules",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminModule",
+    "params": "moduleId, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/modules/${moduleId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminCurriculum",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning/curriculum",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminStage",
+    "params": "stageId, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/stages/${stageId}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminStageContent",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/content",
+    "usedInPages": []
+  },
+  {
+    "methodName": "updateAdminStageContent",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/content/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminStageObjectives",
+    "params": "stageId = 1",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning/stages/${stageId}/objectives",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminObjective",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/objectives",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminObjective",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/objectives/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteAdminObjective",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/objectives/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminRecallQuestion",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/recall/questions",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminRecallQuestion",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/recall/questions/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteAdminRecallQuestion",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/recall/questions/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminTip",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/tips",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminTip",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/tips/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteAdminTip",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/tips/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminSong",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/songs",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "updateAdminSong",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/songs/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteAdminSong",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/songs/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "createAdminChallenge",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/challenges",
+    "usedInPages": []
+  },
+  {
+    "methodName": "updateAdminChallenge",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/learning/challenges/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteAdminChallenge",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/learning/challenges/${id}",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getAdminStudentSubmissions",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/learning/student-submissions",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "gradeAdminWrittenAssessment",
+    "params": "id, data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/learning/assessments/${id}/grade",
+    "usedInPages": [
+      "components/AdminCurriculumManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getPracticeCommitment",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/commitment",
+    "usedInPages": [
+      "components/YourPracticeCommitment.jsx"
+    ]
+  },
+  {
+    "methodName": "savePracticeCommitment",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/commitment",
+    "usedInPages": [
+      "components/YourPracticeCommitment.jsx"
+    ]
+  },
+  {
+    "methodName": "getLearningJournalSessions",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/practice/sessions",
+    "usedInPages": [
+      "components/LearningJournalKanban.jsx"
+    ]
+  },
+  {
+    "methodName": "addLearningJournalSession",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/sessions",
+    "usedInPages": [
+      "components/LearningJournalKanban.jsx"
+    ]
+  },
+  {
+    "methodName": "updateLearningJournalSessionStatus",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/practice/sessions/${id}/status",
+    "usedInPages": [
+      "components/LearningJournalKanban.jsx"
+    ]
+  },
+  {
+    "methodName": "updateLearningJournalSessionDetails",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/practice/sessions/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "completePracticeActivity",
+    "params": "activityKey",
+    "httpMethod": "POST",
+    "endpoint": "/api/practice/activities/${activityKey}/complete",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getModuleCompletionSummary",
+    "params": "moduleId = 1",
+    "httpMethod": "GET",
+    "endpoint": "/api/modules/${moduleId}/completion-summary",
+    "usedInPages": [
+      "components/ModuleCompleteCard.jsx"
+    ]
+  },
+  {
+    "methodName": "getStagesUnlockStatus",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/learning/stages/unlock-status",
+    "usedInPages": []
+  },
+  {
+    "methodName": "getAdminPracticeCommitments",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/practice-commitments${query ? ",
+    "usedInPages": [
+      "pages/AdminPortalPage.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsDashboardStats",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/stats",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getPublicCmsPage",
+    "params": "pageSlug",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/public/${encodeURIComponent(pageSlug)}",
+    "usedInPages": [
+      "pages/WelcomePage.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsSections",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/sections${query ? ",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx",
+      "components/WelcomePageManager.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsSection",
+    "params": "id",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/sections/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "createCmsSection",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/cms/sections",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "updateCmsSection",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/cms/sections/${id}",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx",
+      "components/WelcomePageManager.jsx"
+    ]
+  },
+  {
+    "methodName": "deleteCmsSection",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/cms/sections/${id}",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "publishCmsSection",
+    "params": "id",
+    "httpMethod": "POST",
+    "endpoint": "/api/cms/sections/${id}/publish",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "unpublishCmsSection",
+    "params": "id",
+    "httpMethod": "POST",
+    "endpoint": "/api/cms/sections/${id}/unpublish",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsMedia",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/media${query ? ",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "uploadCmsMedia",
+    "params": "formData",
+    "httpMethod": "POST",
+    "endpoint": "/api/cms/media",
+    "usedInPages": [
+      "components/MediaUploadField.jsx",
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "updateCmsMedia",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/cms/media/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "deleteCmsMedia",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/cms/media/${id}",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsModules",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/modules",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "updateCmsModule",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/cms/modules/${id}",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsStages",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/stages",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "updateCmsStage",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/cms/stages/${id}",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getCmsRevisions",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/cms/revisions${query ? ",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "rollbackCmsRevision",
+    "params": "id",
+    "httpMethod": "POST",
+    "endpoint": "/api/cms/revisions/${id}/rollback",
+    "usedInPages": [
+      "components/PortalContentManagement.jsx"
+    ]
+  },
+  {
+    "methodName": "getVideoTranscript",
+    "params": "stageId, videoId",
+    "httpMethod": "GET",
+    "endpoint": "/apiUNKNOWN",
+    "usedInPages": [
+      "components/VideoTranscriptSection.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetVideosForTranscript",
+    "params": "",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/transcripts/videos",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetTranscripts",
+    "params": "params = {}",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/transcripts${query ? ",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGetTranscriptById",
+    "params": "id",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/transcripts/${id}",
+    "usedInPages": []
+  },
+  {
+    "methodName": "adminGetTranscriptByVideo",
+    "params": "videoId",
+    "httpMethod": "GET",
+    "endpoint": "/api/admin/transcripts/by-video/${videoId}",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminCreateTranscript",
+    "params": "data",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/transcripts",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminUpdateTranscript",
+    "params": "id, data",
+    "httpMethod": "PUT",
+    "endpoint": "/api/admin/transcripts/${id}",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminDeleteTranscript",
+    "params": "id",
+    "httpMethod": "DELETE",
+    "endpoint": "/api/admin/transcripts/${id}",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  },
+  {
+    "methodName": "adminGenerateDraftTranscript",
+    "params": "videoId",
+    "httpMethod": "POST",
+    "endpoint": "/api/admin/transcripts/generate-draft",
+    "usedInPages": [
+      "components/AdminTranscriptManager.jsx"
+    ]
+  }
+]

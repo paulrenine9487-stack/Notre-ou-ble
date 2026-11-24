@@ -1,0 +1,4068 @@
+{
+  "matched": [
+    {
+      "frontend": {
+        "methodName": "register",
+        "params": "userData",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/register",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/register",
+        "fullPath": "/api/auth/register",
+        "line": 7,
+        "raw": "router.post('/register', registerLimiter, authController.register);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "login",
+        "params": "credentials",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/login",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/login",
+        "fullPath": "/api/auth/login",
+        "line": 8,
+        "raw": "router.post('/login', authLimiter, authController.login);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "verifyMfa",
+        "params": "payload",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/verify-mfa",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/verify-mfa",
+        "fullPath": "/api/auth/verify-mfa",
+        "line": 9,
+        "raw": "router.post('/verify-mfa', authLimiter, authController.verifyMfa);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getMfaSetup",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/auth/mfa-setup",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "GET",
+        "subPath": "/mfa-setup",
+        "fullPath": "/api/auth/mfa-setup",
+        "line": 11,
+        "raw": "router.get('/mfa-setup', authenticateToken, authController.getMfaSetup);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getMe",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/auth/me",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "GET",
+        "subPath": "/me",
+        "fullPath": "/api/auth/me",
+        "line": 16,
+        "raw": "router.get('/me', authenticateToken, authController.getCurrentUser);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "forgotPassword",
+        "params": "email",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/forgot-password",
+        "usedInPages": [
+          "pages/LoginPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/forgot-password",
+        "fullPath": "/api/auth/forgot-password",
+        "line": 12,
+        "raw": "router.post('/forgot-password', otpLimiter, authController.forgotPassword);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "verifyResetOtp",
+        "params": "{ email, otp }",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/verify-otp",
+        "usedInPages": [
+          "pages/LoginPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/verify-otp",
+        "fullPath": "/api/auth/verify-otp",
+        "line": 13,
+        "raw": "router.post('/verify-otp', otpLimiter, authController.verifyOtp);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "resendResetOtp",
+        "params": "email",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/resend-otp",
+        "usedInPages": [
+          "pages/LoginPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/resend-otp",
+        "fullPath": "/api/auth/resend-otp",
+        "line": 14,
+        "raw": "router.post('/resend-otp', otpLimiter, authController.resendOtp);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "resetPassword",
+        "params": "{ token, newPassword, confirmPassword }",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/reset-password",
+        "usedInPages": [
+          "pages/LoginPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/reset-password",
+        "fullPath": "/api/auth/reset-password",
+        "line": 15,
+        "raw": "router.post('/reset-password', otpLimiter, authController.resetPassword);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "logout",
+        "params": "",
+        "httpMethod": "POST",
+        "endpoint": "/api/auth/logout",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "authRoutes.js",
+        "method": "POST",
+        "subPath": "/logout",
+        "fullPath": "/api/auth/logout",
+        "line": 17,
+        "raw": "router.post('/logout', authController.logout);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getProfile",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/users/profile",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "userRoutes.js",
+        "method": "GET",
+        "subPath": "/profile",
+        "fullPath": "/api/users/profile",
+        "line": 8,
+        "raw": "router.get('/profile', userController.getProfile);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateProfile",
+        "params": "updates",
+        "httpMethod": "PUT",
+        "endpoint": "/api/users/profile",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "userRoutes.js",
+        "method": "PUT",
+        "subPath": "/profile",
+        "fullPath": "/api/users/profile",
+        "line": 9,
+        "raw": "router.put('/profile', userController.updateProfile);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getDashboardOverview",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/dashboard/overview",
+        "usedInPages": [
+          "pages/DashboardPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "dashboardRoutes.js",
+        "method": "GET",
+        "subPath": "/overview",
+        "fullPath": "/api/dashboard/overview",
+        "line": 8,
+        "raw": "router.get('/overview', dashboardController.getOverview);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningModules",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/modules",
+        "usedInPages": [
+          "pages/ModuleSelectionPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/modules",
+        "fullPath": "/api/learning/modules",
+        "line": 60,
+        "raw": "router.get('/modules', fiveStageCtrl.getLearningModules);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getModuleStages",
+        "params": "moduleId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/modules/${moduleId}/stages",
+        "usedInPages": [
+          "components/CreatePracticeTaskModal.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/modules/:moduleId/stages",
+        "fullPath": "/api/learning/modules/:moduleId/stages",
+        "line": 63,
+        "raw": "router.get('/modules/:moduleId/stages', fiveStageCtrl.getStages);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStageById",
+        "params": "stageId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages/${stageId}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages/:stageId",
+        "fullPath": "/api/learning/stages/:stageId",
+        "line": 50,
+        "raw": "router.get('/stages/:stageId', fiveStageCtrl.getStageDetails);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "startStage",
+        "params": "stageId",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/stages/${stageId}/start",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/stages/:stageId/start",
+        "fullPath": "/api/learning/stages/:stageId/start",
+        "line": 52,
+        "raw": "router.post('/stages/:stageId/start', fiveStageCtrl.startStage);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getTaskById",
+        "params": "taskId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/tasks/${taskId}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/tasks/:taskId",
+        "fullPath": "/api/learning/tasks/:taskId",
+        "line": 130,
+        "raw": "router.get('/tasks/:taskId', learningController.getTaskById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "startTask",
+        "params": "taskId",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/tasks/${taskId}/start",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/tasks/:taskId/start",
+        "fullPath": "/api/learning/tasks/:taskId/start",
+        "line": 131,
+        "raw": "router.post('/tasks/:taskId/start', learningController.startTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitTask",
+        "params": "taskId, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/tasks/${taskId}/submit",
+        "usedInPages": [
+          "components/TaskRunner.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/tasks/:taskId/submit",
+        "fullPath": "/api/learning/tasks/:taskId/submit",
+        "line": 132,
+        "raw": "router.post('/tasks/:taskId/submit', learningController.submitTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "uploadTaskAudio",
+        "params": "taskId, formData",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/tasks/${taskId}/audio",
+        "usedInPages": [
+          "components/TaskRunner.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/tasks/:taskId/audio",
+        "fullPath": "/api/learning/tasks/:taskId/audio",
+        "line": 133,
+        "raw": "router.post('/tasks/:taskId/audio', uploadAudio.single('audio'), learningController.uploadAudioTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getTaskSubmissions",
+        "params": "taskId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/tasks/${taskId}/submissions",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/tasks/:taskId/submissions",
+        "fullPath": "/api/learning/tasks/:taskId/submissions",
+        "line": 134,
+        "raw": "router.get('/tasks/:taskId/submissions', learningController.getTaskSubmissions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getTaskScore",
+        "params": "taskId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/tasks/${taskId}/score",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/tasks/:taskId/score",
+        "fullPath": "/api/learning/tasks/:taskId/score",
+        "line": 135,
+        "raw": "router.get('/tasks/:taskId/score', learningController.getTaskScore);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningProgress",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/progress",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/progress",
+        "fullPath": "/api/learning/progress",
+        "line": 126,
+        "raw": "router.get('/progress', fiveStageCtrl.getProgressSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningSummary",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/dashboard/learning-summary",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "dashboardRoutes.js",
+        "method": "GET",
+        "subPath": "/learning-summary",
+        "fullPath": "/api/dashboard/learning-summary",
+        "line": 10,
+        "raw": "router.get('/learning-summary', dashboardController.getLearningSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLessons",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/lessons",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/lessons",
+        "fullPath": "/api/learning/lessons",
+        "line": 137,
+        "raw": "router.get('/lessons', learningController.getLessons);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "toggleLessonComplete",
+        "params": "lessonId",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/complete",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/complete",
+        "fullPath": "/api/learning/complete",
+        "line": 138,
+        "raw": "router.post('/complete', learningController.toggleLessonComplete);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "startPracticeSession",
+        "params": "data = {}",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/start",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/start",
+        "fullPath": "/api/practice/start",
+        "line": 26,
+        "raw": "router.post('/start', practiceController.startSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "completePracticeSession",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/complete",
+        "usedInPages": [
+          "components/PracticeTimer.jsx",
+          "components/SongPhraseMapper.jsx",
+          "components/TaskRunner.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/complete",
+        "fullPath": "/api/practice/complete",
+        "line": 29,
+        "raw": "router.post('/complete', practiceController.recordSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeSessions",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/sessions",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/sessions",
+        "fullPath": "/api/practice/sessions",
+        "line": 16,
+        "raw": "router.get('/sessions', stageFivePracticeCtrl.getPracticeSessions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "recordPracticeSession",
+        "params": "{ session_type, duration_minutes, exercise_name, notes }",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/sessions",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/sessions",
+        "fullPath": "/api/practice/sessions",
+        "line": 17,
+        "raw": "router.post('/sessions', stageFivePracticeCtrl.addManualSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getWeeklyStats",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/weekly-stats",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/weekly-stats",
+        "fullPath": "/api/practice/weekly-stats",
+        "line": 34,
+        "raw": "router.get('/weekly-stats', practiceController.getWeeklyStats);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeGoal",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/goals",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/goals",
+        "fullPath": "/api/practice/goals",
+        "line": 36,
+        "raw": "router.get('/goals', practiceController.getGoal);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "setPracticeGoal",
+        "params": "weekly_target_minutes",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/goals",
+        "usedInPages": [
+          "components/PracticeStatistics.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/goals",
+        "fullPath": "/api/practice/goals",
+        "line": 37,
+        "raw": "router.post('/goals', practiceController.setGoal);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createPracticeReflection",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/reflections",
+        "usedInPages": [
+          "components/PracticeReflectionForm.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/reflections",
+        "fullPath": "/api/practice/reflections",
+        "line": 42,
+        "raw": "router.post('/reflections', practiceController.createReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeReflectionById",
+        "params": "id",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/reflections/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/reflections/:id",
+        "fullPath": "/api/practice/reflections/:id",
+        "line": 44,
+        "raw": "router.get('/reflections/:id', practiceController.getReflectionById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updatePracticeReflection",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/practice/reflections/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PUT",
+        "subPath": "/reflections/:id",
+        "fullPath": "/api/practice/reflections/:id",
+        "line": 45,
+        "raw": "router.put('/reflections/:id', practiceController.updateReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deletePracticeReflection",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/practice/reflections/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "DELETE",
+        "subPath": "/reflections/:id",
+        "fullPath": "/api/practice/reflections/:id",
+        "line": 46,
+        "raw": "router.delete('/reflections/:id', practiceController.deleteReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getDiaryTasks",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/diary/tasks",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/diary/tasks",
+        "fullPath": "/api/practice/diary/tasks",
+        "line": 52,
+        "raw": "router.get('/diary/tasks', practiceController.getDiaryTasks);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getDiaryTaskById",
+        "params": "id",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/diary/tasks/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/diary/tasks/:id",
+        "fullPath": "/api/practice/diary/tasks/:id",
+        "line": 56,
+        "raw": "router.get('/diary/tasks/:id', practiceController.getDiaryTaskById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createDiaryTask",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/diary/tasks",
+        "usedInPages": [
+          "components/CreatePracticeTaskModal.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/diary/tasks",
+        "fullPath": "/api/practice/diary/tasks",
+        "line": 51,
+        "raw": "router.post('/diary/tasks', practiceController.createDiaryTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateDiaryTask",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/practice/diary/tasks/${id}",
+        "usedInPages": [
+          "components/PracticeDiaryBoard.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PUT",
+        "subPath": "/diary/tasks/:id",
+        "fullPath": "/api/practice/diary/tasks/:id",
+        "line": 57,
+        "raw": "router.put('/diary/tasks/:id', practiceController.updateDiaryTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateDiaryTaskStatus",
+        "params": "id, status, position",
+        "httpMethod": "PATCH",
+        "endpoint": "/api/practice/diary/tasks/${id}/status",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PATCH",
+        "subPath": "/diary/tasks/:id/status",
+        "fullPath": "/api/practice/diary/tasks/:id/status",
+        "line": 58,
+        "raw": "router.patch('/diary/tasks/:id/status', practiceController.updateDiaryTaskStatus);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "reorderDiaryTasks",
+        "params": "items",
+        "httpMethod": "PATCH",
+        "endpoint": "/api/practice/diary/tasks/reorder",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PATCH",
+        "subPath": "/diary/tasks/reorder",
+        "fullPath": "/api/practice/diary/tasks/reorder",
+        "line": 53,
+        "raw": "router.patch('/diary/tasks/reorder', practiceController.reorderDiaryTasks);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteDiaryTask",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/practice/diary/tasks/${id}",
+        "usedInPages": [
+          "components/PracticeDiaryBoard.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "DELETE",
+        "subPath": "/diary/tasks/:id",
+        "fullPath": "/api/practice/diary/tasks/:id",
+        "line": 59,
+        "raw": "router.delete('/diary/tasks/:id', practiceController.deleteDiaryTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createDiaryTaskFromLearning",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/diary/tasks/from-learning",
+        "usedInPages": [
+          "components/TaskRunner.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/diary/tasks/from-learning",
+        "fullPath": "/api/practice/diary/tasks/from-learning",
+        "line": 55,
+        "raw": "router.post('/diary/tasks/from-learning', practiceController.createFromLearningTask);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLinkedLearningTasks",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/diary/tasks/linked-learning",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/diary/tasks/linked-learning",
+        "fullPath": "/api/practice/diary/tasks/linked-learning",
+        "line": 54,
+        "raw": "router.get('/diary/tasks/linked-learning', practiceController.getLinkedLearningTasks);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeAnalytics",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/analytics",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/analytics",
+        "fullPath": "/api/practice/analytics",
+        "line": 64,
+        "raw": "router.get('/analytics', practiceController.getAnalytics);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeSummary",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/dashboard/practice-summary",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "dashboardRoutes.js",
+        "method": "GET",
+        "subPath": "/practice-summary",
+        "fullPath": "/api/dashboard/practice-summary",
+        "line": 9,
+        "raw": "router.get('/practice-summary', dashboardController.getPracticeSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getRecentActivity",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/dashboard/recent-activity",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "dashboardRoutes.js",
+        "method": "GET",
+        "subPath": "/recent-activity",
+        "fullPath": "/api/dashboard/recent-activity",
+        "line": 12,
+        "raw": "router.get('/recent-activity', dashboardController.getRecentActivity);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongs",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/songs",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "GET",
+        "subPath": "/",
+        "fullPath": "/api/songs",
+        "line": 9,
+        "raw": "router.get('/', songController.getSongs);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createSong",
+        "params": "songData",
+        "httpMethod": "POST",
+        "endpoint": "/api/songs",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "POST",
+        "subPath": "/",
+        "fullPath": "/api/songs",
+        "line": 10,
+        "raw": "router.post('/', songController.createSong);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteSong",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/songs/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "DELETE",
+        "subPath": "/:id",
+        "fullPath": "/api/songs/:id",
+        "line": 11,
+        "raw": "router.delete('/:id', songController.deleteSong);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongPhrases",
+        "params": "songId",
+        "httpMethod": "GET",
+        "endpoint": "/api/songs/${songId}/phrases",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "GET",
+        "subPath": "/:songId/phrases",
+        "fullPath": "/api/songs/:songId/phrases",
+        "line": 14,
+        "raw": "router.get('/:songId/phrases', songController.getSongPhrases);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "addSongPhrase",
+        "params": "songId, phraseData",
+        "httpMethod": "POST",
+        "endpoint": "/api/songs/${songId}/phrases",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "POST",
+        "subPath": "/:songId/phrases",
+        "fullPath": "/api/songs/:songId/phrases",
+        "line": 15,
+        "raw": "router.post('/:songId/phrases', songController.addPhrase);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateSongPhrase",
+        "params": "phraseId, phraseData",
+        "httpMethod": "PUT",
+        "endpoint": "/api/songs/phrases/${phraseId}",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "PUT",
+        "subPath": "/phrases/:phraseId",
+        "fullPath": "/api/songs/phrases/:phraseId",
+        "line": 16,
+        "raw": "router.put('/phrases/:phraseId', songController.updatePhrase);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteSongPhrase",
+        "params": "phraseId",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/songs/phrases/${phraseId}",
+        "usedInPages": [
+          "components/SongPhraseMapper.jsx"
+        ]
+      },
+      "backend": {
+        "file": "songRoutes.js",
+        "method": "DELETE",
+        "subPath": "/phrases/:phraseId",
+        "fullPath": "/api/songs/phrases/:phraseId",
+        "line": 17,
+        "raw": "router.delete('/phrases/:phraseId', songController.deletePhrase);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminOverview",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/overview",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/overview",
+        "fullPath": "/api/admin/overview",
+        "line": 22,
+        "raw": "router.get('/overview', adminController.getOverview);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminUsers",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/users",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/users",
+        "fullPath": "/api/admin/users",
+        "line": 118,
+        "raw": "router.get('/users', requireSuperAdmin, adminController.getUsers);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminUser",
+        "params": "userData",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/users",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/users",
+        "fullPath": "/api/admin/users",
+        "line": 119,
+        "raw": "router.post('/users', requireSuperAdmin, adminController.createAdminUser);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateUserRole",
+        "params": "userId, role",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/users/${userId}/role",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/users/:id/role",
+        "fullPath": "/api/admin/users/:id/role",
+        "line": 120,
+        "raw": "router.put('/users/:id/role', requireSuperAdmin, adminController.updateUserRole);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminPracticeReports",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/practice-reports",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/practice-reports",
+        "fullPath": "/api/admin/practice-reports",
+        "line": 23,
+        "raw": "router.get('/practice-reports', adminController.getPracticeReports);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminAuditLogs",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/audit-logs",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/audit-logs",
+        "fullPath": "/api/admin/audit-logs",
+        "line": 121,
+        "raw": "router.get('/audit-logs', requireSuperAdmin, adminController.getAuditLogs);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getTeacherSubmissionById",
+        "params": "submissionId",
+        "httpMethod": "GET",
+        "endpoint": "/api/teacher/submissions/${submissionId}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "teacherRoutes.js",
+        "method": "GET",
+        "subPath": "/submissions/:submissionId",
+        "fullPath": "/api/teacher/submissions/:submissionId",
+        "line": 12,
+        "raw": "router.get('/submissions/:submissionId', teacherController.getSubmissionById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "assessSubmission",
+        "params": "submissionId, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/teacher/submissions/${submissionId}/assess",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "teacherRoutes.js",
+        "method": "POST",
+        "subPath": "/submissions/:submissionId/assess",
+        "fullPath": "/api/teacher/submissions/:submissionId/assess",
+        "line": 13,
+        "raw": "router.post('/submissions/:submissionId/assess', teacherController.assessSubmission);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "requestRevision",
+        "params": "submissionId, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/teacher/submissions/${submissionId}/request-revision",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "teacherRoutes.js",
+        "method": "POST",
+        "subPath": "/submissions/:submissionId/request-revision",
+        "fullPath": "/api/teacher/submissions/:submissionId/request-revision",
+        "line": 14,
+        "raw": "router.post('/submissions/:submissionId/request-revision', teacherController.requestRevision);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getBrandingTheme",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/theme",
+        "usedInPages": [
+          "components/ColorPaletteWheel.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/theme",
+        "fullPath": "/api/admin/theme",
+        "line": 29,
+        "raw": "router.get('/theme', adminController.getBrandingTheme);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateBrandingTheme",
+        "params": "themeData",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/theme",
+        "usedInPages": [
+          "components/ColorPaletteWheel.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/theme",
+        "fullPath": "/api/admin/theme",
+        "line": 30,
+        "raw": "router.put('/theme', adminController.updateBrandingTheme);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPublicTheme",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/public-theme",
+        "usedInPages": [
+          "context/AuthContext.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/public-theme",
+        "fullPath": "/api/admin/public-theme",
+        "line": 14,
+        "raw": "router.get('/public-theme', adminController.getBrandingTheme);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningModules",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/modules",
+        "usedInPages": [
+          "pages/ModuleSelectionPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/modules",
+        "fullPath": "/api/learning/modules",
+        "line": 60,
+        "raw": "router.get('/modules', fiveStageCtrl.getLearningModules);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningModuleById",
+        "params": "moduleId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/modules/${moduleId}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/modules/:moduleId",
+        "fullPath": "/api/learning/modules/:moduleId",
+        "line": 61,
+        "raw": "router.get('/modules/:moduleId', fiveStageCtrl.getLearningModuleById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningModuleProgress",
+        "params": "moduleId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/modules/${moduleId}/progress",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/modules/:moduleId/progress",
+        "fullPath": "/api/learning/modules/:moduleId/progress",
+        "line": 30,
+        "raw": "router.get('/modules/:moduleId/progress', stageFivePracticeCtrl.getModuleCompletionSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getFiveStages",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages",
+        "fullPath": "/api/learning/stages",
+        "line": 49,
+        "raw": "router.get('/stages', fiveStageCtrl.getStages);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStageDetails",
+        "params": "stageId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages/${stageId}",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages/:stageId",
+        "fullPath": "/api/learning/stages/:stageId",
+        "line": 50,
+        "raw": "router.get('/stages/:stageId', fiveStageCtrl.getStageDetails);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStageObjectives",
+        "params": "stageId = 1",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages/${stageId}/objectives",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages/:stageId/objectives",
+        "fullPath": "/api/learning/stages/:stageId/objectives",
+        "line": 56,
+        "raw": "router.get('/stages/:stageId/objectives', fiveStageCtrl.getStageObjectives);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "acknowledgeStageObjectives",
+        "params": "stageId = 1",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/stages/${stageId}/objectives/acknowledge",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/stages/:stageId/objectives/acknowledge",
+        "fullPath": "/api/learning/stages/:stageId/objectives/acknowledge",
+        "line": 57,
+        "raw": "router.post('/stages/:stageId/objectives/acknowledge', fiveStageCtrl.acknowledgeStageObjectives);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "startLearningStage",
+        "params": "stageId",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/stages/${stageId}/start",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/stages/:stageId/start",
+        "fullPath": "/api/learning/stages/:stageId/start",
+        "line": 52,
+        "raw": "router.post('/stages/:stageId/start', fiveStageCtrl.startStage);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "recordActivityProgress",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/activity-progress",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/activity-progress",
+        "fullPath": "/api/learning/activity-progress",
+        "line": 53,
+        "raw": "router.post('/activity-progress', fiveStageCtrl.recordActivityProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getRecallQuestions",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/recall/questions",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/recall/questions",
+        "fullPath": "/api/learning/recall/questions",
+        "line": 66,
+        "raw": "router.get('/recall/questions', fiveStageCtrl.getRecallQuestions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "saveRecallAnswers",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/recall/answers",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/recall/answers",
+        "fullPath": "/api/learning/recall/answers",
+        "line": 67,
+        "raw": "router.post('/recall/answers', fiveStageCtrl.saveRecallAnswers);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getRecallAnswers",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/recall/answers",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/recall/answers",
+        "fullPath": "/api/learning/recall/answers",
+        "line": 68,
+        "raw": "router.get('/recall/answers', fiveStageCtrl.getRecallAnswers);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningVideos",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/videos",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/videos",
+        "fullPath": "/api/learning/videos",
+        "line": 73,
+        "raw": "router.get('/videos', fiveStageCtrl.getVideos);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getBreathingTips",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/tips",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/tips",
+        "fullPath": "/api/learning/tips",
+        "line": 74,
+        "raw": "router.get('/tips', fiveStageCtrl.getBreathingTips);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningSongs",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/songs",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/songs",
+        "fullPath": "/api/learning/songs",
+        "line": 75,
+        "raw": "router.get('/songs', fiveStageCtrl.getSongs);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "recordSongPractice",
+        "params": "songId, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/songs/${songId}/practice",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/songs/:songId/practice",
+        "fullPath": "/api/learning/songs/:songId/practice",
+        "line": 76,
+        "raw": "router.post('/songs/:songId/practice', fiveStageCtrl.recordSongPractice);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPartSection",
+        "params": "stageId = 3, partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages/${stageId}/parts/${partNumber}",
+        "usedInPages": [
+          "components/PartTwoInteractivePractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages/:stageId/parts/:partNumber",
+        "fullPath": "/api/learning/stages/:stageId/parts/:partNumber",
+        "line": 78,
+        "raw": "router.get('/stages/:stageId/parts/:partNumber', fiveStageCtrl.getPartSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPostureTab",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/posture",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/posture",
+        "fullPath": "/api/learning/parts/:partNumber/posture",
+        "line": 80,
+        "raw": "router.get('/parts/:partNumber/posture', fiveStageCtrl.getPostureTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getBreatheTab",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/breathe",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/breathe",
+        "fullPath": "/api/learning/parts/:partNumber/breathe",
+        "line": 81,
+        "raw": "router.get('/parts/:partNumber/breathe', fiveStageCtrl.getBreatheTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongTab",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/song",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/song",
+        "fullPath": "/api/learning/parts/:partNumber/song",
+        "line": 82,
+        "raw": "router.get('/parts/:partNumber/song', fiveStageCtrl.getSongTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "savePostureProgress",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/posture/progress",
+        "usedInPages": [
+          "components/PartTwoInteractivePractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/posture/progress",
+        "fullPath": "/api/learning/parts/:partNumber/posture/progress",
+        "line": 90,
+        "raw": "router.post('/parts/:partNumber/posture/progress', fiveStageCtrl.savePostureProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "completePartTab",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/complete",
+        "usedInPages": [
+          "components/InteractiveSongPractice.jsx",
+          "components/PartTwoInteractivePractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/complete",
+        "fullPath": "/api/learning/parts/:partNumber/complete",
+        "line": 91,
+        "raw": "router.post('/parts/:partNumber/complete', fiveStageCtrl.completePartTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPartProgress",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/progress",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/progress",
+        "fullPath": "/api/learning/parts/:partNumber/progress",
+        "line": 92,
+        "raw": "router.get('/parts/:partNumber/progress', fiveStageCtrl.getPartProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getBreathingLevels",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/breathing-levels",
+        "usedInPages": [
+          "components/InteractiveBreathingTimer.jsx",
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/breathing-levels",
+        "fullPath": "/api/learning/breathing-levels",
+        "line": 17,
+        "raw": "router.get('/breathing-levels', fiveStageCtrl.getBreathingLevels);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "saveBreathingSession",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/breathe/session",
+        "usedInPages": [
+          "components/InteractiveBreathingTimer.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/breathe/session",
+        "fullPath": "/api/learning/parts/:partNumber/breathe/session",
+        "line": 96,
+        "raw": "router.post('/parts/:partNumber/breathe/session', fiveStageCtrl.saveBreathingSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getBreathingSessions",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/breathe/sessions",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/breathe/sessions",
+        "fullPath": "/api/learning/parts/:partNumber/breathe/sessions",
+        "line": 97,
+        "raw": "router.get('/parts/:partNumber/breathe/sessions', fiveStageCtrl.getBreathingSessions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetBreathingLevels",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning/breathing-levels",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning/breathing-levels",
+        "fullPath": "/api/admin/learning/breathing-levels",
+        "line": 81,
+        "raw": "router.get('/learning/breathing-levels', fiveStageCtrl.adminGetBreathingLevels);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdateBreathingLevel",
+        "params": "levelKey, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/breathing-levels/${levelKey}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/breathing-levels/:level_key",
+        "fullPath": "/api/admin/learning/breathing-levels/:level_key",
+        "line": 82,
+        "raw": "router.put('/learning/breathing-levels/:level_key', fiveStageCtrl.adminUpdateBreathingLevel);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongPractice",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/song",
+        "usedInPages": [
+          "components/InteractiveSongPractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/song",
+        "fullPath": "/api/learning/parts/:partNumber/song",
+        "line": 82,
+        "raw": "router.get('/parts/:partNumber/song', fiveStageCtrl.getSongTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongLevels",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/song/levels",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/song/levels",
+        "fullPath": "/api/learning/parts/:partNumber/song/levels",
+        "line": 83,
+        "raw": "router.get('/parts/:partNumber/song/levels', fiveStageCtrl.getSongLevels);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongScore",
+        "params": "partNumber = 2, levelId",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/song/levels/${levelId}/score",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/song/levels/:levelId/score",
+        "fullPath": "/api/learning/parts/:partNumber/song/levels/:levelId/score",
+        "line": 84,
+        "raw": "router.get('/parts/:partNumber/song/levels/:levelId/score', fiveStageCtrl.getSongScore);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "saveSongProgress",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/song/progress",
+        "usedInPages": [
+          "components/InteractiveSongPractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/song/progress",
+        "fullPath": "/api/learning/parts/:partNumber/song/progress",
+        "line": 85,
+        "raw": "router.post('/parts/:partNumber/song/progress', fiveStageCtrl.saveSongProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "startSongSession",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/song/session/start",
+        "usedInPages": [
+          "components/InteractiveSongPractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/song/session/start",
+        "fullPath": "/api/learning/parts/:partNumber/song/session/start",
+        "line": 86,
+        "raw": "router.post('/parts/:partNumber/song/session/start', fiveStageCtrl.startSongSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "completeSongSession",
+        "params": "partNumber = 2, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/parts/${partNumber}/song/session/complete",
+        "usedInPages": [
+          "components/InteractiveSongPractice.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/parts/:partNumber/song/session/complete",
+        "fullPath": "/api/learning/parts/:partNumber/song/session/complete",
+        "line": 87,
+        "raw": "router.post('/parts/:partNumber/song/session/complete', fiveStageCtrl.completeSongSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getSongProgress",
+        "params": "partNumber = 2",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/parts/${partNumber}/song/progress",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/parts/:partNumber/song/progress",
+        "fullPath": "/api/learning/parts/:partNumber/song/progress",
+        "line": 88,
+        "raw": "router.get('/parts/:partNumber/song/progress', fiveStageCtrl.getSongProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetSongPractice",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/song-practice",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/song-practice",
+        "fullPath": "/api/admin/song-practice",
+        "line": 85,
+        "raw": "router.get('/song-practice', fiveStageCtrl.adminGetSongPractice);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdateSongPractice",
+        "params": "data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/song-practice",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/song-practice",
+        "fullPath": "/api/admin/song-practice",
+        "line": 87,
+        "raw": "router.put('/song-practice', fiveStageCtrl.adminUpdateSongPractice);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUploadSongAudio",
+        "params": "formData",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/song-practice/audio",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/song-practice/audio",
+        "fullPath": "/api/admin/song-practice/audio",
+        "line": 88,
+        "raw": "router.post('/song-practice/audio', uploadAudio.single('audio'), fiveStageCtrl.adminUploadSongAudio);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUploadSongScore",
+        "params": "levelId, dataOrFormData",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/song-practice/levels/${levelId}/score",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/song-practice/levels/:levelId/score",
+        "fullPath": "/api/admin/song-practice/levels/:levelId/score",
+        "line": 89,
+        "raw": "router.post('/song-practice/levels/:levelId/score', cmsUpload.single('score_file'), fiveStageCtrl.adminUploadSongScore);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdateSongMarkers",
+        "params": "levelId, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/song-practice/levels/${levelId}/markers",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/song-practice/levels/:levelId/markers",
+        "fullPath": "/api/admin/song-practice/levels/:levelId/markers",
+        "line": 91,
+        "raw": "router.put('/song-practice/levels/:levelId/markers', fiveStageCtrl.adminUpdateSongMarkers);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetSongStudents",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/song-practice/students",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/song-practice/students",
+        "fullPath": "/api/admin/song-practice/students",
+        "line": 92,
+        "raw": "router.get('/song-practice/students', fiveStageCtrl.adminGetStudentSongProgressList);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminResetStudentSongProgress",
+        "params": "userId",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/song-practice/students/${userId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/song-practice/students/:userId",
+        "fullPath": "/api/admin/song-practice/students/:userId",
+        "line": 93,
+        "raw": "router.delete('/song-practice/students/:userId', fiveStageCtrl.adminResetStudentSongProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetMythFactQuestions",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/myth-fact/questions",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx",
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/myth-fact/questions",
+        "fullPath": "/api/admin/myth-fact/questions",
+        "line": 96,
+        "raw": "router.get('/myth-fact/questions', fiveStageCtrl.adminGetMythFactQuestions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdateMythFactQuestion",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/myth-fact/questions/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/myth-fact/questions/:id",
+        "fullPath": "/api/admin/myth-fact/questions/:id",
+        "line": 97,
+        "raw": "router.put('/myth-fact/questions/:id', fiveStageCtrl.adminUpdateMythFactQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminCreateMythFactQuestion",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/myth-fact/questions",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/myth-fact/questions",
+        "fullPath": "/api/admin/myth-fact/questions",
+        "line": 98,
+        "raw": "router.post('/myth-fact/questions', fiveStageCtrl.adminCreateMythFactQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminDeleteMythFactQuestion",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/myth-fact/questions/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/myth-fact/questions/:id",
+        "fullPath": "/api/admin/myth-fact/questions/:id",
+        "line": 99,
+        "raw": "router.delete('/myth-fact/questions/:id', fiveStageCtrl.adminDeleteMythFactQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetMythFactStudentResults",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/myth-fact/student-results",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx",
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/myth-fact/student-results",
+        "fullPath": "/api/admin/myth-fact/student-results",
+        "line": 100,
+        "raw": "router.get('/myth-fact/student-results', fiveStageCtrl.adminGetMythFactStudentResults);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminResetStudentMythFact",
+        "params": "userId",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/myth-fact/student-results/${userId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/myth-fact/student-results/:userId",
+        "fullPath": "/api/admin/myth-fact/student-results/:userId",
+        "line": 101,
+        "raw": "router.delete('/myth-fact/student-results/:userId', fiveStageCtrl.adminResetStudentMythFact);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetPartSection",
+        "params": "partId = 1",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning/parts/${partId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning/parts/:partId",
+        "fullPath": "/api/admin/learning/parts/:partId",
+        "line": 70,
+        "raw": "router.get('/learning/parts/:partId', fiveStageCtrl.adminGetPartSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdatePartSection",
+        "params": "partId = 1, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/parts/${partId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/parts/:partId",
+        "fullPath": "/api/admin/learning/parts/:partId",
+        "line": 71,
+        "raw": "router.put('/learning/parts/:partId', fiveStageCtrl.adminUpdatePartSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdatePartTab",
+        "params": "partId = 1, tabKey, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/parts/${partId}/tabs/${tabKey}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/parts/:partId/tabs/:tabKey",
+        "fullPath": "/api/admin/learning/parts/:partId/tabs/:tabKey",
+        "line": 72,
+        "raw": "router.put('/learning/parts/:partId/tabs/:tabKey', fiveStageCtrl.adminUpdatePartTab);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminCreatePostureIndicator",
+        "params": "partId = 1, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/parts/${partId}/indicators",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/parts/:partId/indicators",
+        "fullPath": "/api/admin/learning/parts/:partId/indicators",
+        "line": 73,
+        "raw": "router.post('/learning/parts/:partId/indicators', fiveStageCtrl.adminCreatePostureIndicator);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdatePostureIndicator",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/indicators/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/indicators/:id",
+        "fullPath": "/api/admin/learning/indicators/:id",
+        "line": 74,
+        "raw": "router.put('/learning/indicators/:id', fiveStageCtrl.adminUpdatePostureIndicator);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminDeletePostureIndicator",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/indicators/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/indicators/:id",
+        "fullPath": "/api/admin/learning/indicators/:id",
+        "line": 75,
+        "raw": "router.delete('/learning/indicators/:id', fiveStageCtrl.adminDeletePostureIndicator);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminCreatePostureChecklistItem",
+        "params": "partId = 1, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/parts/${partId}/checklist",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/parts/:partId/checklist",
+        "fullPath": "/api/admin/learning/parts/:partId/checklist",
+        "line": 76,
+        "raw": "router.post('/learning/parts/:partId/checklist', fiveStageCtrl.adminCreatePostureChecklistItem);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdatePostureChecklistItem",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/checklist/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/checklist/:id",
+        "fullPath": "/api/admin/learning/checklist/:id",
+        "line": 77,
+        "raw": "router.put('/learning/checklist/:id', fiveStageCtrl.adminUpdatePostureChecklistItem);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminDeletePostureChecklistItem",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/checklist/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/checklist/:id",
+        "fullPath": "/api/admin/learning/checklist/:id",
+        "line": 78,
+        "raw": "router.delete('/learning/checklist/:id', fiveStageCtrl.adminDeletePostureChecklistItem);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningChallenges",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/challenges",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/challenges",
+        "fullPath": "/api/learning/challenges",
+        "line": 106,
+        "raw": "router.get('/challenges', fiveStageCtrl.getChallenges);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getMythFactChallenge",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/breath-management/challenges/myth-fact",
+        "usedInPages": [
+          "components/MythOrFactChallenge.jsx"
+        ]
+      },
+      "backend": {
+        "file": "breathManagementRoutes.js",
+        "method": "GET",
+        "subPath": "/challenges/myth-fact",
+        "fullPath": "/api/breath-management/challenges/myth-fact",
+        "line": 11,
+        "raw": "router.get('/challenges/myth-fact', fiveStageCtrl.getMythFactChallenge);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitMythFactAnswer",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/breath-management/challenges/myth-fact/submit-answer",
+        "usedInPages": [
+          "components/MythOrFactChallenge.jsx"
+        ]
+      },
+      "backend": {
+        "file": "breathManagementRoutes.js",
+        "method": "POST",
+        "subPath": "/challenges/myth-fact/submit-answer",
+        "fullPath": "/api/breath-management/challenges/myth-fact/submit-answer",
+        "line": 12,
+        "raw": "router.post('/challenges/myth-fact/submit-answer', fiveStageCtrl.submitMythFactAnswer);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "completeMythFactChallenge",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/breath-management/challenges/myth-fact/complete",
+        "usedInPages": [
+          "components/MythOrFactChallenge.jsx"
+        ]
+      },
+      "backend": {
+        "file": "breathManagementRoutes.js",
+        "method": "POST",
+        "subPath": "/challenges/myth-fact/complete",
+        "fullPath": "/api/breath-management/challenges/myth-fact/complete",
+        "line": 13,
+        "raw": "router.post('/challenges/myth-fact/complete', fiveStageCtrl.completeMythFactChallenge);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getMythFactProgress",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/breath-management/challenges/myth-fact/progress",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "breathManagementRoutes.js",
+        "method": "GET",
+        "subPath": "/challenges/myth-fact/progress",
+        "fullPath": "/api/breath-management/challenges/myth-fact/progress",
+        "line": 14,
+        "raw": "router.get('/challenges/myth-fact/progress', fiveStageCtrl.getMythFactProgress);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getMythFactResults",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/breath-management/challenges/myth-fact/results",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "breathManagementRoutes.js",
+        "method": "GET",
+        "subPath": "/challenges/myth-fact/results",
+        "fullPath": "/api/breath-management/challenges/myth-fact/results",
+        "line": 15,
+        "raw": "router.get('/challenges/myth-fact/results', fiveStageCtrl.getMythFactResults);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStudentReflection",
+        "params": "moduleId = 1, stageId = 4",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/reflections/breath-management?moduleId=${moduleId}&stageId=${stageId}",
+        "usedInPages": [
+          "components/PersonalLearningPinboard.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/reflections/breath-management",
+        "fullPath": "/api/learning/reflections/breath-management",
+        "line": 37,
+        "raw": "router.get('/reflections/breath-management', reflectionCtrl.getStudentReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitStudentReflection",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/reflections/breath-management",
+        "usedInPages": [
+          "components/PersonalLearningPinboard.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/reflections/breath-management",
+        "fullPath": "/api/learning/reflections/breath-management",
+        "line": 38,
+        "raw": "router.post('/reflections/breath-management', reflectionCtrl.submitStudentReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateStudentReflection",
+        "params": "data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/learning/reflections/breath-management",
+        "usedInPages": [
+          "components/PersonalLearningPinboard.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "PUT",
+        "subPath": "/reflections/breath-management",
+        "fullPath": "/api/learning/reflections/breath-management",
+        "line": 39,
+        "raw": "router.put('/reflections/breath-management', reflectionCtrl.updateStudentReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetLearningReflections",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning-reflections?${query}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx",
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning-reflections",
+        "fullPath": "/api/admin/learning-reflections",
+        "line": 104,
+        "raw": "router.get('/learning-reflections', reflectionCtrl.adminGetReflections);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminResetStudentReflection",
+        "params": "userId",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning-reflections/${userId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning-reflections/:userId",
+        "fullPath": "/api/admin/learning-reflections/:userId",
+        "line": 105,
+        "raw": "router.delete('/learning-reflections/:userId', reflectionCtrl.adminResetStudentReflection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitChallengeAttempt",
+        "params": "challengeId, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/challenges/${challengeId}/attempts",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/challenges/:challengeId/attempts",
+        "fullPath": "/api/learning/challenges/:challengeId/attempts",
+        "line": 108,
+        "raw": "router.post('/challenges/:challengeId/attempts', fiveStageCtrl.submitChallengeAttempt);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitWrittenAssessment",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/assessments",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/assessments",
+        "fullPath": "/api/learning/assessments",
+        "line": 111,
+        "raw": "router.post('/assessments', fiveStageCtrl.submitWrittenAssessment);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getWrittenAssessments",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/assessments",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/assessments",
+        "fullPath": "/api/learning/assessments",
+        "line": 112,
+        "raw": "router.get('/assessments', fiveStageCtrl.getWrittenAssessments);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "uploadStudentRecording",
+        "params": "formData",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/recordings",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/recordings",
+        "fullPath": "/api/learning/recordings",
+        "line": 114,
+        "raw": "router.post('/recordings', uploadAudio.single('audio'), fiveStageCtrl.uploadRecording);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStudentRecordings",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/recordings",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/recordings",
+        "fullPath": "/api/learning/recordings",
+        "line": 115,
+        "raw": "router.get('/recordings', fiveStageCtrl.getRecordings);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitLearningFeedback",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/feedback",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/feedback",
+        "fullPath": "/api/learning/feedback",
+        "line": 118,
+        "raw": "router.post('/feedback', fiveStageCtrl.submitFeedback);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningFeedback",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/feedback",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/feedback",
+        "fullPath": "/api/learning/feedback",
+        "line": 119,
+        "raw": "router.get('/feedback', fiveStageCtrl.getFeedback);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "submitPracticeSummary",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/practice-summary",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "POST",
+        "subPath": "/practice-summary",
+        "fullPath": "/api/learning/practice-summary",
+        "line": 121,
+        "raw": "router.post('/practice-summary', fiveStageCtrl.submitPracticeSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeSummary",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/practice-summary",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/practice-summary",
+        "fullPath": "/api/learning/practice-summary",
+        "line": 122,
+        "raw": "router.get('/practice-summary', fiveStageCtrl.getPracticeSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningProgressSummary",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/progress/summary",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/progress/summary",
+        "fullPath": "/api/learning/progress/summary",
+        "line": 125,
+        "raw": "router.get('/progress/summary', fiveStageCtrl.getProgressSummary);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminModules",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/modules",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/modules",
+        "fullPath": "/api/admin/modules",
+        "line": 25,
+        "raw": "router.get('/modules', adminController.getModules);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminModule",
+        "params": "moduleId, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/modules/${moduleId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/modules/:id",
+        "fullPath": "/api/admin/modules/:id",
+        "line": 26,
+        "raw": "router.put('/modules/:id', adminController.updateModule);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminCurriculum",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning/curriculum",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning/curriculum",
+        "fullPath": "/api/admin/learning/curriculum",
+        "line": 33,
+        "raw": "router.get('/learning/curriculum', fiveStageCtrl.getCurriculumForAdmin);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminStage",
+        "params": "stageId, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/stages/${stageId}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/stages/:stageId",
+        "fullPath": "/api/admin/learning/stages/:stageId",
+        "line": 34,
+        "raw": "router.put('/learning/stages/:stageId', fiveStageCtrl.updateStageForAdmin);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminStageContent",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/content",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/content",
+        "fullPath": "/api/admin/learning/content",
+        "line": 35,
+        "raw": "router.post('/learning/content', fiveStageCtrl.createStageContent);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminStageContent",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/content/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/content/:id",
+        "fullPath": "/api/admin/learning/content/:id",
+        "line": 36,
+        "raw": "router.put('/learning/content/:id', fiveStageCtrl.updateStageContent);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminStageObjectives",
+        "params": "stageId = 1",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning/stages/${stageId}/objectives",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning/stages/:stageId/objectives",
+        "fullPath": "/api/admin/learning/stages/:stageId/objectives",
+        "line": 40,
+        "raw": "router.get('/learning/stages/:stageId/objectives', fiveStageCtrl.getAdminStageObjectives);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminObjective",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/objectives",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/objectives",
+        "fullPath": "/api/admin/learning/objectives",
+        "line": 41,
+        "raw": "router.post('/learning/objectives', fiveStageCtrl.createObjective);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminObjective",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/objectives/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/objectives/:id",
+        "fullPath": "/api/admin/learning/objectives/:id",
+        "line": 42,
+        "raw": "router.put('/learning/objectives/:id', fiveStageCtrl.updateObjective);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteAdminObjective",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/objectives/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/objectives/:id",
+        "fullPath": "/api/admin/learning/objectives/:id",
+        "line": 43,
+        "raw": "router.delete('/learning/objectives/:id', fiveStageCtrl.deleteObjective);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminRecallQuestion",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/recall/questions",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/recall/questions",
+        "fullPath": "/api/admin/learning/recall/questions",
+        "line": 46,
+        "raw": "router.post('/learning/recall/questions', fiveStageCtrl.createRecallQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminRecallQuestion",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/recall/questions/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/recall/questions/:id",
+        "fullPath": "/api/admin/learning/recall/questions/:id",
+        "line": 47,
+        "raw": "router.put('/learning/recall/questions/:id', fiveStageCtrl.updateRecallQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteAdminRecallQuestion",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/recall/questions/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/recall/questions/:id",
+        "fullPath": "/api/admin/learning/recall/questions/:id",
+        "line": 48,
+        "raw": "router.delete('/learning/recall/questions/:id', fiveStageCtrl.deleteRecallQuestion);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminTip",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/tips",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/tips",
+        "fullPath": "/api/admin/learning/tips",
+        "line": 51,
+        "raw": "router.post('/learning/tips', fiveStageCtrl.createTip);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminTip",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/tips/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/tips/:id",
+        "fullPath": "/api/admin/learning/tips/:id",
+        "line": 52,
+        "raw": "router.put('/learning/tips/:id', fiveStageCtrl.updateTip);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteAdminTip",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/tips/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/tips/:id",
+        "fullPath": "/api/admin/learning/tips/:id",
+        "line": 53,
+        "raw": "router.delete('/learning/tips/:id', fiveStageCtrl.deleteTip);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminSong",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/songs",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/songs",
+        "fullPath": "/api/admin/learning/songs",
+        "line": 56,
+        "raw": "router.post('/learning/songs', fiveStageCtrl.createSong);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminSong",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/songs/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/songs/:id",
+        "fullPath": "/api/admin/learning/songs/:id",
+        "line": 57,
+        "raw": "router.put('/learning/songs/:id', fiveStageCtrl.updateSong);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteAdminSong",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/songs/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/songs/:id",
+        "fullPath": "/api/admin/learning/songs/:id",
+        "line": 58,
+        "raw": "router.delete('/learning/songs/:id', fiveStageCtrl.deleteSong);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createAdminChallenge",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/challenges",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/challenges",
+        "fullPath": "/api/admin/learning/challenges",
+        "line": 61,
+        "raw": "router.post('/learning/challenges', fiveStageCtrl.createChallenge);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateAdminChallenge",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/learning/challenges/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/learning/challenges/:id",
+        "fullPath": "/api/admin/learning/challenges/:id",
+        "line": 62,
+        "raw": "router.put('/learning/challenges/:id', fiveStageCtrl.updateChallenge);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteAdminChallenge",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/learning/challenges/${id}",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/learning/challenges/:id",
+        "fullPath": "/api/admin/learning/challenges/:id",
+        "line": 63,
+        "raw": "router.delete('/learning/challenges/:id', fiveStageCtrl.deleteChallenge);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminStudentSubmissions",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/learning/student-submissions",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/learning/student-submissions",
+        "fullPath": "/api/admin/learning/student-submissions",
+        "line": 66,
+        "raw": "router.get('/learning/student-submissions', fiveStageCtrl.getStudentSubmissionsForAdmin);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "gradeAdminWrittenAssessment",
+        "params": "id, data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/learning/assessments/${id}/grade",
+        "usedInPages": [
+          "components/AdminCurriculumManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/learning/assessments/:id/grade",
+        "fullPath": "/api/admin/learning/assessments/:id/grade",
+        "line": 67,
+        "raw": "router.post('/learning/assessments/:id/grade', fiveStageCtrl.gradeWrittenAssessment);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeCommitment",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/commitment",
+        "usedInPages": [
+          "components/YourPracticeCommitment.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/commitment",
+        "fullPath": "/api/practice/commitment",
+        "line": 12,
+        "raw": "router.get('/commitment', stageFivePracticeCtrl.getCommitment);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "savePracticeCommitment",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/commitment",
+        "usedInPages": [
+          "components/YourPracticeCommitment.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/commitment",
+        "fullPath": "/api/practice/commitment",
+        "line": 13,
+        "raw": "router.post('/commitment', stageFivePracticeCtrl.saveCommitment);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getLearningJournalSessions",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/sessions",
+        "usedInPages": [
+          "components/LearningJournalKanban.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "GET",
+        "subPath": "/sessions",
+        "fullPath": "/api/practice/sessions",
+        "line": 16,
+        "raw": "router.get('/sessions', stageFivePracticeCtrl.getPracticeSessions);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "addLearningJournalSession",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/sessions",
+        "usedInPages": [
+          "components/LearningJournalKanban.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/sessions",
+        "fullPath": "/api/practice/sessions",
+        "line": 17,
+        "raw": "router.post('/sessions', stageFivePracticeCtrl.addManualSession);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateLearningJournalSessionStatus",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/practice/sessions/${id}/status",
+        "usedInPages": [
+          "components/LearningJournalKanban.jsx"
+        ]
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PUT",
+        "subPath": "/sessions/:id/status",
+        "fullPath": "/api/practice/sessions/:id/status",
+        "line": 18,
+        "raw": "router.put('/sessions/:id/status', stageFivePracticeCtrl.updateSessionStatus);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateLearningJournalSessionDetails",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/practice/sessions/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "PUT",
+        "subPath": "/sessions/:id",
+        "fullPath": "/api/practice/sessions/:id",
+        "line": 19,
+        "raw": "router.put('/sessions/:id', stageFivePracticeCtrl.updateSessionDetails);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "completePracticeActivity",
+        "params": "activityKey",
+        "httpMethod": "POST",
+        "endpoint": "/api/practice/activities/${activityKey}/complete",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "practiceRoutes.js",
+        "method": "POST",
+        "subPath": "/activities/:activityKey/complete",
+        "fullPath": "/api/practice/activities/:activityKey/complete",
+        "line": 21,
+        "raw": "router.post('/activities/:activityKey/complete', stageFivePracticeCtrl.completePracticeActivity);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getStagesUnlockStatus",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/learning/stages/unlock-status",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "learningRoutes.js",
+        "method": "GET",
+        "subPath": "/stages/unlock-status",
+        "fullPath": "/api/learning/stages/unlock-status",
+        "line": 28,
+        "raw": "router.get('/stages/unlock-status', stageFivePracticeCtrl.getStagesUnlockStatus);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsDashboardStats",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/stats",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "GET",
+        "subPath": "/stats",
+        "fullPath": "/api/cms/stats",
+        "line": 16,
+        "raw": "router.get('/stats', cmsController.getCmsDashboardStats);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getPublicCmsPage",
+        "params": "pageSlug",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/public/${encodeURIComponent(pageSlug)}",
+        "usedInPages": [
+          "pages/WelcomePage.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "GET",
+        "subPath": "/public/:pageSlug",
+        "fullPath": "/api/cms/public/:pageSlug",
+        "line": 9,
+        "raw": "router.get('/public/:pageSlug', cmsController.getPublicPageSections);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsSection",
+        "params": "id",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/sections/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "GET",
+        "subPath": "/sections/:id",
+        "fullPath": "/api/cms/sections/:id",
+        "line": 20,
+        "raw": "router.get('/sections/:id', cmsController.getSectionById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "createCmsSection",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/cms/sections",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "POST",
+        "subPath": "/sections",
+        "fullPath": "/api/cms/sections",
+        "line": 21,
+        "raw": "router.post('/sections', cmsController.createSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateCmsSection",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/cms/sections/${id}",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx",
+          "components/WelcomePageManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "PUT",
+        "subPath": "/sections/:id",
+        "fullPath": "/api/cms/sections/:id",
+        "line": 22,
+        "raw": "router.put('/sections/:id', cmsController.updateSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteCmsSection",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/cms/sections/${id}",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "DELETE",
+        "subPath": "/sections/:id",
+        "fullPath": "/api/cms/sections/:id",
+        "line": 23,
+        "raw": "router.delete('/sections/:id', cmsController.deleteSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "publishCmsSection",
+        "params": "id",
+        "httpMethod": "POST",
+        "endpoint": "/api/cms/sections/${id}/publish",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "POST",
+        "subPath": "/sections/:id/publish",
+        "fullPath": "/api/cms/sections/:id/publish",
+        "line": 24,
+        "raw": "router.post('/sections/:id/publish', cmsController.publishSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "unpublishCmsSection",
+        "params": "id",
+        "httpMethod": "POST",
+        "endpoint": "/api/cms/sections/${id}/unpublish",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "POST",
+        "subPath": "/sections/:id/unpublish",
+        "fullPath": "/api/cms/sections/:id/unpublish",
+        "line": 25,
+        "raw": "router.post('/sections/:id/unpublish', cmsController.unpublishSection);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "uploadCmsMedia",
+        "params": "formData",
+        "httpMethod": "POST",
+        "endpoint": "/api/cms/media",
+        "usedInPages": [
+          "components/MediaUploadField.jsx",
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "POST",
+        "subPath": "/media",
+        "fullPath": "/api/cms/media",
+        "line": 29,
+        "raw": "router.post('/media', cmsUpload.single('file'), cmsController.uploadMediaAsset);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateCmsMedia",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/cms/media/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "PUT",
+        "subPath": "/media/:id",
+        "fullPath": "/api/cms/media/:id",
+        "line": 30,
+        "raw": "router.put('/media/:id', cmsController.updateMediaAsset);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "deleteCmsMedia",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/cms/media/${id}",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "DELETE",
+        "subPath": "/media/:id",
+        "fullPath": "/api/cms/media/:id",
+        "line": 31,
+        "raw": "router.delete('/media/:id', cmsController.deleteMediaAsset);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsModules",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/modules",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "GET",
+        "subPath": "/modules",
+        "fullPath": "/api/cms/modules",
+        "line": 34,
+        "raw": "router.get('/modules', cmsController.getCmsModules);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateCmsModule",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/cms/modules/${id}",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "PUT",
+        "subPath": "/modules/:id",
+        "fullPath": "/api/cms/modules/:id",
+        "line": 35,
+        "raw": "router.put('/modules/:id', cmsController.updateCmsModule);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsStages",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/stages",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "GET",
+        "subPath": "/stages",
+        "fullPath": "/api/cms/stages",
+        "line": 38,
+        "raw": "router.get('/stages', cmsController.getCmsStages);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "updateCmsStage",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/cms/stages/${id}",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "PUT",
+        "subPath": "/stages/:id",
+        "fullPath": "/api/cms/stages/:id",
+        "line": 39,
+        "raw": "router.put('/stages/:id', cmsController.updateCmsStage);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "rollbackCmsRevision",
+        "params": "id",
+        "httpMethod": "POST",
+        "endpoint": "/api/cms/revisions/${id}/rollback",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "backend": {
+        "file": "cmsRoutes.js",
+        "method": "POST",
+        "subPath": "/revisions/:id/rollback",
+        "fullPath": "/api/cms/revisions/:id/rollback",
+        "line": 43,
+        "raw": "router.post('/revisions/:id/rollback', cmsController.rollbackRevision);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetVideosForTranscript",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/transcripts/videos",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/transcripts/videos",
+        "fullPath": "/api/admin/transcripts/videos",
+        "line": 108,
+        "raw": "router.get('/transcripts/videos', transcriptCtrl.adminGetVideos);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetTranscriptById",
+        "params": "id",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/transcripts/${id}",
+        "usedInPages": []
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/transcripts/:id",
+        "fullPath": "/api/admin/transcripts/:id",
+        "line": 112,
+        "raw": "router.get('/transcripts/:id', transcriptCtrl.adminGetTranscriptById);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetTranscriptByVideo",
+        "params": "videoId",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/transcripts/by-video/${videoId}",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "GET",
+        "subPath": "/transcripts/by-video/:videoId",
+        "fullPath": "/api/admin/transcripts/by-video/:videoId",
+        "line": 109,
+        "raw": "router.get('/transcripts/by-video/:videoId', transcriptCtrl.adminGetTranscriptByVideo);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminCreateTranscript",
+        "params": "data",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/transcripts",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/transcripts",
+        "fullPath": "/api/admin/transcripts",
+        "line": 113,
+        "raw": "router.post('/transcripts', transcriptCtrl.adminCreateTranscript);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminUpdateTranscript",
+        "params": "id, data",
+        "httpMethod": "PUT",
+        "endpoint": "/api/admin/transcripts/${id}",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "PUT",
+        "subPath": "/transcripts/:id",
+        "fullPath": "/api/admin/transcripts/:id",
+        "line": 114,
+        "raw": "router.put('/transcripts/:id', transcriptCtrl.adminUpdateTranscript);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminDeleteTranscript",
+        "params": "id",
+        "httpMethod": "DELETE",
+        "endpoint": "/api/admin/transcripts/${id}",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "DELETE",
+        "subPath": "/transcripts/:id",
+        "fullPath": "/api/admin/transcripts/:id",
+        "line": 115,
+        "raw": "router.delete('/transcripts/:id', transcriptCtrl.adminDeleteTranscript);",
+        "regex": {}
+      }
+    },
+    {
+      "frontend": {
+        "methodName": "adminGenerateDraftTranscript",
+        "params": "videoId",
+        "httpMethod": "POST",
+        "endpoint": "/api/admin/transcripts/generate-draft",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "backend": {
+        "file": "adminRoutes.js",
+        "method": "POST",
+        "subPath": "/transcripts/generate-draft",
+        "fullPath": "/api/admin/transcripts/generate-draft",
+        "line": 110,
+        "raw": "router.post('/transcripts/generate-draft', transcriptCtrl.adminGenerateDraftTranscript);",
+        "regex": {}
+      }
+    }
+  ],
+  "discrepancies": [
+    {
+      "frontend": {
+        "methodName": "refreshAccessToken",
+        "params": "",
+        "httpMethod": "GET",
+        "endpoint": "/apiUNKNOWN",
+        "usedInPages": []
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "completeStage",
+        "params": "stageId",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/stages/${stageId}/complete",
+        "usedInPages": []
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "updateLearningProgress",
+        "params": "activity_id, completion_status = 'completed'",
+        "httpMethod": "POST",
+        "endpoint": "/api/learning/progress",
+        "usedInPages": []
+      },
+      "issue": "METHOD_MISMATCH (Frontend: POST, Backend: GET)"
+    },
+    {
+      "frontend": {
+        "methodName": "getPracticeReflections",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/practice/reflections${query ? ",
+        "usedInPages": []
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getTeacherSubmissions",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/teacher/submissions${query ? ",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getPeerPinBoard",
+        "params": "stageId = 2, questionId = null",
+        "httpMethod": "GET",
+        "endpoint": "/apiUNKNOWN",
+        "usedInPages": [
+          "pages/LearningPage.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getModuleCompletionSummary",
+        "params": "moduleId = 1",
+        "httpMethod": "GET",
+        "endpoint": "/api/modules/${moduleId}/completion-summary",
+        "usedInPages": [
+          "components/ModuleCompleteCard.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getAdminPracticeCommitments",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/practice-commitments${query ? ",
+        "usedInPages": [
+          "pages/AdminPortalPage.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsSections",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/sections${query ? ",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx",
+          "components/WelcomePageManager.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsMedia",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/media${query ? ",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getCmsRevisions",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/cms/revisions${query ? ",
+        "usedInPages": [
+          "components/PortalContentManagement.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "getVideoTranscript",
+        "params": "stageId, videoId",
+        "httpMethod": "GET",
+        "endpoint": "/apiUNKNOWN",
+        "usedInPages": [
+          "components/VideoTranscriptSection.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    },
+    {
+      "frontend": {
+        "methodName": "adminGetTranscripts",
+        "params": "params = {}",
+        "httpMethod": "GET",
+        "endpoint": "/api/admin/transcripts${query ? ",
+        "usedInPages": [
+          "components/AdminTranscriptManager.jsx"
+        ]
+      },
+      "issue": "ENDPOINT_NOT_FOUND_IN_BACKEND"
+    }
+  ]
+}
