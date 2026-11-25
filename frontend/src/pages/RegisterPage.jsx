@@ -16,8 +16,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
-  RefreshCw,
-  KeyRound
+  RefreshCw
 } from 'lucide-react';
 
 const MUSIC_OPTIONS = [
@@ -35,9 +34,6 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { register, selectedGoal, setSelectedGoal } = useAuth();
-
-  // Step state: 'form' (registration inputs) | 'otp' (email verification)
-  const [step, setStep] = useState('form');
 
   // Registration Form State (Phone Number completely removed)
   const [formData, setFormData] = useState({
@@ -61,33 +57,10 @@ export default function RegisterPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // OTP Verification State
-  const [otpCode, setOtpCode] = useState('');
-  const [otpEmail, setOtpEmail] = useState('');
-  const [otpError, setOtpError] = useState('');
-  const [isOtpLoading, setIsOtpLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendSuccessNotice, setResendSuccessNotice] = useState('');
-
-  // Handle location state (e.g. from login redirect for unverified email)
+  // Clear any stale pending session storage
   useEffect(() => {
-    if (location.state?.step === 'otp' && location.state?.email) {
-      setOtpEmail(location.state.email);
-      setStep('otp');
-      setResendCooldown(30);
-    }
-  }, [location.state]);
-
-  // Resend OTP Countdown Timer
-  useEffect(() => {
-    let timer;
-    if (resendCooldown > 0) {
-      timer = setInterval(() => {
-        setResendCooldown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+    try { sessionStorage.removeItem('resonova_pending_email'); } catch (_) {}
+  }, []);
 
   // Toggle music option chip
   const toggleMusicType = (type) => {
@@ -313,12 +286,17 @@ export default function RegisterPage() {
       });
 
       if (response && response.success) {
-        setOtpEmail(formData.email.trim().toLowerCase());
-        setOtpCode('');
-        setOtpError('');
-        setResendCooldown(30);
-        setStep('otp');
+        setSuccessMessage('Account created successfully! Redirecting to login...');
         window.scrollTo({ top: 100, behavior: 'smooth' });
+        setTimeout(() => {
+          navigate('/login', {
+            state: {
+              registeredEmail: formData.email.trim(),
+              email: formData.email.trim(),
+              infoMessage: 'Registration successful! Please log in with your password.'
+            }
+          });
+        }, 1500);
       }
     } catch (err) {
       const msg = err.data?.message || err.message || 'Registration failed. Please verify your details and try again.';
@@ -332,74 +310,6 @@ export default function RegisterPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Handle OTP Verification Submission
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setOtpError('');
-    const cleanOtp = otpCode.trim();
-
-    if (!cleanOtp) {
-      setOtpError('Please enter the 6-digit verification code.');
-      return;
-    }
-    if (!/^\d{6}$/.test(cleanOtp)) {
-      setOtpError('Verification code must be exactly 6 digits.');
-      return;
-    }
-
-    setIsOtpLoading(true);
-    try {
-      const res = await api.verifyEmailOtp({
-        email: otpEmail,
-        otp: cleanOtp
-      });
-
-      if (res && res.success) {
-        setSuccessMessage('Email verified successfully! Your account is now active. Redirecting to Login...');
-        setTimeout(() => {
-          navigate('/login', {
-            state: {
-              registeredEmail: otpEmail,
-              email: otpEmail,
-              infoMessage: 'Email verified successfully! Please log in with your credentials.'
-            }
-          });
-        }, 1600);
-      }
-    } catch (err) {
-      const msg = err.data?.message || err.message || 'Invalid or expired verification code.';
-      setOtpError(msg);
-    } finally {
-      setIsOtpLoading(false);
-    }
-  };
-
-  // Handle Resend OTP Request
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0 || isOtpLoading) return;
-    setOtpError('');
-    setResendSuccessNotice('');
-
-    try {
-      const res = await api.resendRegistrationOtp(otpEmail);
-      if (res && res.success) {
-        setResendCooldown(30);
-        setResendSuccessNotice('A new 6-digit verification code has been dispatched to your email.');
-        setTimeout(() => setResendSuccessNotice(''), 4000);
-      }
-    } catch (err) {
-      setOtpError(err.data?.message || err.message || 'Could not resend verification code. Please try again.');
-    }
-  };
-
-  // Mask email for display: paulrenine9487@gmail.com -> p***7@gmail.com
-  const getMaskedEmail = (emailStr) => {
-    if (!emailStr || !emailStr.includes('@')) return emailStr || '';
-    const [local, domain] = emailStr.split('@');
-    if (local.length <= 2) return `${local.charAt(0)}*@${domain}`;
-    return `${local.charAt(0)}${'*'.repeat(Math.min(local.length - 2, 5))}${local.slice(-1)}@${domain}`;
   };
 
   return (
@@ -444,7 +354,7 @@ export default function RegisterPage() {
             lineHeight: 1.25,
             marginBottom: '6px'
           }}>
-            {step === 'otp' ? 'Verify Your Email Address' : 'Create your No Tre(ou)ble Account'}
+            Create your No Tre(ou)ble Account
           </h1>
           <p style={{
             fontSize: '0.84rem',
@@ -452,14 +362,12 @@ export default function RegisterPage() {
             maxWidth: '560px',
             margin: '0 auto'
           }}>
-            {step === 'otp'
-              ? 'Enter the 6-digit verification code sent to your email to activate your account.'
-              : 'Begin your journey towards better breathing, stronger vocals and confident singing.'}
+            Begin your journey towards better breathing, stronger vocals and confident singing.
           </p>
         </div>
 
         {/* Selected Musical Goal Banner (Preserved) */}
-        {selectedGoal && step === 'form' && (
+        {selectedGoal && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.07), rgba(6, 182, 212, 0.05))',
             border: '1.5px solid #c084fc',
@@ -531,7 +439,7 @@ export default function RegisterPage() {
         )}
 
         {/* Server Error Alert */}
-        {serverError && step === 'form' && (
+        {serverError && (
           <div style={{
             background: '#fef2f2',
             border: '1.5px solid #DC4C64',
@@ -588,11 +496,8 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* ================================================================= */}
-        {/* STEP 1: REGISTRATION FORM (Phone Number Removed, Username -> Full Name) */}
-        {/* ================================================================= */}
-        {step === 'form' && (
-          <form onSubmit={handleSubmit} noValidate>
+        {/* REGISTRATION FORM (Phone Number Removed, Username -> Full Name) */}
+        <form onSubmit={handleSubmit} noValidate>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
               {/* Field 1: Full Name (Required, Unicode, 3-50 chars, no numbers) */}
@@ -965,7 +870,7 @@ export default function RegisterPage() {
                 {isSubmitting ? (
                   <>
                     <RefreshCw size={18} className="animate-spin" />
-                    <span>Creating Account & Sending OTP...</span>
+                    <span>Creating Account...</span>
                   </>
                 ) : (
                   <>
@@ -976,212 +881,6 @@ export default function RegisterPage() {
               </button>
             </div>
           </form>
-        )}
-
-        {/* ================================================================= */}
-        {/* STEP 2: EMAIL OTP VERIFICATION SCREEN (Phase 5 Requirements)       */}
-        {/* ================================================================= */}
-        {step === 'otp' && (
-          <div>
-            {/* Header / Info Badge */}
-            <div style={{
-              background: '#F5F3FF',
-              border: '1.5px solid #DDD6FE',
-              borderRadius: '16px',
-              padding: '18px 20px',
-              marginBottom: '28px',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '12px',
-                background: '#7C3AED',
-                color: '#FFFFFF',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '12px'
-              }}>
-                <KeyRound size={22} />
-              </div>
-              <h3 style={{ fontSize: '1.08rem', fontWeight: 800, color: '#191B35', margin: '0 0 6px 0' }}>
-                Verify Your Email
-              </h3>
-              <p style={{ fontSize: '0.86rem', color: '#5B21B6', margin: 0, lineHeight: 1.5 }}>
-                A 6-digit verification code has been dispatched to:<br />
-                <strong style={{ fontSize: '0.94rem', color: '#191B35' }}>{otpEmail}</strong>
-              </p>
-            </div>
-
-            {/* Resend Notice */}
-            {resendSuccessNotice && (
-              <div style={{
-                background: '#ecfdf5',
-                border: '1px solid #10B981',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                marginBottom: '20px',
-                fontSize: '0.86rem',
-                color: '#065f46',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <CheckCircle2 size={18} color="#10B981" />
-                <span>{resendSuccessNotice}</span>
-              </div>
-            )}
-
-            {/* OTP Error Banner */}
-            {otpError && (
-              <div style={{
-                background: '#fef2f2',
-                border: '1.5px solid #DC4C64',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                marginBottom: '20px',
-                color: '#991b1b',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <AlertCircle size={18} color="#DC4C64" style={{ flexShrink: 0 }} />
-                <span>{otpError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleVerifyOtp}>
-              <div style={{ marginBottom: '24px' }}>
-                <label htmlFor="reg-otp-input" style={{
-                  display: 'block',
-                  fontSize: '0.9rem',
-                  fontWeight: 700,
-                  color: '#191B35',
-                  marginBottom: '8px',
-                  textAlign: 'center'
-                }}>
-                  Enter 6-Digit Verification Code
-                </label>
-                <input
-                  id="reg-otp-input"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => {
-                    const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
-                    setOtpCode(clean);
-                    setOtpError('');
-                  }}
-                  placeholder="••••••"
-                  style={{
-                    width: '100%',
-                    maxWidth: '280px',
-                    margin: '0 auto',
-                    display: 'block',
-                    padding: '14px 18px',
-                    borderRadius: '14px',
-                    border: otpError ? '2px solid #DC4C64' : '2px solid #7C3AED',
-                    background: '#FFFFFF',
-                    fontSize: '1.8rem',
-                    fontWeight: 800,
-                    letterSpacing: '10px',
-                    textAlign: 'center',
-                    color: '#7C3AED',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-                <div style={{ fontSize: '0.78rem', color: '#77728A', textAlign: 'center', marginTop: '8px' }}>
-                  Code expires in 5 minutes.
-                </div>
-              </div>
-
-              {/* Verify Button */}
-              <button
-                type="submit"
-                disabled={isOtpLoading || otpCode.trim().length !== 6}
-                className="btn-primary-gradient"
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  fontSize: '1.02rem',
-                  borderRadius: '14px',
-                  opacity: (isOtpLoading || otpCode.trim().length !== 6) ? 0.65 : 1,
-                  cursor: (isOtpLoading || otpCode.trim().length !== 6) ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px'
-                }}
-              >
-                {isOtpLoading ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    <span>Activating Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>VERIFY & ACTIVATE ACCOUNT</span>
-                    <ArrowRight size={18} />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Resend and Edit options */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: '22px',
-              paddingTop: '18px',
-              borderTop: '1px solid #f3effc',
-              fontSize: '0.86rem'
-            }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setStep('form');
-                  setOtpError('');
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#6B7280',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <ArrowLeft size={16} />
-                <span>Edit Registration Details</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={resendCooldown > 0 || isOtpLoading}
-                onClick={handleResendOtp}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: resendCooldown > 0 ? '#9CA3AF' : '#7C3AED',
-                  fontWeight: 750,
-                  cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
-                  textDecoration: resendCooldown > 0 ? 'none' : 'underline'
-                }}
-              >
-                {resendCooldown > 0 ? `Resend Code in ${resendCooldown}s` : 'Resend Code'}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Already have an account? LOGIN */}
         <div style={{

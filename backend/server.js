@@ -236,6 +236,25 @@ app.get('/api/health/circuits', (req, res) => {
   });
 });
 
+// Safe diagnostic endpoint for SMTP email service health (never exposes secrets)
+app.get('/api/health/smtp', async (req, res) => {
+  const { verifySmtpConnection, getSmtpStatus } = require('./utils/emailService');
+  const status = getSmtpStatus();
+  const diagnostic = await verifySmtpConnection();
+  const httpCode = diagnostic.connected ? 200 : (diagnostic.configured ? 502 : 503);
+  res.status(httpCode).json({
+    service: 'SMTP Email Delivery',
+    configured: status.configured,
+    connected: diagnostic.connected || false,
+    host: status.host,
+    port: status.port,
+    secure: status.secure,
+    from: status.from,
+    diagnostic: diagnostic.error ? { error: diagnostic.error, message: diagnostic.message } : { status: 'OPERATIONAL' },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Mount API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

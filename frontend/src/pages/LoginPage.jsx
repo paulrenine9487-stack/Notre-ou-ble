@@ -469,7 +469,7 @@ export default function LoginPage() {
                 <div style={{ paddingTop: '8px', borderTop: '1px solid #fee2e2' }}>
                   <button
                     type="button"
-                    onClick={() => navigate('/register', { state: { email: unverifiedEmail, step: 'otp' } })}
+                    onClick={() => navigate('/register')}
                     style={{
                       background: '#7C3AED',
                       color: '#FFFFFF',
@@ -481,7 +481,7 @@ export default function LoginPage() {
                       cursor: 'pointer'
                     }}
                   >
-                    Enter Verification Code (OTP) →
+                    Go to Registration →
                   </button>
                 </div>
               )}

@@ -137,46 +137,15 @@ async function runMasterSuite() {
       })
     });
     const regData = await regRes.json();
-    if (regRes.status === 201 && regData.success && (regData.requireOtp || regData.requiresOtp || regData.otpRequired)) {
-      pass('Student registration succeeded without phone number (requireOtp = true)');
+    if (regRes.status === 201 && regData.success && regData.user?.is_email_verified === 1) {
+      pass('Student registration succeeded directly without phone number (is_email_verified = 1, direct registration)');
     } else {
       fail('Student registration failed', regData);
     }
 
-    // 2.2 Verify Account Unverified Lockout before OTP
-    const preOtpLoginRes = await fetch(`${BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: testStudentEmail, password: testPassword })
-    });
-    const preOtpLoginData = await preOtpLoginRes.json();
-    if (preOtpLoginRes.status === 403 && preOtpLoginData.emailUnverified) {
-      pass('Login correctly blocked before email verification (403 Forbidden with emailUnverified flag)');
-    } else {
-      fail('Pre-OTP login was not blocked as expected', preOtpLoginData);
-    }
+    studentId = regData.user.id;
 
-    // 2.3 Fetch OTP code from database & verify
-    const [otpRows] = await pool.query(
-      `SELECT evo.id, evo.otp_hash, evo.user_id 
-       FROM email_verification_otps evo
-       JOIN users u ON evo.user_id = u.id
-       WHERE u.email = ? AND evo.is_used = 0 
-       ORDER BY evo.created_at DESC LIMIT 1`,
-      [testStudentEmail]
-    );
-
-    if (otpRows.length === 0) {
-      throw new Error('No OTP record generated in database');
-    }
-    studentId = otpRows[0].user_id;
-
-    // Simulate OTP verification & activation
-    await pool.query('UPDATE users SET is_email_verified = 1, email_verified_at = NOW() WHERE id = ?', [studentId]);
-    await pool.query('UPDATE email_verification_otps SET is_used = 1 WHERE user_id = ?', [studentId]);
-    pass('Email OTP verified and student account successfully activated');
-
-    // 2.4 Authenticated Login
+    // 2.2 Authenticated Login (Immediate, no OTP required)
     const loginRes = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
