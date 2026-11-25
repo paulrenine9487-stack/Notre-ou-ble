@@ -4,6 +4,8 @@ const authController = require('../controllers/authController');
 const authenticateToken = require('../middleware/auth');
 const { authLimiter, registerLimiter, otpLimiter, refreshLimiter } = require('../middleware/rateLimiter');
 
+router.get('/check-email', authController.checkEmailAvailability);
+router.post('/check-email', authController.checkEmailAvailability);
 router.post('/register', registerLimiter, authController.register);
 router.post('/verify-email-otp', otpLimiter, authController.verifyEmailOtp);
 router.post('/resend-registration-otp', otpLimiter, authController.resendRegistrationOtp);

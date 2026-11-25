@@ -67,6 +67,37 @@ function validatePasswordStrength(password) {
   return null;
 }
 
+// 0. CHECK EMAIL AVAILABILITY (Pre-flight check to prevent 409 Conflict surprises)
+exports.checkEmailAvailability = async (req, res, next) => {
+  try {
+    const rawEmail = String(req.query.email || req.body?.email || '').trim().toLowerCase();
+    if (!rawEmail || !isValidEmail(rawEmail)) {
+      return res.status(200).json({ success: true, available: true });
+    }
+
+    const [existingUsers] = await pool.query(
+      'SELECT id, username, email, is_email_verified FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1',
+      [rawEmail]
+    );
+
+    if (existingUsers.length > 0 && Boolean(existingUsers[0].is_email_verified)) {
+      return res.status(200).json({
+        success: true,
+        available: false,
+        conflictField: 'email',
+        message: 'This email address is already registered. Please log in.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      available: true
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // 1. REGISTER (Phase 1-9 Requirements)
 exports.register = async (req, res, next) => {
   try {

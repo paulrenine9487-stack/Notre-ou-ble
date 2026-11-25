@@ -196,6 +196,19 @@ async function handleResponse(response) {
 
 export const api = {
   // Authentication
+  async checkEmailAvailability(email) {
+    try {
+      const cleanEmail = String(email || '').trim().toLowerCase();
+      if (!cleanEmail || !cleanEmail.includes('@')) {
+        return { success: true, available: true };
+      }
+      const res = await fetch(`${API_BASE}/auth/check-email?email=${encodeURIComponent(cleanEmail)}`);
+      return await res.json();
+    } catch {
+      return { success: true, available: true };
+    }
+  },
+
   async register(userData) {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',

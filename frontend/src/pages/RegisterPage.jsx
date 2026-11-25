@@ -204,7 +204,37 @@ export default function RegisterPage() {
       setErrors((prev) => ({ ...prev, confirm_password: confirmError }));
     }
 
+    if (name === 'email' && conflictField === 'email') {
+      setConflictField(null);
+    }
+
     setServerError('');
+  };
+
+  // Pre-flight real-time check for email availability on blur
+  const handleEmailBlur = async () => {
+    const raw = formData.email.trim();
+    if (!raw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return;
+
+    try {
+      const checkRes = await api.checkEmailAvailability(raw);
+      if (checkRes && checkRes.available === false) {
+        setConflictField('email');
+        setErrors((prev) => ({
+          ...prev,
+          email: 'This email address is already registered. Please log in.'
+        }));
+      } else if (conflictField === 'email') {
+        setConflictField(null);
+        setErrors((prev) => {
+          const updated = { ...prev };
+          delete updated.email;
+          return updated;
+        });
+      }
+    } catch {
+      // Passive check fails gracefully without blocking user typing
+    }
   };
 
   // Full form validation before submit
@@ -251,8 +281,25 @@ export default function RegisterPage() {
       return;
     }
 
+    if (conflictField === 'email') {
+      setServerError('This email address is already registered. Please log in.');
+      window.scrollTo({ top: 140, behavior: 'smooth' });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // 1. Pre-flight check email availability to prevent 409 browser console conflict
+      const emailCheck = await api.checkEmailAvailability(formData.email.trim());
+      if (emailCheck && emailCheck.available === false) {
+        setConflictField('email');
+        setErrors((prev) => ({ ...prev, email: 'This email address is already registered. Please log in.' }));
+        setServerError('This email address is already registered. Please log in.');
+        window.scrollTo({ top: 140, behavior: 'smooth' });
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await register({
         full_name: formData.full_name.trim(),
         username: formData.full_name.trim(), // backwards-compatible alias
@@ -648,7 +695,10 @@ export default function RegisterPage() {
                       boxSizing: 'border-box'
                     }}
                     onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                    onBlur={(e) => !errors.email && (e.target.style.borderColor = '#EAE5F3')}
+                    onBlur={(e) => {
+                      handleEmailBlur();
+                      if (!errors.email) e.target.style.borderColor = '#EAE5F3';
+                    }}
                   />
                   <Mail size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
                 </div>
@@ -657,6 +707,47 @@ export default function RegisterPage() {
                 </div>
                 {errors.email && (
                   <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.email}</p>
+                )}
+                {conflictField === 'email' && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '10px 14px',
+                    background: '#FAF5FF',
+                    border: '1.5px solid #D8B4FE',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '0.84rem'
+                  }}>
+                    <span style={{ color: '#6B21A8', fontWeight: 700 }}>Already registered?</span>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/login', {
+                        state: {
+                          registeredEmail: formData.email.trim(),
+                          email: formData.email.trim(),
+                          infoMessage: `An account with ${formData.email.trim()} is already registered. Please log in.`
+                        }
+                      })}
+                      style={{
+                        background: '#7C3AED',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '6px 14px',
+                        fontWeight: 750,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>Log In Instead</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 )}
               </div>
 
