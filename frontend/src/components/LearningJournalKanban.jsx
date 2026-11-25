@@ -39,10 +39,15 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
   const [completeModalSession, setCompleteModalSession] = useState(null);
   const [actualDuration, setActualDuration] = useState(10);
   const [completeNotes, setCompleteNotes] = useState('');
+  const [completeSubmitting, setCompleteSubmitting] = useState(false);
+  const [completeModalError, setCompleteModalError] = useState('');
+  const [updatingSessionId, setUpdatingSessionId] = useState(null);
 
-  const loadSessions = async () => {
+  const loadSessions = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) {
+        setLoading(true);
+      }
       setErrorMsg('');
       const res = await api.getLearningJournalSessions();
       if (res && res.success) {
@@ -50,14 +55,19 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
       }
     } catch (err) {
       console.error('Failed to load journal sessions:', err);
-      setErrorMsg('Could not load learning journal sessions.');
+      if (!isBackground) {
+        setErrorMsg('Could not load learning journal sessions.');
+      }
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadSessions();
+    const isBackground = sessions.length > 0;
+    loadSessions(isBackground);
   }, [refreshTrigger]);
 
   useEffect(() => {
@@ -65,7 +75,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
       if (e.detail?.sessions && Array.isArray(e.detail.sessions)) {
         setSessions(e.detail.sessions);
       } else {
-        loadSessions();
+        loadSessions(true);
       }
     };
     window.addEventListener('resonova_commitment_saved', handleCommitmentSaved);
@@ -88,25 +98,13 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
         setCompleteModalSession(target);
         setActualDuration(target.planned_duration || 10);
         setCompleteNotes(target.notes || '');
+        setCompleteModalError('');
         return;
       }
     }
 
-    // Optimistic UI update
-    setSessions(prev =>
-      prev.map(s => {
-        if (s.id === sessionId) {
-          return {
-            ...s,
-            status: newStatus,
-            actual_duration: actualDur || s.actual_duration || s.planned_duration,
-            notes: notes !== null ? notes : s.notes,
-            completed_at: newStatus === 'done' ? new Date().toISOString() : s.completed_at
-          };
-        }
-        return s;
-      })
-    );
+    setUpdatingSessionId(sessionId);
+    setErrorMsg('');
 
     try {
       const payload = { status: newStatus };
@@ -119,21 +117,22 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
 
       const res = await api.updateLearningJournalSessionStatus(sessionId, payload);
 
-      if (res && res.success) {
+      if (res && res.success && res.session) {
+        // Authoritative update directly from MySQL confirmation
+        setSessions(prev => prev.map(s => s.id === sessionId ? res.session : s));
         const displayLabel = newStatus === 'planned' ? 'TO DO' : newStatus === 'practising' ? 'DOING' : 'DONE';
         showNotification(`Session moved to ${displayLabel}!`);
         if (onSessionsUpdated) {
           onSessionsUpdated();
         }
       } else {
-        // Rollback
-        loadSessions();
-        setErrorMsg(res?.message || 'Could not update session status.');
+        setErrorMsg(res?.message || 'Could not update session status in database.');
       }
     } catch (err) {
       console.error('Status update failed:', err);
-      loadSessions();
-      setErrorMsg('Failed to sync session with database.');
+      setErrorMsg(err.message || 'Failed to sync session with database.');
+    } finally {
+      setUpdatingSessionId(null);
     }
   };
 
@@ -193,10 +192,38 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
   // Complete Session Modal Submit
   const handleCompleteSubmit = async (e) => {
     e.preventDefault();
-    if (!completeModalSession) return;
+    if (!completeModalSession || completeSubmitting) return;
+
     const sId = completeModalSession.id;
-    setCompleteModalSession(null);
-    await changeSessionStatus(sId, 'done', actualDuration, completeNotes);
+    setCompleteSubmitting(true);
+    setCompleteModalError('');
+
+    try {
+      const payload = {
+        status: 'done',
+        actual_duration: Number(actualDuration) || completeModalSession.planned_duration || 10,
+        notes: completeNotes ? String(completeNotes).trim() : null
+      };
+
+      const res = await api.updateLearningJournalSessionStatus(sId, payload);
+
+      if (res && res.success && res.session) {
+        // Authoritative update from database confirmation
+        setSessions(prev => prev.map(s => s.id === sId ? res.session : s));
+        setCompleteModalSession(null);
+        showNotification('Session marked as DONE and logged to Practice Journal! ✓');
+        if (onSessionsUpdated) {
+          onSessionsUpdated();
+        }
+      } else {
+        setCompleteModalError(res?.message || 'Could not complete session in database.');
+      }
+    } catch (err) {
+      console.error('Completion submission failed:', err);
+      setCompleteModalError(err.message || 'Failed to sync session with database.');
+    } finally {
+      setCompleteSubmitting(false);
+    }
   };
 
   // Group sessions by column
@@ -549,6 +576,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                       {col.id === 'practising' && (
                         <button
                           type="button"
+                          disabled={updatingSessionId === session.id}
                           onClick={() => changeSessionStatus(session.id, 'planned')}
                           title="Move back to To Do"
                           style={{
@@ -562,7 +590,8 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                             border: 'none',
                             fontSize: '0.72rem',
                             fontWeight: 700,
-                            cursor: 'pointer'
+                            cursor: updatingSessionId === session.id ? 'not-allowed' : 'pointer',
+                            opacity: updatingSessionId === session.id ? 0.5 : 1
                           }}
                         >
                           <MoveLeft size={12} />
@@ -573,6 +602,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                       {col.id === 'done' && (
                         <button
                           type="button"
+                          disabled={updatingSessionId === session.id}
                           onClick={() => changeSessionStatus(session.id, 'practising')}
                           title="Move back to Doing"
                           style={{
@@ -586,7 +616,8 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                             border: 'none',
                             fontSize: '0.72rem',
                             fontWeight: 700,
-                            cursor: 'pointer'
+                            cursor: updatingSessionId === session.id ? 'not-allowed' : 'pointer',
+                            opacity: updatingSessionId === session.id ? 0.5 : 1
                           }}
                         >
                           <MoveLeft size={12} />
@@ -598,6 +629,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                       {col.id === 'planned' && (
                         <button
                           type="button"
+                          disabled={updatingSessionId === session.id}
                           onClick={() => changeSessionStatus(session.id, 'practising')}
                           title="Start Doing"
                           style={{
@@ -612,10 +644,15 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                             border: 'none',
                             fontSize: '0.76rem',
                             fontWeight: 750,
-                            cursor: 'pointer'
+                            cursor: updatingSessionId === session.id ? 'not-allowed' : 'pointer',
+                            opacity: updatingSessionId === session.id ? 0.6 : 1
                           }}
                         >
-                          <Play size={11} fill="#FFFFFF" />
+                          {updatingSessionId === session.id ? (
+                            <RefreshCw size={11} className="animate-spin" />
+                          ) : (
+                            <Play size={11} fill="#FFFFFF" />
+                          )}
                           <span>Start Doing</span>
                         </button>
                       )}
@@ -623,6 +660,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                       {col.id === 'practising' && (
                         <button
                           type="button"
+                          disabled={updatingSessionId === session.id}
                           onClick={() => changeSessionStatus(session.id, 'done')}
                           style={{
                             marginLeft: 'auto',
@@ -636,10 +674,15 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                             border: 'none',
                             fontSize: '0.76rem',
                             fontWeight: 750,
-                            cursor: 'pointer'
+                            cursor: updatingSessionId === session.id ? 'not-allowed' : 'pointer',
+                            opacity: updatingSessionId === session.id ? 0.6 : 1
                           }}
                         >
-                          <Check size={13} strokeWidth={2.5} />
+                          {updatingSessionId === session.id ? (
+                            <RefreshCw size={11} className="animate-spin" />
+                          ) : (
+                            <Check size={13} strokeWidth={2.5} />
+                          )}
                           <span>Mark as Done</span>
                         </button>
                       )}
@@ -900,6 +943,26 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
             </p>
 
             <form onSubmit={handleCompleteSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {completeModalError && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    background: '#FEF2F2',
+                    border: '1.5px solid #FCA5A5',
+                    borderRadius: 10,
+                    color: '#991B1B',
+                    fontSize: '0.85rem',
+                    fontWeight: 650,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}
+                >
+                  <AlertCircle size={16} color="#DC2626" style={{ flexShrink: 0 }} />
+                  <span>{completeModalError}</span>
+                </div>
+              )}
+
               <div>
                 <label style={{ fontSize: '0.85rem', fontWeight: 750, color: '#334155', display: 'block', marginBottom: 6 }}>
                   Actual Duration Practised (Minutes)
@@ -908,6 +971,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                   type="number"
                   min="1"
                   max="240"
+                  disabled={completeSubmitting}
                   value={actualDuration}
                   onChange={(e) => setActualDuration(parseInt(e.target.value, 10) || 1)}
                   style={{
@@ -928,6 +992,7 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                 </label>
                 <textarea
                   rows={3}
+                  disabled={completeSubmitting}
                   value={completeNotes}
                   onChange={(e) => setCompleteNotes(e.target.value)}
                   placeholder="How did this session feel? What went well?"
@@ -945,7 +1010,10 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
                 <button
                   type="button"
-                  onClick={() => setCompleteModalSession(null)}
+                  disabled={completeSubmitting}
+                  onClick={() => {
+                    if (!completeSubmitting) setCompleteModalSession(null);
+                  }}
                   style={{
                     padding: '10px 18px',
                     borderRadius: 10,
@@ -953,13 +1021,15 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                     background: '#FFFFFF',
                     color: '#64748B',
                     fontWeight: 700,
-                    cursor: 'pointer'
+                    cursor: completeSubmitting ? 'not-allowed' : 'pointer',
+                    opacity: completeSubmitting ? 0.6 : 1
                   }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled={completeSubmitting}
                   style={{
                     padding: '10px 22px',
                     borderRadius: 10,
@@ -967,11 +1037,22 @@ export default function LearningJournalKanban({ onSessionsUpdated, refreshTrigge
                     background: '#16A34A',
                     color: '#FFFFFF',
                     fontWeight: 750,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
+                    cursor: completeSubmitting ? 'not-allowed' : 'pointer',
+                    opacity: completeSubmitting ? 0.75 : 1,
+                    boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
                   }}
                 >
-                  Confirm & Complete ✓
+                  {completeSubmitting ? (
+                    <>
+                      <RefreshCw size={15} className="animate-spin" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : (
+                    <span>Confirm & Complete ✓</span>
+                  )}
                 </button>
               </div>
             </form>

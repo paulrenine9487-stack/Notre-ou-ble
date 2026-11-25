@@ -21,8 +21,8 @@ export default function LoginPage() {
   const location = useLocation();
   const { login, verifyMfa } = useAuth();
 
-  // If passed from registration or redirect
-  const registeredEmail = location.state?.registeredEmail || '';
+  // If passed from registration, conflict banner, or redirect
+  const registeredEmail = location.state?.registeredEmail || location.state?.email || '';
   const infoMessage = location.state?.infoMessage || '';
 
   const [email, setEmail] = useState(registeredEmail);
@@ -30,7 +30,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Sync email from location.state if navigated after mount (e.g. from registration or conflict banner)
+  useEffect(() => {
+    const passedEmail = location.state?.registeredEmail || location.state?.email;
+    if (passedEmail) {
+      setEmail(passedEmail);
+    }
+    // Security guarantee: never carry over or prefill password
+    setPassword('');
+  }, [location.state]);
 
   // MFA modal state (for Privileged Admin / Superadmin accounts)
   const [showMfaModal, setShowMfaModal] = useState(false);
@@ -115,6 +126,11 @@ export default function LoginPage() {
         navigate(destination, { replace: true });
       }
     } catch (err) {
+      if (err.data?.emailUnverified) {
+        setUnverifiedEmail(err.data.email || email.trim());
+      } else {
+        setUnverifiedEmail('');
+      }
       if (err.data?.message) {
         setServerError(err.data.message);
       } else if (err.message) {
@@ -440,12 +456,35 @@ export default function LoginPage() {
               padding: '12px 16px',
               marginBottom: '24px',
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: 'column',
               gap: '10px',
               color: '#DC4C64'
             }}>
-              <AlertCircle size={18} style={{ color: '#DC4C64', flexShrink: 0 }} />
-              <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{serverError}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AlertCircle size={18} style={{ color: '#DC4C64', flexShrink: 0 }} />
+                <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{serverError}</div>
+              </div>
+
+              {unverifiedEmail && (
+                <div style={{ paddingTop: '8px', borderTop: '1px solid #fee2e2' }}>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/register', { state: { email: unverifiedEmail, step: 'otp' } })}
+                    style={{
+                      background: '#7C3AED',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 14px',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Enter Verification Code (OTP) →
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -462,6 +501,7 @@ export default function LoginPage() {
                     id="login-email"
                     name="email"
                     type="email"
+                    autoComplete="username"
                     placeholder="Enter your registered email"
                     value={email}
                     onChange={(e) => {
@@ -527,6 +567,7 @@ export default function LoginPage() {
                     id="login-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {

@@ -80,6 +80,8 @@ async function resilientFetch(url, options = {}, attempt = 0) {
     urlStr.includes('/auth/register') ||
     urlStr.includes('/auth/refresh') ||
     urlStr.includes('/auth/verify-otp') ||
+    urlStr.includes('/auth/verify-email-otp') ||
+    urlStr.includes('/auth/resend-registration-otp') ||
     urlStr.includes('/auth/verify-mfa');
 
   // Adaptive Timeout Configuration
@@ -199,6 +201,24 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
+    });
+    return handleResponse(res);
+  },
+
+  async verifyEmailOtp({ email, otp }) {
+    const res = await fetch(`${API_BASE}/auth/verify-email-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp })
+    });
+    return handleResponse(res);
+  },
+
+  async resendRegistrationOtp(email) {
+    const res = await fetch(`${API_BASE}/auth/resend-registration-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
     });
     return handleResponse(res);
   },

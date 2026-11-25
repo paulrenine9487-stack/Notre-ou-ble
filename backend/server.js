@@ -125,12 +125,12 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-Id', 'X-Correlation-Id']
 }));
 
 // Enterprise Readiness Gate: Gently pauses requests during the 1-2s DB initialization window
 app.use(async (req, res, next) => {
-  if (req.path === '/api/health' || req.path === '/api/health/live') {
+  if (req.path === '/api/health' || req.path === '/api/health/live' || req.path === '/api/health/circuits') {
     return next();
   }
   if (!isServerReady && !initError) {
@@ -139,6 +139,17 @@ app.use(async (req, res, next) => {
       await new Promise(r => setTimeout(r, 100));
       attempts++;
     }
+  }
+  if (initError && !req.path.startsWith('/api/health')) {
+    return res.status(503).json({
+      success: false,
+      message: 'Service is temporarily unavailable due to a database initialization issue.',
+      error: {
+        code: 'INITIALIZATION_FAILED',
+        message: 'The database connection or migration failed to initialize.',
+        details: process.env.NODE_ENV === 'production' ? undefined : initError.message
+      }
+    });
   }
   next();
 });
@@ -391,15 +402,9 @@ async function startServer() {
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   } catch (err) {
+    initError = err;
+    isServerReady = false;
     console.error('[No Tre(ou)ble Server Startup Error]:', err.message);
-    const fallbackServer = app.listen(PORT, () => {
-      console.log(`[No Tre(ou)ble Server] Running in degraded mode on port ${PORT}`);
-    });
-    fallbackServer.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`\n[No Tre(ou)ble Server Error] Port ${PORT} is already in use.`);
-      }
-    });
   }
 }
 

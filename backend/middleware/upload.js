@@ -58,7 +58,7 @@ function fileFilter(req, file, cb) {
 const multerUpload = multer({
   storage: storage,
   limits: {
-    fileSize: 25 * 1024 * 1024, // 25 MB max per OWASP ASVS
+    fileSize: 40 * 1024 * 1024, // 40 MB max for audio recordings
     files: 1
   },
   fileFilter: fileFilter
@@ -122,7 +122,7 @@ function uploadAudioSecure(fieldName = 'audio') {
     uploadSingle(req, res, function (err) {
       if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ success: false, message: 'Audio file exceeds the 25 MB limit.' });
+          return res.status(400).json({ success: false, message: 'Audio file exceeds the 40 MB limit.' });
         }
         return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
       } else if (err) {

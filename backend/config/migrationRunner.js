@@ -148,6 +148,15 @@ const MIGRATIONS_REGISTRY = [
       const runTranscriptsMigration = require('./migrateTranscripts');
       await runTranscriptsMigration();
     }
+  },
+  {
+    version: '015',
+    name: '015_registration_email_otp',
+    description: 'Registration email OTP verification, nullable phone, and unverified account protection',
+    run: async () => {
+      const runRegistrationOtpMigration = require('./migrateRegistrationOtp');
+      await runRegistrationOtpMigration();
+    }
   }
 ];
 

@@ -55,7 +55,9 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [toastType, setToastType] = useState('success'); // 'success' | 'error'
 
   const audioRef = useRef(null);
   const handleCompleteSessionRef = useRef(null);
@@ -274,9 +276,11 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
     }
   };
 
-  // Complete Practice Session Handler
+  // Complete Practice Session Handler - STRICT RULE: COMPLETE ONLY, NEVER AUTO-NAVIGATE
   const handleCompleteSession = async () => {
+    if (isCompleting) return;
     try {
+      setIsCompleting(true);
       const listenDuration = sessionStartTime ? Math.round((Date.now() - sessionStartTime) / 1000) : Math.round(currentTime);
       await api.completeSongSession(2, {
         session_id: activeSessionId,
@@ -290,26 +294,19 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
       await api.completePartTab(2, { tab_key: 'song', duration_minutes: 5 });
 
       setSessionCompleted(true);
+      setToastType('success');
       setToastMessage(`Practice session completed! Stage 04: Let's Check Ourselves is unlocked ✓`);
       setTimeout(() => setToastMessage(null), 5000);
 
       if (onSessionComplete) onSessionComplete();
-      if (onProceedToNextStage) {
-        setTimeout(() => {
-          onProceedToNextStage();
-        }, 600);
-      }
+      // Student remains on this page! Explicit navigation via Next button required.
     } catch (err) {
       console.error('Error completing song session:', err);
-      setToastMessage('Practice record saved to your journal.');
-      setTimeout(() => setToastMessage(null), 4000);
-      setSessionCompleted(true);
-      if (onSessionComplete) onSessionComplete();
-      if (onProceedToNextStage) {
-        setTimeout(() => {
-          onProceedToNextStage();
-        }, 800);
-      }
+      setToastType('error');
+      setToastMessage(err.message || 'Failed to complete practice session. Please try again.');
+      setTimeout(() => setToastMessage(null), 5000);
+    } finally {
+      setIsCompleting(false);
     }
   };
   handleCompleteSessionRef.current = handleCompleteSession;
@@ -692,9 +689,9 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            background: '#F0FDF4',
-            border: '1.5px solid #86EFAC',
-            color: '#166534',
+            background: toastType === 'error' ? '#FEF2F2' : '#F0FDF4',
+            border: toastType === 'error' ? '1.5px solid #FCA5A5' : '1.5px solid #86EFAC',
+            color: toastType === 'error' ? '#991B1B' : '#166534',
             padding: '12px 18px',
             borderRadius: 12,
             fontSize: '0.90rem',
@@ -703,7 +700,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
             animation: 'fadeIn 0.25s ease'
           }}
         >
-          <Award size={20} color="#16A34A" />
+          {toastType === 'error' ? <Info size={20} color="#DC2626" /> : <Award size={20} color="#16A34A" />}
           <span>{toastMessage}</span>
         </div>
       )}
@@ -1118,7 +1115,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
               {sessionCompleted ? (
                 <button
                   type="button"
-                  onClick={onProceedToNextStage || handleCompleteSession}
+                  onClick={onProceedToNextStage}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1142,6 +1139,7 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                 <button
                   type="button"
                   onClick={handleCompleteSession}
+                  disabled={isCompleting}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1153,13 +1151,14 @@ export default function InteractiveSongPractice({ onBackToBreathe, onSessionComp
                     color: '#FFFFFF',
                     fontSize: '0.92rem',
                     fontWeight: 800,
-                    cursor: 'pointer',
+                    cursor: isCompleting ? 'not-allowed' : 'pointer',
+                    opacity: isCompleting ? 0.7 : 1,
                     boxShadow: '0 4px 12px rgba(22, 139, 122, 0.28)',
                     transition: 'all 0.18s ease'
                   }}
                 >
                   <Check size={16} />
-                  <span>Complete Practice Session ✓</span>
+                  <span>{isCompleting ? 'Completing Session...' : 'Complete Practice Session ✓'}</span>
                 </button>
               )}
             </div>

@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { api } from '../services/api';
 import {
   Eye,
   EyeOff,
   User,
   Mail,
-  Phone,
   Music,
   UserCheck,
   Lock,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   AlertCircle,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  RefreshCw,
+  KeyRound
 } from 'lucide-react';
 
 const MUSIC_OPTIONS = [
@@ -30,28 +33,63 @@ const MUSIC_OPTIONS = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, selectedGoal, setSelectedGoal } = useAuth();
 
+  // Step state: 'form' (registration inputs) | 'otp' (email verification)
+  const [step, setStep] = useState('form');
+
+  // Registration Form State (Phone Number completely removed)
   const [formData, setFormData] = useState({
-    username: '',
+    full_name: '',
     gender: '',
     email: '',
-    phone: '',
     types_of_music: [],
     vocal_trainer_name: '',
     password: '',
     confirm_password: ''
   });
 
+  // Password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Form error state
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [conflictField, setConflictField] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Toggle music option
+  // OTP Verification State
+  const [otpCode, setOtpCode] = useState('');
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendSuccessNotice, setResendSuccessNotice] = useState('');
+
+  // Handle location state (e.g. from login redirect for unverified email)
+  useEffect(() => {
+    if (location.state?.step === 'otp' && location.state?.email) {
+      setOtpEmail(location.state.email);
+      setStep('otp');
+      setResendCooldown(30);
+    }
+  }, [location.state]);
+
+  // Resend OTP Countdown Timer
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Toggle music option chip
   const toggleMusicType = (type) => {
     setFormData((prev) => {
       const exists = prev.types_of_music.includes(type);
@@ -66,77 +104,143 @@ export default function RegisterPage() {
     });
   };
 
+  // Field validation rules
+  const validateField = (name, value, allValues = formData) => {
+    switch (name) {
+      case 'full_name': {
+        if (!value || !value.trim()) {
+          return 'Full Name is required.';
+        }
+        const trimmed = value.trim();
+        if (trimmed.length < 3) {
+          return 'Full Name must contain at least 3 characters.';
+        }
+        if (trimmed.length > 50) {
+          return 'Full Name cannot exceed 50 characters.';
+        }
+        if (/\d/.test(trimmed)) {
+          return 'Full Name cannot contain numbers.';
+        }
+        // Unicode-aware regex allowing letters from all scripts, spaces, hyphens and apostrophes
+        if (!/^[\p{L}\s'\-]+$/u.test(trimmed)) {
+          return 'Please enter a valid full name.';
+        }
+        return '';
+      }
+
+      case 'gender': {
+        if (!value || !String(value).trim()) {
+          return 'Please select your gender.';
+        }
+        return '';
+      }
+
+      case 'email': {
+        if (!value || !value.trim()) {
+          return 'Email ID is required.';
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          return 'Please enter a valid email address.';
+        }
+        return '';
+      }
+
+      case 'types_of_music': {
+        if (!value || value.length === 0) {
+          return 'Please select at least one type of music.';
+        }
+        return '';
+      }
+
+      case 'password': {
+        if (!value) {
+          return 'Password is required.';
+        }
+        if (value.length < 8) {
+          return 'Password must contain at least 8 characters.';
+        }
+        if (!/[A-Z]/.test(value)) {
+          return 'Include at least one uppercase letter.';
+        }
+        if (!/[a-z]/.test(value)) {
+          return 'Include at least one lowercase letter.';
+        }
+        if (!/[0-9]/.test(value)) {
+          return 'Include at least one number.';
+        }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(value)) {
+          return 'Include at least one special character.';
+        }
+        return '';
+      }
+
+      case 'confirm_password': {
+        if (!value) {
+          return 'Confirm password is required.';
+        }
+        if (value !== allValues.password) {
+          return 'Passwords do not match.';
+        }
+        return '';
+      }
+
+      default:
+        return '';
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+    const updatedForm = { ...formData, [name]: value };
+    setFormData(updatedForm);
+
+    // Validate current field
+    const fieldError = validateField(name, value, updatedForm);
+    setErrors((prev) => ({ ...prev, [name]: fieldError }));
+
+    // Revalidate confirm_password if original password changed
+    if (name === 'password' && formData.confirm_password) {
+      const confirmError = validateField('confirm_password', formData.confirm_password, updatedForm);
+      setErrors((prev) => ({ ...prev, confirm_password: confirmError }));
     }
+
     setServerError('');
   };
 
-  // Client-side validations
+  // Full form validation before submit
   const validate = () => {
-    const errs = {};
+    const errs = {
+      full_name: validateField('full_name', formData.full_name),
+      gender: validateField('gender', formData.gender),
+      email: validateField('email', formData.email),
+      types_of_music: validateField('types_of_music', formData.types_of_music),
+      password: validateField('password', formData.password),
+      confirm_password: validateField('confirm_password', formData.confirm_password, formData)
+    };
 
-    // 1. Username
-    if (!formData.username.trim()) {
-      errs.username = 'Username is required.';
-    } else if (formData.username.trim().length < 3) {
-      errs.username = 'Username must be at least 3 characters.';
+    const cleanErrors = {};
+    for (const [k, v] of Object.entries(errs)) {
+      if (v) cleanErrors[k] = v;
     }
 
-    // 2. Gender
-    if (!formData.gender) {
-      errs.gender = 'Please select your gender.';
-    }
-
-    // 3. Email
-    if (!formData.email.trim()) {
-      errs.email = 'Email ID is required.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errs.email = 'Please enter a valid email address.';
-    }
-
-    // 4. Phone
-    if (!formData.phone.trim()) {
-      errs.phone = 'Phone number is required.';
-    } else {
-      const cleanPhone = formData.phone.replace(/[\s\-\(\)]/g, '');
-      const indianPhoneRegex = /^(\+?91|0)?[6-9]\d{9}$/;
-      const genericPhoneRegex = /^\+?[0-9]{10,15}$/;
-      if (!indianPhoneRegex.test(cleanPhone) && !genericPhoneRegex.test(cleanPhone)) {
-        errs.phone = 'Please enter a valid 10-digit mobile number (e.g., 9876543210 or +91...).';
-      }
-    }
-
-    // 5. Types of music
-    if (formData.types_of_music.length === 0) {
-      errs.types_of_music = 'Please select at least one type of music.';
-    }
-
-    // 6. Vocal trainer name is explicitly OPTIONAL - no validation needed
-
-    // 7. Password
-    if (!formData.password) {
-      errs.password = 'Password is required.';
-    } else if (formData.password.length < 6) {
-      errs.password = 'Password must be at least 6 characters.';
-    } else if (!/[a-zA-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
-      errs.password = 'Password must include both letters and numbers.';
-    }
-
-    // 8. Confirm Password
-    if (!formData.confirm_password) {
-      errs.confirm_password = 'Confirm password is required.';
-    } else if (formData.password !== formData.confirm_password) {
-      errs.confirm_password = 'Password and Confirm Password do not match.';
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    setErrors(cleanErrors);
+    return Object.keys(cleanErrors).length === 0;
   };
 
+  // Check if form is valid and ready for submission
+  const isFormValid =
+    formData.full_name.trim().length >= 3 &&
+    Boolean(formData.gender) &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()) &&
+    formData.types_of_music.length > 0 &&
+    formData.password.length >= 8 &&
+    /[A-Z]/.test(formData.password) &&
+    /[a-z]/.test(formData.password) &&
+    /[0-9]/.test(formData.password) &&
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(formData.password) &&
+    formData.password === formData.confirm_password;
+
+  // Handle Form Registration Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
@@ -150,10 +254,10 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       const response = await register({
-        username: formData.username.trim(),
+        full_name: formData.full_name.trim(),
+        username: formData.full_name.trim(), // backwards-compatible alias
         gender: formData.gender,
         email: formData.email.trim(),
-        phone: formData.phone.trim(),
         types_of_music: formData.types_of_music,
         vocal_trainer_name: formData.vocal_trainer_name.trim() || null,
         password: formData.password,
@@ -161,33 +265,94 @@ export default function RegisterPage() {
         selected_musical_goal: selectedGoal || null
       });
 
-      if (response.success) {
-        setSuccessMessage('Registration successful! Redirecting you to the Login page...');
-        setTimeout(() => {
-          navigate('/login', {
-            state: {
-              registeredEmail: formData.email.trim(),
-              infoMessage: 'Registration successful! Please log in with your credentials.'
-            }
-          });
-        }, 1800);
+      if (response && response.success) {
+        setOtpEmail(formData.email.trim().toLowerCase());
+        setOtpCode('');
+        setOtpError('');
+        setResendCooldown(30);
+        setStep('otp');
+        window.scrollTo({ top: 100, behavior: 'smooth' });
       }
     } catch (err) {
       const msg = err.data?.message || err.message || 'Registration failed. Please verify your details and try again.';
       setServerError(msg);
-      if (err.status === 409 || err.data?.conflictField || /already exists|already taken/i.test(msg)) {
-        const field = err.data?.conflictField || (/username/i.test(msg) ? 'username' : 'email');
-        setConflictField(field);
-        if (field === 'username') {
-          setErrors(prev => ({ ...prev, username: 'This username is already taken. Please choose another username.' }));
-        } else {
-          setErrors(prev => ({ ...prev, email: 'An account with this email already exists. Please log in.' }));
-        }
+
+      if (err.status === 409 || err.data?.conflictField || /already registered|already exists/i.test(msg)) {
+        setConflictField('email');
+        setErrors((prev) => ({ ...prev, email: 'This email address is already registered. Please log in.' }));
       }
       window.scrollTo({ top: 140, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle OTP Verification Submission
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setOtpError('');
+    const cleanOtp = otpCode.trim();
+
+    if (!cleanOtp) {
+      setOtpError('Please enter the 6-digit verification code.');
+      return;
+    }
+    if (!/^\d{6}$/.test(cleanOtp)) {
+      setOtpError('Verification code must be exactly 6 digits.');
+      return;
+    }
+
+    setIsOtpLoading(true);
+    try {
+      const res = await api.verifyEmailOtp({
+        email: otpEmail,
+        otp: cleanOtp
+      });
+
+      if (res && res.success) {
+        setSuccessMessage('Email verified successfully! Your account is now active. Redirecting to Login...');
+        setTimeout(() => {
+          navigate('/login', {
+            state: {
+              registeredEmail: otpEmail,
+              email: otpEmail,
+              infoMessage: 'Email verified successfully! Please log in with your credentials.'
+            }
+          });
+        }, 1600);
+      }
+    } catch (err) {
+      const msg = err.data?.message || err.message || 'Invalid or expired verification code.';
+      setOtpError(msg);
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
+
+  // Handle Resend OTP Request
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isOtpLoading) return;
+    setOtpError('');
+    setResendSuccessNotice('');
+
+    try {
+      const res = await api.resendRegistrationOtp(otpEmail);
+      if (res && res.success) {
+        setResendCooldown(30);
+        setResendSuccessNotice('A new 6-digit verification code has been dispatched to your email.');
+        setTimeout(() => setResendSuccessNotice(''), 4000);
+      }
+    } catch (err) {
+      setOtpError(err.data?.message || err.message || 'Could not resend verification code. Please try again.');
+    }
+  };
+
+  // Mask email for display: paulrenine9487@gmail.com -> p***7@gmail.com
+  const getMaskedEmail = (emailStr) => {
+    if (!emailStr || !emailStr.includes('@')) return emailStr || '';
+    const [local, domain] = emailStr.split('@');
+    if (local.length <= 2) return `${local.charAt(0)}*@${domain}`;
+    return `${local.charAt(0)}${'*'.repeat(Math.min(local.length - 2, 5))}${local.slice(-1)}@${domain}`;
   };
 
   return (
@@ -212,7 +377,7 @@ export default function RegisterPage() {
         </Link>
       </div>
 
-      {/* Main Registration Card */}
+      {/* Main Registration / OTP Card */}
       <div style={{
         maxWidth: '740px',
         margin: '0 auto',
@@ -232,7 +397,7 @@ export default function RegisterPage() {
             lineHeight: 1.25,
             marginBottom: '6px'
           }}>
-            Create your No Tre(ou)ble Account
+            {step === 'otp' ? 'Verify Your Email Address' : 'Create your No Tre(ou)ble Account'}
           </h1>
           <p style={{
             fontSize: '0.84rem',
@@ -240,12 +405,14 @@ export default function RegisterPage() {
             maxWidth: '560px',
             margin: '0 auto'
           }}>
-            Begin your journey towards better breathing, stronger vocals and confident singing.
+            {step === 'otp'
+              ? 'Enter the 6-digit verification code sent to your email to activate your account.'
+              : 'Begin your journey towards better breathing, stronger vocals and confident singing.'}
           </p>
         </div>
 
-        {/* Selected Musical Goal Banner (if selected from Section 4) */}
-        {selectedGoal && (
+        {/* Selected Musical Goal Banner (Preserved) */}
+        {selectedGoal && step === 'form' && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.07), rgba(6, 182, 212, 0.05))',
             border: '1.5px solid #c084fc',
@@ -288,7 +455,9 @@ export default function RegisterPage() {
                 color: '#9333ea',
                 fontSize: '0.78rem',
                 fontWeight: 600,
-                textDecoration: 'underline'
+                textDecoration: 'underline',
+                border: 'none',
+                cursor: 'pointer'
               }}
             >
               Change
@@ -296,7 +465,7 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Server Success Alert */}
+        {/* Success Alert */}
         {successMessage && (
           <div style={{
             background: '#ecfdf5',
@@ -315,7 +484,7 @@ export default function RegisterPage() {
         )}
 
         {/* Server Error Alert */}
-        {serverError && (
+        {serverError && step === 'form' && (
           <div style={{
             background: '#fef2f2',
             border: '1.5px solid #DC4C64',
@@ -347,7 +516,7 @@ export default function RegisterPage() {
                   onClick={() => navigate('/login', {
                     state: {
                       registeredEmail: formData.email.trim(),
-                      infoMessage: `Welcome back! An account with ${formData.email.trim()} is already registered. Please log in.`
+                      infoMessage: `An account with ${formData.email.trim()} is already registered. Please log in.`
                     }
                   })}
                   style={{
@@ -355,7 +524,7 @@ export default function RegisterPage() {
                     alignItems: 'center',
                     gap: '8px',
                     padding: '9px 18px',
-                    background: '#DC4C64',
+                    background: '#7C3AED',
                     color: '#FFFFFF',
                     borderRadius: '10px',
                     border: 'none',
@@ -367,390 +536,561 @@ export default function RegisterPage() {
                   <span>Log In with this Email</span>
                   <ArrowRight size={15} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/login', {
-                    state: {
-                      registeredEmail: formData.email.trim(),
-                      openForgotModal: true
-                    }
-                  })}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#991b1b',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    textDecoration: 'underline',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Forgot your password? Reset it here
-                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Registration Form with fields in EXACT order */}
-        <form onSubmit={handleSubmit} noValidate>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-            {/* Field 1: Username (Required, unique) */}
-            <div>
-              <label htmlFor="reg-username" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                1. Username <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="reg-username"
-                  type="text"
-                  name="username"
-                  placeholder="Enter a unique username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 18px 13px 44px',
-                    borderRadius: '12px',
-                    border: errors.username ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.username && (e.target.style.borderColor = '#EAE5F3')}
-                />
-                <User size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
-              </div>
-              {errors.username && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.username}</p>
-              )}
-            </div>
+        {/* ================================================================= */}
+        {/* STEP 1: REGISTRATION FORM (Phone Number Removed, Username -> Full Name) */}
+        {/* ================================================================= */}
+        {step === 'form' && (
+          <form onSubmit={handleSubmit} noValidate>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
-            {/* Field 2: Gender (Required dropdown) */}
-            <div>
-              <label htmlFor="reg-gender" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                2. Gender <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  id="reg-gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 40px 13px 18px',
-                    borderRadius: '12px',
-                    border: errors.gender ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: formData.gender ? '#1f2937' : '#9ca3af',
-                    outline: 'none',
-                    appearance: 'none',
-                    cursor: 'pointer'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.gender && (e.target.style.borderColor = '#EAE5F3')}
-                >
-                  <option value="" disabled>Select your gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-                <ChevronDown size={18} style={{ position: 'absolute', right: '16px', top: '16px', color: '#7C3AED', pointerEvents: 'none' }} />
-              </div>
-              {errors.gender && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.gender}</p>
-              )}
-            </div>
-
-            {/* Field 3: Email ID (Required, valid email, unique) */}
-            <div>
-              <label htmlFor="reg-email" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                3. Email ID <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="reg-email"
-                  type="email"
-                  name="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 18px 13px 44px',
-                    borderRadius: '12px',
-                    border: errors.email ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.email && (e.target.style.borderColor = '#EAE5F3')}
-                />
-                <Mail size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
-              </div>
-              {errors.email && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.email}</p>
-              )}
-            </div>
-
-            {/* Field 4: Phone Number (Required, Indian mobile numbers) */}
-            <div>
-              <label htmlFor="reg-phone" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                4. Phone Number <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="reg-phone"
-                  type="tel"
-                  name="phone"
-                  placeholder="e.g. 9876543210 or +91 98765 43210"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 18px 13px 44px',
-                    borderRadius: '12px',
-                    border: errors.phone ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.phone && (e.target.style.borderColor = '#EAE5F3')}
-                />
-                <Phone size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
-                Supports Indian 10-digit mobile numbers with or without +91 prefix.
-              </div>
-              {errors.phone && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.phone}</p>
-              )}
-            </div>
-
-            {/* Field 5: Types of Music (Required, Multi-Select Dropdown/Chips) */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                5. Types of Music <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ fontSize: '0.82rem', color: '#77728A', marginBottom: '10px' }}>
-                Select all musical genres and vocal styles that match your training goals:
-              </div>
-
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '10px',
-                padding: '14px',
-                borderRadius: '14px',
-                background: '#FFFFFF',
-                border: errors.types_of_music ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3'
-              }}>
-                {MUSIC_OPTIONS.map((option) => {
-                  const isChecked = formData.types_of_music.includes(option);
-                  return (
-                    <button
-                      type="button"
-                      key={option}
-                      onClick={() => toggleMusicType(option)}
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: '9999px',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        border: isChecked ? '1.5px solid #7C3AED' : '1.5px solid #d8b4fe',
-                        background: isChecked ? 'linear-gradient(135deg, #7C3AED, #6366f1)' : '#ffffff',
-                        color: isChecked ? '#ffffff' : '#374151',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: isChecked ? '0 4px 10px rgba(124, 58, 237, 0.25)' : 'none'
-                      }}
-                    >
-                      {isChecked ? '✓ ' : '+ '}
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-              {errors.types_of_music && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.types_of_music}</p>
-              )}
-            </div>
-
-            {/* Field 6: Vocal Trainer Name (OPTIONAL) */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label htmlFor="reg-trainer-name" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
-                  6. Vocal Trainer Name
+              {/* Field 1: Full Name (Required, Unicode, 3-50 chars, no numbers) */}
+              <div>
+                <label htmlFor="reg-fullname" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  1. Full Name <span style={{ color: '#DC4C64' }}>*</span>
                 </label>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7C3AED', background: '#f3e8ff', padding: '2px 8px', borderRadius: '6px' }}>
-                  OPTIONAL
-                </span>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="reg-fullname"
+                    type="text"
+                    name="full_name"
+                    placeholder="Enter your full name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 18px 13px 44px',
+                      borderRadius: '12px',
+                      border: errors.full_name ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: '#1f2937',
+                      outline: 'none',
+                      transition: 'border-color 0.2s',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => !errors.full_name && (e.target.style.borderColor = '#EAE5F3')}
+                  />
+                  <User size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                </div>
+                {errors.full_name && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.full_name}</p>
+                )}
               </div>
-              <div style={{ position: 'relative' }}>
+
+              {/* Field 2: Gender (Required dropdown) */}
+              <div>
+                <label htmlFor="reg-gender" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  2. Gender <span style={{ color: '#DC4C64' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    id="reg-gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 40px 13px 18px',
+                      borderRadius: '12px',
+                      border: errors.gender ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: formData.gender ? '#1f2937' : '#9ca3af',
+                      outline: 'none',
+                      appearance: 'none',
+                      cursor: 'pointer',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => !errors.gender && (e.target.style.borderColor = '#EAE5F3')}
+                  >
+                    <option value="" disabled>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  <ChevronDown size={18} style={{ position: 'absolute', right: '16px', top: '16px', color: '#7C3AED', pointerEvents: 'none' }} />
+                </div>
+                {errors.gender && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.gender}</p>
+                )}
+              </div>
+
+              {/* Field 3: Email ID (Required, valid email format) */}
+              <div>
+                <label htmlFor="reg-email" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  3. Email ID <span style={{ color: '#DC4C64' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="reg-email"
+                    type="email"
+                    name="email"
+                    placeholder="name@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 18px 13px 44px',
+                      borderRadius: '12px',
+                      border: errors.email ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: '#1f2937',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => !errors.email && (e.target.style.borderColor = '#EAE5F3')}
+                  />
+                  <Mail size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
+                  A 6-digit verification code will be sent to this email to activate your account.
+                </div>
+                {errors.email && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.email}</p>
+                )}
+              </div>
+
+              {/* Field 4: Types of Music (Required, Multi-Select Chips) */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  4. Types of Music <span style={{ color: '#DC4C64' }}>*</span>
+                </label>
+                <div style={{ fontSize: '0.82rem', color: '#77728A', marginBottom: '10px' }}>
+                  Select all musical genres and vocal styles that match your training goals:
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '10px',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: '#FFFFFF',
+                  border: errors.types_of_music ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3'
+                }}>
+                  {MUSIC_OPTIONS.map((option) => {
+                    const isChecked = formData.types_of_music.includes(option);
+                    return (
+                      <button
+                        type="button"
+                        key={option}
+                        onClick={() => toggleMusicType(option)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '9999px',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          border: isChecked ? '1.5px solid #7C3AED' : '1.5px solid #d8b4fe',
+                          background: isChecked ? 'linear-gradient(135deg, #7C3AED, #6366f1)' : '#ffffff',
+                          color: isChecked ? '#ffffff' : '#374151',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          boxShadow: isChecked ? '0 4px 10px rgba(124, 58, 237, 0.25)' : 'none'
+                        }}
+                      >
+                        {isChecked ? '✓ ' : '+ '}
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                {errors.types_of_music && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.types_of_music}</p>
+                )}
+              </div>
+
+              {/* Field 5: Vocal Trainer Name (OPTIONAL) */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label htmlFor="reg-trainer-name" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#191B35' }}>
+                    5. Vocal Trainer Name
+                  </label>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#7C3AED', background: '#f3e8ff', padding: '2px 8px', borderRadius: '6px' }}>
+                    OPTIONAL
+                  </span>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="reg-trainer-name"
+                    type="text"
+                    name="vocal_trainer_name"
+                    placeholder="Enter your vocal guru / mentor name (optional)"
+                    value={formData.vocal_trainer_name}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 18px 13px 44px',
+                      borderRadius: '12px',
+                      border: '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: '#1f2937',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => e.target.style.borderColor = '#EAE5F3'}
+                  />
+                  <UserCheck size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
+                  If you currently study under a vocal teacher or guru, mention their name. This field will never block registration.
+                </div>
+              </div>
+
+              {/* Field 6: Password (Required, 8+ chars, upper, lower, number, special char, toggle) */}
+              <div>
+                <label htmlFor="reg-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  6. Password <span style={{ color: '#DC4C64' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="reg-password"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    placeholder="Create a strong password (8+ chars)"
+                    value={formData.password}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 48px 13px 44px',
+                      borderRadius: '12px',
+                      border: errors.password ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: '#1f2937',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => !errors.password && (e.target.style.borderColor = '#EAE5F3')}
+                  />
+                  <Lock size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#77728A',
+                      cursor: 'pointer'
+                    }}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
+                  Minimum 8 characters with at least one uppercase letter, one lowercase letter, one number and one special character.
+                </div>
+                {errors.password && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.password}</p>
+                )}
+              </div>
+
+              {/* Field 7: Confirm Password (Required, must match password) */}
+              <div>
+                <label htmlFor="reg-confirm-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
+                  7. Confirm Password <span style={{ color: '#DC4C64' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="reg-confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirm_password"
+                    placeholder="Re-enter your password"
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '13px 48px 13px 44px',
+                      borderRadius: '12px',
+                      border: errors.confirm_password ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
+                      background: '#FFFFFF',
+                      fontSize: '0.95rem',
+                      color: '#1f2937',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
+                    onBlur={(e) => !errors.confirm_password && (e.target.style.borderColor = '#EAE5F3')}
+                  />
+                  <Lock size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '16px',
+                      top: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#77728A',
+                      cursor: 'pointer'
+                    }}
+                    title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.confirm_password && (
+                  <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.confirm_password}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Registration Submit Button */}
+            <div style={{ marginTop: '36px' }}>
+              <button
+                type="submit"
+                disabled={isSubmitting || !isFormValid}
+                className="btn-primary-gradient"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  fontSize: '1.05rem',
+                  borderRadius: '14px',
+                  opacity: (isSubmitting || !isFormValid) ? 0.65 : 1,
+                  cursor: (isSubmitting || !isFormValid) ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw size={18} className="animate-spin" />
+                    <span>Creating Account & Sending OTP...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>REGISTER ACCOUNT</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ================================================================= */}
+        {/* STEP 2: EMAIL OTP VERIFICATION SCREEN (Phase 5 Requirements)       */}
+        {/* ================================================================= */}
+        {step === 'otp' && (
+          <div>
+            {/* Header / Info Badge */}
+            <div style={{
+              background: '#F5F3FF',
+              border: '1.5px solid #DDD6FE',
+              borderRadius: '16px',
+              padding: '18px 20px',
+              marginBottom: '28px',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                background: '#7C3AED',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px'
+              }}>
+                <KeyRound size={22} />
+              </div>
+              <h3 style={{ fontSize: '1.08rem', fontWeight: 800, color: '#191B35', margin: '0 0 6px 0' }}>
+                Verify Your Email
+              </h3>
+              <p style={{ fontSize: '0.86rem', color: '#5B21B6', margin: 0, lineHeight: 1.5 }}>
+                A 6-digit verification code has been dispatched to:<br />
+                <strong style={{ fontSize: '0.94rem', color: '#191B35' }}>{otpEmail}</strong>
+              </p>
+            </div>
+
+            {/* Resend Notice */}
+            {resendSuccessNotice && (
+              <div style={{
+                background: '#ecfdf5',
+                border: '1px solid #10B981',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                marginBottom: '20px',
+                fontSize: '0.86rem',
+                color: '#065f46',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <CheckCircle2 size={18} color="#10B981" />
+                <span>{resendSuccessNotice}</span>
+              </div>
+            )}
+
+            {/* OTP Error Banner */}
+            {otpError && (
+              <div style={{
+                background: '#fef2f2',
+                border: '1.5px solid #DC4C64',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                marginBottom: '20px',
+                color: '#991b1b',
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <AlertCircle size={18} color="#DC4C64" style={{ flexShrink: 0 }} />
+                <span>{otpError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp}>
+              <div style={{ marginBottom: '24px' }}>
+                <label htmlFor="reg-otp-input" style={{
+                  display: 'block',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  color: '#191B35',
+                  marginBottom: '8px',
+                  textAlign: 'center'
+                }}>
+                  Enter 6-Digit Verification Code
+                </label>
                 <input
-                  id="reg-trainer-name"
+                  id="reg-otp-input"
                   type="text"
-                  name="vocal_trainer_name"
-                  placeholder="Enter your vocal guru / mentor name (optional)"
-                  value={formData.vocal_trainer_name}
-                  onChange={handleChange}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setOtpCode(clean);
+                    setOtpError('');
+                  }}
+                  placeholder="••••••"
                   style={{
                     width: '100%',
-                    padding: '13px 18px 13px 44px',
-                    borderRadius: '12px',
-                    border: '1.5px solid #EAE5F3',
+                    maxWidth: '280px',
+                    margin: '0 auto',
+                    display: 'block',
+                    padding: '14px 18px',
+                    borderRadius: '14px',
+                    border: otpError ? '2px solid #DC4C64' : '2px solid #7C3AED',
                     background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none'
+                    fontSize: '1.8rem',
+                    fontWeight: 800,
+                    letterSpacing: '10px',
+                    textAlign: 'center',
+                    color: '#7C3AED',
+                    outline: 'none',
+                    boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => e.target.style.borderColor = '#EAE5F3'}
                 />
-                <UserCheck size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
+                <div style={{ fontSize: '0.78rem', color: '#77728A', textAlign: 'center', marginTop: '8px' }}>
+                  Code expires in 5 minutes.
+                </div>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
-                If you currently study under a vocal teacher or guru, mention their name. This field will never block registration.
-              </div>
-            </div>
 
-            {/* Field 7: Password (Required, secure, show/hide, strength) */}
-            <div>
-              <label htmlFor="reg-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                7. Password <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="reg-password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="Create a secure password (letters and numbers)"
-                  value={formData.password}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 48px 13px 44px',
-                    borderRadius: '12px',
-                    border: errors.password ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.password && (e.target.style.borderColor = '#EAE5F3')}
-                />
-                <Lock size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '16px',
-                    top: '14px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#77728A',
-                    cursor: 'pointer'
-                  }}
-                  title={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#77728A', marginTop: '4px' }}>
-                Minimum 6 characters, combining letters and numbers.
-              </div>
-              {errors.password && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.password}</p>
-              )}
-            </div>
+              {/* Verify Button */}
+              <button
+                type="submit"
+                disabled={isOtpLoading || otpCode.trim().length !== 6}
+                className="btn-primary-gradient"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  fontSize: '1.02rem',
+                  borderRadius: '14px',
+                  opacity: (isOtpLoading || otpCode.trim().length !== 6) ? 0.65 : 1,
+                  cursor: (isOtpLoading || otpCode.trim().length !== 6) ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }}
+              >
+                {isOtpLoading ? (
+                  <>
+                    <RefreshCw size={18} className="animate-spin" />
+                    <span>Activating Account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>VERIFY & ACTIVATE ACCOUNT</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
 
-            {/* Field 8: Confirm Password (Required, must match) */}
-            <div>
-              <label htmlFor="reg-confirm-password" style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, color: '#191B35', marginBottom: '8px' }}>
-                8. Confirm Password <span style={{ color: '#DC4C64' }}>*</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="reg-confirm-password"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirm_password"
-                  placeholder="Re-enter your password"
-                  value={formData.confirm_password}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '13px 48px 13px 44px',
-                    borderRadius: '12px',
-                    border: errors.confirm_password ? '1.5px solid #DC4C64' : '1.5px solid #EAE5F3',
-                    background: '#FFFFFF',
-                    fontSize: '0.95rem',
-                    color: '#1f2937',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7C3AED'}
-                  onBlur={(e) => !errors.confirm_password && (e.target.style.borderColor = '#EAE5F3')}
-                />
-                <Lock size={18} style={{ position: 'absolute', left: '16px', top: '15px', color: '#7C3AED' }} />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '16px',
-                    top: '14px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#77728A',
-                    cursor: 'pointer'
-                  }}
-                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.confirm_password && (
-                <p style={{ color: '#DC4C64', fontSize: '0.82rem', marginTop: '5px', fontWeight: 600 }}>{errors.confirm_password}</p>
-              )}
+            {/* Resend and Edit options */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '22px',
+              paddingTop: '18px',
+              borderTop: '1px solid #f3effc',
+              fontSize: '0.86rem'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('form');
+                  setOtpError('');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#6B7280',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ArrowLeft size={16} />
+                <span>Edit Registration Details</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={resendCooldown > 0 || isOtpLoading}
+                onClick={handleResendOtp}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: resendCooldown > 0 ? '#9CA3AF' : '#7C3AED',
+                  fontWeight: 750,
+                  cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+                  textDecoration: resendCooldown > 0 ? 'none' : 'underline'
+                }}
+              >
+                {resendCooldown > 0 ? `Resend Code in ${resendCooldown}s` : 'Resend Code'}
+              </button>
             </div>
           </div>
-
-          {/* Registration Submit Buttons */}
-          <div style={{ marginTop: '36px' }}>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-primary-gradient"
-              style={{
-                width: '100%',
-                padding: '16px',
-                fontSize: '1.05rem',
-                borderRadius: '14px',
-                opacity: isSubmitting ? 0.75 : 1
-              }}
-            >
-              {isSubmitting ? (
-                <span>Registering Account in MySQL...</span>
-              ) : (
-                <>
-                  <span>REGISTER ACCOUNT</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+        )}
 
         {/* Already have an account? LOGIN */}
         <div style={{
@@ -778,4 +1118,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

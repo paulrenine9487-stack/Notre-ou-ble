@@ -34,6 +34,25 @@ function gatewayMiddleware(options = {}) {
       return origWriteHead.apply(this, args);
     };
 
+    // Intercept res.json to capture error payload for structured diagnostic logging
+    const origJson = res.json;
+    res.json = function (body) {
+      if (res.statusCode >= 400 && body && typeof body === 'object') {
+        req._errorSummary = {
+          code: body.error?.code || (body.conflictField ? 'CONFLICT_' + body.conflictField.toUpperCase() : `HTTP_${res.statusCode}`),
+          message: body.message || body.error?.message || 'Error',
+          category: res.statusCode === 401 ? 'AUTHENTICATION' :
+                    res.statusCode === 403 ? 'AUTHORIZATION_RBAC' :
+                    res.statusCode === 404 ? 'NOT_FOUND' :
+                    res.statusCode === 409 ? 'DUPLICATE_CONFLICT' :
+                    res.statusCode === 400 ? 'VALIDATION_INPUT' :
+                    res.statusCode === 429 ? 'RATE_LIMIT' :
+                    res.statusCode === 504 ? 'GATEWAY_TIMEOUT' : 'SERVER_INTERNAL'
+        };
+      }
+      return origJson.apply(this, arguments);
+    };
+
     // 3. Adaptive Request timeout handler
     const isUploadOrStream = req.path.includes('/recordings') ||
       req.path.includes('/audio') ||
@@ -68,7 +87,9 @@ function gatewayMiddleware(options = {}) {
         const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress;
         const status = res.statusCode;
         const color = status >= 500 ? '\x1b[31m' : status >= 400 ? '\x1b[33m' : '\x1b[32m';
-        console.log(`[API-GATEWAY] ${color}${req.method} ${req.originalUrl} ${status}\x1b[0m - ${latencyMs}ms (IP: ${clientIp}, ID: ${correlationId.slice(0, 8)})`);
+        const userTag = req.user ? `[User: ${req.user.id}, Role: ${req.user.role}]` : '[Anon]';
+        const errTag = req._errorSummary ? ` | [${req._errorSummary.category}] ${req._errorSummary.message} (${req._errorSummary.code})` : '';
+        console.log(`[API-GATEWAY] ${color}${req.method} ${req.originalUrl} ${status}\x1b[0m - ${latencyMs}ms (IP: ${clientIp}, ID: ${correlationId.slice(0, 8)}) ${userTag}${errTag}`);
       }
     });
 

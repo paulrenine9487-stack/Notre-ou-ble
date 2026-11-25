@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const pool = require('../config/db');
-const { sendPasswordResetOtpEmail } = require('../utils/emailService');
+const { sendPasswordResetOtpEmail, sendRegistrationOtpEmail } = require('../utils/emailService');
 const { logSecurityEvent, getClientIp } = require('../utils/securityLogger');
 const tokenService = require('../services/tokenService');
 const {
@@ -15,117 +15,159 @@ const {
 
 // Validation helpers
 function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(String(email).toLowerCase());
+  return emailRegex.test(email.trim().toLowerCase());
 }
 
-function isValidPhone(phone) {
-  const clean = String(phone).replace(/[\s\-\(\)]/g, '');
-  const phoneRegex = /^(\+?91|0)?[6-9]\d{9}$/;
-  const genericRegex = /^\+?[0-9]{10,15}$/;
-  return phoneRegex.test(clean) || genericRegex.test(clean);
-}
-
-function validatePasswordStrength(password) {
-  if (!password || password.length < 8) {
-    return 'Password must be at least 8 characters long.';
+function validateFullName(name) {
+  if (!name || typeof name !== 'string') {
+    return 'Full Name is required.';
   }
-  const hasLetter = /[a-zA-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  if (!hasLetter || !hasNumber) {
-    return 'Password must contain both letters and numbers.';
+  const trimmed = name.trim();
+  if (trimmed.length === 0) {
+    return 'Full Name is required.';
+  }
+  if (trimmed.length < 3) {
+    return 'Full Name must contain at least 3 characters.';
+  }
+  if (trimmed.length > 50) {
+    return 'Full Name cannot exceed 50 characters.';
+  }
+  if (/\d/.test(trimmed)) {
+    return 'Full Name cannot contain numbers.';
+  }
+  // Unicode-aware regex allowing letters from all scripts, spaces, hyphens and apostrophes
+  const nameRegex = /^[\p{L}\s'\-]+$/u;
+  if (!nameRegex.test(trimmed)) {
+    return 'Please enter a valid full name.';
   }
   return null;
 }
 
-// 1. REGISTER
+function validatePasswordStrength(password) {
+  if (!password || typeof password !== 'string') {
+    return 'Password is required.';
+  }
+  if (password.length < 8) {
+    return 'Password must contain at least 8 characters.';
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'Include at least one uppercase letter.';
+  }
+  if (!/[a-z]/.test(password)) {
+    return 'Include at least one lowercase letter.';
+  }
+  if (!/[0-9]/.test(password)) {
+    return 'Include at least one number.';
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)) {
+    return 'Include at least one special character.';
+  }
+  return null;
+}
+
+// 1. REGISTER (Phase 1-9 Requirements)
 exports.register = async (req, res, next) => {
   try {
     const {
+      full_name,
+      fullName,
       username,
       gender,
       email,
       phone,
       types_of_music,
+      typesOfMusic,
       vocal_trainer_name,
+      vocalTrainerName,
       password,
       confirm_password,
+      confirmPassword,
       selected_musical_goal
     } = req.body;
 
-    if (!username || !username.trim()) {
-      return res.status(400).json({ success: false, message: 'Username is required.' });
+    // Full Name: accepts full_name, fullName, or backwards-compatible username
+    const rawFullName = full_name !== undefined ? full_name : (fullName !== undefined ? fullName : username);
+    const nameError = validateFullName(rawFullName);
+    if (nameError) {
+      return res.status(400).json({ success: false, message: nameError });
     }
-    if (!gender || !gender.trim()) {
-      return res.status(400).json({ success: false, message: 'Gender selection is required.' });
+    const cleanFullName = rawFullName.trim();
+
+    // Gender selection is required
+    if (!gender || !String(gender).trim()) {
+      return res.status(400).json({ success: false, message: 'Please select your gender.' });
     }
-    if (!email || !email.trim()) {
+
+    // Email validation
+    if (!email || !String(email).trim()) {
       return res.status(400).json({ success: false, message: 'Email ID is required.' });
     }
-    if (!phone || !phone.trim()) {
-      return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    const cleanEmail = email.trim().toLowerCase();
+    if (!isValidEmail(cleanEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
     }
+
+    // Phone number is completely optional for new registrations.
+    // Clean phone if provided, else null.
+    const cleanPhone = phone && String(phone).trim() ? String(phone).trim() : null;
+
+    // Password validation (Strong 8+ chars, upper, lower, number, special char)
     if (!password) {
       return res.status(400).json({ success: false, message: 'Password is required.' });
     }
-    if (!confirm_password) {
-      return res.status(400).json({ success: false, message: 'Confirm password is required.' });
-    }
-
-    let musicPreferences = [];
-    if (Array.isArray(types_of_music)) {
-      musicPreferences = types_of_music.filter(m => m && m.trim());
-    } else if (typeof types_of_music === 'string' && types_of_music.trim()) {
-      musicPreferences = types_of_music.split(',').map(m => m.trim()).filter(Boolean);
-    }
-    if (musicPreferences.length === 0) {
-      return res.status(400).json({ success: false, message: 'Please select at least one type of music.' });
-    }
-
-    if (!isValidEmail(email)) {
-      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
-    }
-
-    if (!isValidPhone(phone)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid phone number (10-digit mobile number, e.g. 9876543210 or +91...).'
-      });
-    }
-
     const passwordError = validatePasswordStrength(password);
     if (passwordError) {
       return res.status(400).json({ success: false, message: passwordError });
     }
 
-    if (password !== confirm_password) {
-      return res.status(400).json({ success: false, message: 'Password and Confirm Password do not match.' });
+    // Confirm password validation (accepts confirm_password or confirmPassword)
+    const effectiveConfirmPassword = confirm_password !== undefined ? confirm_password : confirmPassword;
+    if (!effectiveConfirmPassword) {
+      return res.status(400).json({ success: false, message: 'Confirm password is required.' });
+    }
+    if (password !== effectiveConfirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match.' });
     }
 
-    // Check unique username
-    const [existingUsernames] = await pool.query(
-      'SELECT id FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1',
-      [username.trim()]
-    );
-    if (existingUsernames.length > 0) {
-      return res.status(409).json({
-        success: false,
-        conflictField: 'username',
-        message: 'This username is already taken. Please choose another username.'
-      });
+    // Musical preferences (accepts types_of_music or typesOfMusic)
+    const effectiveMusic = types_of_music !== undefined ? types_of_music : typesOfMusic;
+    let musicPreferences = [];
+    if (Array.isArray(effectiveMusic)) {
+      musicPreferences = effectiveMusic.map(m => String(m).trim()).filter(Boolean);
+    } else if (typeof effectiveMusic === 'string' && effectiveMusic.trim()) {
+      musicPreferences = effectiveMusic.split(',').map(m => m.trim()).filter(Boolean);
+    }
+    if (musicPreferences.length === 0) {
+      return res.status(400).json({ success: false, message: 'Please select at least one type of music.' });
     }
 
-    // Check unique email
-    const [existingEmails] = await pool.query(
-      'SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1',
-      [email.trim()]
+    const effectiveTrainer = vocal_trainer_name !== undefined ? vocal_trainer_name : vocalTrainerName;
+
+    // Check duplicate email in MySQL
+    const [existingUsers] = await pool.query(
+      'SELECT id, username, email, is_email_verified FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1',
+      [cleanEmail]
     );
-    if (existingEmails.length > 0) {
-      return res.status(409).json({
-        success: false,
-        conflictField: 'email',
-        message: 'An account with this email already exists. Please log in.'
-      });
+
+    let userId = null;
+    let isPendingUpdate = false;
+
+    if (existingUsers.length > 0) {
+      const existingUser = existingUsers[0];
+      if (Boolean(existingUser.is_email_verified)) {
+        return res.status(409).json({
+          success: false,
+          conflictField: 'email',
+          message: 'This email address is already registered. Please log in.'
+        });
+      } else {
+        // Pending unverified account already exists for this email
+        // Reuse and update the pending record to allow continuation without duplicate key collision
+        userId = existingUser.id;
+        isPendingUpdate = true;
+      }
     }
 
     // Hash password with bcrypt (work factor 10)
@@ -136,21 +178,43 @@ exports.register = async (req, res, next) => {
     try {
       await connection.beginTransaction();
 
-      const [userResult] = await connection.query(
-        `INSERT INTO users (username, gender, email, phone, vocal_trainer_name, password_hash, selected_musical_goal, role)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'USER')`,
-        [
-          username.trim(),
-          gender.trim(),
-          email.trim().toLowerCase(),
-          phone.trim(),
-          vocal_trainer_name ? vocal_trainer_name.trim() : null,
-          passwordHash,
-          selected_musical_goal || null
-        ]
-      );
+      if (isPendingUpdate && userId) {
+        // Update unverified pending user with latest registration inputs
+        await connection.query(
+          `UPDATE users 
+           SET username = ?, gender = ?, phone = ?, vocal_trainer_name = ?, 
+               password_hash = ?, selected_musical_goal = ?, updated_at = NOW()
+           WHERE id = ?`,
+          [
+            cleanFullName,
+            gender.trim(),
+            cleanPhone,
+            effectiveTrainer ? effectiveTrainer.trim() : null,
+            passwordHash,
+            selected_musical_goal || null,
+            userId
+          ]
+        );
 
-      const userId = userResult.insertId;
+        // Refresh music preferences
+        await connection.query('DELETE FROM user_music_preferences WHERE user_id = ?', [userId]);
+      } else {
+        // Create new pending user with is_email_verified = 0
+        const [userResult] = await connection.query(
+          `INSERT INTO users (username, gender, email, phone, vocal_trainer_name, password_hash, selected_musical_goal, role, is_email_verified)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'USER', 0)`,
+          [
+            cleanFullName,
+            gender.trim(),
+            cleanEmail,
+            cleanPhone,
+            effectiveTrainer ? effectiveTrainer.trim() : null,
+            passwordHash,
+            selected_musical_goal || null
+          ]
+        );
+        userId = userResult.insertId;
+      }
 
       if (musicPreferences.length > 0) {
         const musicValues = musicPreferences.map(music => [userId, music]);
@@ -165,21 +229,48 @@ exports.register = async (req, res, next) => {
         [userId]
       );
 
+      // Generate cryptographically secure 6-digit numeric OTP
+      const otpCode = crypto.randomInt(100000, 1000000).toString();
+      const otpHash = await bcrypt.hash(otpCode, 10);
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5-minute expiry
+
+      // Invalidate any prior active OTPs for this email
+      await connection.query(
+        'UPDATE email_verification_otps SET is_used = 1 WHERE LOWER(email) = LOWER(?) AND is_used = 0',
+        [cleanEmail]
+      );
+
+      // Insert new OTP record with hash ONLY
+      await connection.query(
+        `INSERT INTO email_verification_otps (user_id, email, otp_hash, attempts, max_attempts, is_used, expires_at)
+         VALUES (?, ?, ?, 0, 5, 0, ?)`,
+        [userId, cleanEmail, otpHash, expiresAt]
+      );
+
       await connection.commit();
 
+      // Dispatch OTP email using SMTP service
+      await sendRegistrationOtpEmail({
+        toEmail: cleanEmail,
+        fullName: cleanFullName,
+        otpCode
+      });
+
       await logSecurityEvent(req, {
-        action: 'USER_REGISTERED',
+        action: 'REGISTRATION_OTP_ISSUED',
         status: 'SUCCESS',
         userId,
-        username: username.trim(),
-        details: { email: email.trim().toLowerCase() }
+        username: cleanFullName,
+        details: { email: cleanEmail }
       });
 
       return res.status(201).json({
         success: true,
-        message: 'Registration successful! Please log in with your credentials.',
+        message: 'Registration submitted! A 6-digit verification code has been sent to your email.',
         userId,
-        email: email.trim().toLowerCase()
+        email: cleanEmail,
+        requireOtp: true,
+        expiresInMinutes: 5
       });
     } catch (err) {
       await connection.rollback();
@@ -187,6 +278,219 @@ exports.register = async (req, res, next) => {
     } finally {
       connection.release();
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 1.B. VERIFY REGISTRATION EMAIL OTP (POST /api/auth/verify-email-otp)
+exports.verifyEmailOtp = async (req, res, next) => {
+  let connection;
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !String(email).trim()) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' });
+    }
+    if (!otp || !String(otp).trim()) {
+      return res.status(400).json({ success: false, message: '6-digit verification code is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
+    if (!/^\d{6}$/.test(cleanOtp)) {
+      return res.status(400).json({ success: false, message: 'Verification code must be exactly 6 digits.' });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // Fetch active OTP record with exclusive row lock
+    const [records] = await connection.query(
+      `SELECT id, user_id, email, otp_hash, attempts, max_attempts, expires_at, is_used
+       FROM email_verification_otps
+       WHERE LOWER(email) = LOWER(?) AND is_used = 0
+       ORDER BY id DESC LIMIT 1 FOR UPDATE`,
+      [cleanEmail]
+    );
+
+    if (records.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'No active verification code found for this email. Please request a new code.'
+      });
+    }
+
+    const record = records[0];
+
+    // Check expiry
+    if (new Date(record.expires_at) < new Date()) {
+      await connection.query('UPDATE email_verification_otps SET is_used = 1 WHERE id = ?', [record.id]);
+      await connection.commit();
+      return res.status(400).json({
+        success: false,
+        message: 'Verification code has expired. Please click "Resend Code" to receive a new code.'
+      });
+    }
+
+    // Check attempt limit
+    if (record.attempts >= record.max_attempts) {
+      await connection.query('UPDATE email_verification_otps SET is_used = 1 WHERE id = ?', [record.id]);
+      await connection.commit();
+      await logSecurityEvent(req, {
+        action: 'EMAIL_OTP_RATE_LIMITED',
+        status: 'BLOCKED',
+        details: { email: cleanEmail, attempts: record.attempts }
+      });
+      return res.status(429).json({
+        success: false,
+        message: 'Too many incorrect attempts. This code has been invalidated. Please request a new code.'
+      });
+    }
+
+    // Verify OTP hash with bcrypt
+    const isMatch = await bcrypt.compare(cleanOtp, record.otp_hash);
+    if (!isMatch) {
+      const newAttempts = record.attempts + 1;
+      const remainingAttempts = Math.max(0, record.max_attempts - newAttempts);
+      await connection.query('UPDATE email_verification_otps SET attempts = ? WHERE id = ?', [newAttempts, record.id]);
+      await connection.commit();
+
+      await logSecurityEvent(req, {
+        action: 'EMAIL_OTP_FAILED',
+        status: 'FAILURE',
+        details: { email: cleanEmail, attempts: newAttempts }
+      });
+
+      return res.status(400).json({
+        success: false,
+        message: remainingAttempts > 0
+          ? `Invalid verification code. Please check your email or enter the correct 6-digit code. (${remainingAttempts} attempt(s) remaining)`
+          : 'Invalid verification code. Maximum attempts reached. Please request a new code.'
+      });
+    }
+
+    // Successful OTP match: mark OTP as used and activate user account
+    await connection.query('UPDATE email_verification_otps SET is_used = 1 WHERE id = ?', [record.id]);
+
+    await connection.query(
+      'UPDATE users SET is_email_verified = 1, email_verified_at = NOW() WHERE LOWER(email) = LOWER(?)',
+      [cleanEmail]
+    );
+
+    await connection.commit();
+
+    await logSecurityEvent(req, {
+      action: 'EMAIL_VERIFIED_SUCCESS',
+      status: 'SUCCESS',
+      userId: record.user_id,
+      details: { email: cleanEmail }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified successfully! Your account is now active. Please log in with your password.',
+      email: cleanEmail
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback().catch(() => {});
+    }
+    next(error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+};
+
+// 1.C. RESEND REGISTRATION EMAIL OTP (POST /api/auth/resend-registration-otp)
+exports.resendRegistrationOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !String(email).trim()) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Verify user exists and status
+    const [users] = await pool.query(
+      'SELECT id, username, email, is_email_verified FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1',
+      [cleanEmail]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No pending registration found for this email address. Please register first.'
+      });
+    }
+
+    const user = users[0];
+    if (Boolean(user.is_email_verified)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This account is already verified. Please log in.'
+      });
+    }
+
+    // Rate-limit resend: Cooldown of 30 seconds
+    const [recentOtps] = await pool.query(
+      `SELECT id, created_at 
+       FROM email_verification_otps 
+       WHERE LOWER(email) = LOWER(?) AND created_at > NOW() - INTERVAL 30 SECOND 
+       ORDER BY id DESC LIMIT 1`,
+      [cleanEmail]
+    );
+
+    if (recentOtps.length > 0) {
+      return res.status(429).json({
+        success: false,
+        message: 'Please wait 30 seconds before requesting another verification code.'
+      });
+    }
+
+    // Generate new secure 6-digit OTP
+    const newOtp = crypto.randomInt(100000, 1000000).toString();
+    const newOtpHash = await bcrypt.hash(newOtp, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    // Invalidate previous OTPs
+    await pool.query(
+      'UPDATE email_verification_otps SET is_used = 1 WHERE LOWER(email) = LOWER(?) AND is_used = 0',
+      [cleanEmail]
+    );
+
+    // Insert new OTP record
+    await pool.query(
+      `INSERT INTO email_verification_otps (user_id, email, otp_hash, attempts, max_attempts, is_used, expires_at)
+       VALUES (?, ?, ?, 0, 5, 0, ?)`,
+      [user.id, cleanEmail, newOtpHash, expiresAt]
+    );
+
+    // Dispatch via email service
+    await sendRegistrationOtpEmail({
+      toEmail: cleanEmail,
+      fullName: user.username,
+      otpCode: newOtp
+    });
+
+    await logSecurityEvent(req, {
+      action: 'REGISTRATION_OTP_RESENT',
+      status: 'SUCCESS',
+      userId: user.id,
+      details: { email: cleanEmail }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'A new 6-digit verification code has been dispatched to your email.',
+      expiresInMinutes: 5
+    });
   } catch (error) {
     next(error);
   }
@@ -207,7 +511,7 @@ exports.login = async (req, res, next) => {
 
     const [users] = await pool.query(
       `SELECT id, username, gender, email, phone, vocal_trainer_name, password_hash, 
-              selected_musical_goal, role, failed_login_attempts, account_locked_until,
+              selected_musical_goal, role, is_email_verified, failed_login_attempts, account_locked_until,
               mfa_enabled, mfa_secret, created_at 
        FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?) LIMIT 1`,
       [identifier, identifier]
@@ -270,6 +574,23 @@ exports.login = async (req, res, next) => {
         message: lockUntil
           ? 'Too many failed login attempts. Account temporarily locked for 15 minutes for your protection.'
           : 'Invalid credentials. Please verify your username/email and password.'
+      });
+    }
+
+    // Check email verification status before granting token
+    if (user.is_email_verified === 0 || user.is_email_verified === false) {
+      await logSecurityEvent(req, {
+        action: 'LOGIN_BLOCKED_UNVERIFIED_EMAIL',
+        status: 'BLOCKED',
+        userId: user.id,
+        username: user.username,
+        details: { email: user.email }
+      });
+      return res.status(403).json({
+        success: false,
+        emailUnverified: true,
+        email: user.email,
+        message: 'Your email address is not verified yet. Please enter the 6-digit verification code sent to your email to activate your account.'
       });
     }
 

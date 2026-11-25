@@ -5,6 +5,8 @@ const authenticateToken = require('../middleware/auth');
 const { authLimiter, registerLimiter, otpLimiter, refreshLimiter } = require('../middleware/rateLimiter');
 
 router.post('/register', registerLimiter, authController.register);
+router.post('/verify-email-otp', otpLimiter, authController.verifyEmailOtp);
+router.post('/resend-registration-otp', otpLimiter, authController.resendRegistrationOtp);
 router.post('/login', authLimiter, authController.login);
 router.post('/verify-mfa', authLimiter, authController.verifyMfa);
 router.post('/refresh', refreshLimiter, authController.refreshToken);

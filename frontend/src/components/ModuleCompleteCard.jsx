@@ -71,32 +71,42 @@ function CircularProgress({ percentage, label, subtext, color = '#0D9488', size 
 
 export default function ModuleCompleteCard({ refreshTrigger }) {
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [data, setData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const loadSummary = async () => {
+  const loadSummary = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       setErrorMsg('');
       const res = await api.getModuleCompletionSummary(1);
       if (res && res.success) {
         setData(res);
       } else {
-        setErrorMsg('Could not load completion metrics.');
+        if (!isBackground) setErrorMsg('Could not load completion metrics.');
       }
     } catch (err) {
       console.error('Failed to load module summary:', err);
-      setErrorMsg('Could not connect to database.');
+      if (!isBackground) setErrorMsg('Could not connect to database.');
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      } else {
+        setIsRefreshing(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadSummary();
+    const isBackground = data !== null;
+    loadSummary(isBackground);
   }, [refreshTrigger]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div style={{ background: '#FFFFFF', padding: 36, borderRadius: 20, border: '1px solid #DFEBE3', textAlign: 'center' }}>
         <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 10px', color: '#0D9488' }} />

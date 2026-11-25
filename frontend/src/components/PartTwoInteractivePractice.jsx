@@ -178,9 +178,8 @@ export default function PartTwoInteractivePractice({
       });
       if (isAllChecked) {
         await api.completePartTab(2, { tab_key: 'posture', duration_minutes: 5 });
-        setTimeout(() => {
-          setActiveTab('breathe');
-        }, 500);
+        setStatusMessage('All 7 posture alignment points completed! Click "Next: Breathe" when ready to continue.');
+        if (onUpdate) onUpdate();
       }
     } catch (err) {
       console.error('Failed to save posture progress to MySQL:', err);
@@ -631,9 +630,7 @@ export default function PartTwoInteractivePractice({
             onSessionComplete={() => {
               setIsBreatheCompleted(true);
               api.completePartTab(2, { tab_key: 'breathe', duration_minutes: 5 }).catch(() => {});
-              setTimeout(() => {
-                setActiveTab('song');
-              }, 600);
+              if (onUpdate) onUpdate();
             }}
           />
 

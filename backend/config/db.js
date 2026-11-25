@@ -18,4 +18,9 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 10000
 });
 
+// Resilient pool error listener preventing process crashes on dropped idle sockets
+pool.on('error', (err) => {
+  console.error('[MySQL Connection Pool Error]:', err.message || err);
+});
+
 module.exports = pool;

@@ -1232,11 +1232,7 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage, onRegi
         setSaveSuccess(true);
         loadPeerBoards();
         if (onUpdate) onUpdate();
-        if (onProceedToNextStage) {
-          setTimeout(() => {
-            onProceedToNextStage();
-          }, 600);
-        }
+        // STRICT RULE: SAVE ONLY. Student remains on Stage 2 until clicking Next: How To Do It.
       } else {
         setSaveError(res.message || 'Could not save answers.');
       }
@@ -1393,6 +1389,7 @@ function StageTwoStimulateRecall({ stage, onUpdate, onProceedToNextStage, onRegi
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 20 }}>
           <button
+            type="button"
             onClick={handleSaveAnswers}
             disabled={saving}
             style={{
@@ -1663,7 +1660,6 @@ function StageFourAssessPerformance({ stage, onUpdate, onProceedToNextStage, onR
 
         <StudentAudioRecorder
           stageId={stage.id}
-          onProceedToNextStage={onProceedToNextStage}
           onRecordingUploaded={() => {
             if (onUpdate) onUpdate();
           }}
@@ -2132,7 +2128,7 @@ function InteractiveBreathingSimulationGuide() {
 }
 
 // 5. In-Browser Audio Recorder (MediaRecorder API)
-function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextStage }) {
+function StudentAudioRecorder({ stageId, onRecordingUploaded }) {
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
@@ -2140,6 +2136,7 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
   const [comments, setComments] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [fileToUpload, setFileToUpload] = useState(null);
 
   const mediaRecorderRef = useRef(null);
@@ -2148,6 +2145,8 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
 
   const startRecording = async () => {
     try {
+      setUploadError('');
+      setUploadSuccess(false);
       setAudioBlob(null);
       setAudioUrl(null);
       setRecordSeconds(0);
@@ -2177,7 +2176,7 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
         setRecordSeconds(s => s + 1);
       }, 1000);
     } catch (err) {
-      alert(`Microphone access error: ${err.message}. Please allow microphone permissions.`);
+      setUploadError(`Microphone access error: ${err.message}. Please allow microphone permissions.`);
     }
   };
 
@@ -2192,6 +2191,8 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setUploadError('');
+      setUploadSuccess(false);
       setFileToUpload(file);
       setAudioUrl(URL.createObjectURL(file));
       setAudioBlob(file);
@@ -2199,10 +2200,21 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
   };
 
   const submitRecording = async () => {
-    if (!audioBlob) return;
+    setUploadError('');
+    setUploadSuccess(false);
+
+    if (!audioBlob || audioBlob.size === 0) {
+      setUploadError('Please record your voice or select a valid audio file before submitting.');
+      return;
+    }
+
+    if (audioBlob.size > 40 * 1024 * 1024) {
+      setUploadError('The selected audio file exceeds the 40MB size limit. Please choose a smaller audio file.');
+      return;
+    }
+
     try {
       setUploading(true);
-      setUploadSuccess(false);
 
       const formData = new FormData();
       formData.append('audio', audioBlob, fileToUpload ? fileToUpload.name : `voice-recording-${Date.now()}.webm`);
@@ -2211,21 +2223,22 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
       formData.append('comments', comments);
 
       const res = await api.uploadStudentRecording(formData);
-      if (res.success) {
+      if (res && res.success) {
         setUploadSuccess(true);
+        setUploadError('');
         setAudioBlob(null);
         setAudioUrl(null);
         setFileToUpload(null);
         setComments('');
         if (onRecordingUploaded) onRecordingUploaded();
-        if (onProceedToNextStage) {
-          setTimeout(() => {
-            onProceedToNextStage();
-          }, 700);
-        }
+        // STRICT RULE: SUBMIT ONLY.
+        // Student remains on the Audio Recording section. No automatic navigation to Stage 5.
+      } else {
+        setUploadError(res?.message || 'Failed to upload audio recording. Please try again.');
       }
     } catch (e) {
-      alert(`Upload error: ${e.message}`);
+      console.error('Audio upload error:', e);
+      setUploadError(e.message || 'Network or server error while uploading recording. Your audio is preserved — please retry.');
     } finally {
       setUploading(false);
     }
@@ -2245,9 +2258,16 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
         </div>
       )}
 
+      {uploadError && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 10, color: '#991B1B', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', fontWeight: 600 }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} /> {uploadError}
+        </div>
+      )}
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
         {!recording ? (
           <button
+            type="button"
             onClick={startRecording}
             style={{
               display: 'flex',
@@ -2266,6 +2286,7 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
           </button>
         ) : (
           <button
+            type="button"
             onClick={stopRecording}
             style={{
               display: 'flex',
@@ -2342,6 +2363,7 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
       {audioBlob && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
           <button
+            type="button"
             onClick={submitRecording}
             disabled={uploading}
             style={{
@@ -2352,7 +2374,8 @@ function StudentAudioRecorder({ stageId, onRecordingUploaded, onProceedToNextSta
               fontWeight: 750,
               fontSize: '0.88rem',
               border: 'none',
-              cursor: 'pointer'
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              opacity: uploading ? 0.7 : 1
             }}
           >
             {uploading ? 'Uploading...' : 'SUBMIT RECORDING FOR ASSESSMENT'}

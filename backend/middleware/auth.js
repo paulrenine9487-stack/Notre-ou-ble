@@ -71,13 +71,19 @@ async function authenticateToken(req, res, next) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
+        code: 'TOKEN_EXPIRED',
         message: 'Your session has expired. Please log in again.'
       });
     }
-    return res.status(403).json({
-      success: false,
-      message: 'Invalid or malformed authentication token.'
-    });
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_TOKEN',
+        message: 'Authentication token is invalid or malformed. Please log in again.'
+      });
+    }
+    // Database or unexpected error: delegate to centralized error handler rather than returning misleading 403
+    next(error);
   }
 }
 

@@ -428,23 +428,53 @@ exports.addManualSession = async (req, res, next) => {
 
 // PUT /api/practice/sessions/:id/status (Drag & drop or button move, Requirement 2.B & 2.D)
 exports.updateSessionStatus = async (req, res, next) => {
+  let connection;
+  const startTime = Date.now();
   try {
     const userId = req.user.id;
     const sessionId = parseInt(req.params.id, 10);
     const { status, actual_duration, notes } = req.body;
 
-    const validStatuses = ['planned', 'practising', 'done'];
-    const cleanStatus = String(status).toLowerCase();
-    if (!validStatuses.includes(cleanStatus)) {
-      return res.status(400).json({ success: false, message: 'Invalid status. Must be planned, practising, or done.' });
+    if (!sessionId || isNaN(sessionId)) {
+      return res.status(400).json({ success: false, message: 'Invalid session ID provided.' });
     }
 
-    // Verify student ownership
-    const [existing] = await pool.query(`
-      SELECT * FROM student_practice_sessions WHERE id = ? AND user_id = ?
+    // Bidirectional status normalization
+    const rawStatus = (status || '').toString().toLowerCase().trim();
+    const statusMap = {
+      planned: 'planned',
+      todo: 'planned',
+      'to do': 'planned',
+      'to-do': 'planned',
+      practising: 'practising',
+      practicing: 'practising',
+      doing: 'practising',
+      in_progress: 'practising',
+      'in progress': 'practising',
+      'in-progress': 'practising',
+      done: 'done',
+      completed: 'done',
+      complete: 'done'
+    };
+    const cleanStatus = statusMap[rawStatus] || rawStatus;
+    const validStatuses = ['planned', 'practising', 'done'];
+    if (!validStatuses.includes(cleanStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status '${status}'. Must be planned (to do), practising (doing), or done (completed).`
+      });
+    }
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // Verify student ownership with row lock
+    const [existing] = await connection.query(`
+      SELECT * FROM student_practice_sessions WHERE id = ? AND user_id = ? FOR UPDATE
     `, [sessionId, userId]);
 
     if (existing.length === 0) {
+      await connection.rollback();
       return res.status(404).json({ success: false, message: 'Session not found or unauthorised.' });
     }
 
@@ -452,7 +482,7 @@ exports.updateSessionStatus = async (req, res, next) => {
     let startedAt = current.started_at;
     let completedAt = current.completed_at;
 
-    // Safely parse actual duration (preventing any NaN)
+    // Safely parse actual duration (preventing any NaN or negative value)
     let actualDur = current.actual_duration || null;
     if (actual_duration !== undefined && actual_duration !== null) {
       const parsed = parseInt(actual_duration, 10);
@@ -461,27 +491,41 @@ exports.updateSessionStatus = async (req, res, next) => {
       }
     }
 
-    if (cleanStatus === 'practising' && !startedAt) {
-      startedAt = new Date();
-    }
-
-    if (cleanStatus === 'done') {
+    if (cleanStatus === 'practising') {
+      if (!startedAt) startedAt = new Date();
+    } else if (cleanStatus === 'done') {
       if (!completedAt) completedAt = new Date();
       if (!actualDur || actualDur <= 0) actualDur = current.planned_duration || 10;
+
+      // Truncate exercise_name to 150 characters to prevent ER_DATA_TOO_LONG in practice_sessions schema
+      const rawExercise = current.activity || current.session_title || 'Learning Journal Practice';
+      const exerciseName = String(rawExercise).trim().slice(0, 150);
+
+      const cleanNotes = (notes !== undefined && notes !== null && String(notes).trim() !== '')
+        ? String(notes).trim()
+        : (current.notes || 'Completed via Learning Journal Kanban');
 
       // Anti-Tamper & Duplicate Prevention: Only insert into practice_sessions if this session was NOT ALREADY marked 'done'
       if (current.status !== 'done') {
         const durationSeconds = actualDur * 60;
-        await pool.query(`
+        await connection.query(`
           INSERT INTO practice_sessions (
             user_id, session_type, exercise_name, duration_minutes, duration_seconds,
             session_status, completion_status, notes, completed_at
           ) VALUES (?, 'Learning Journal', ?, ?, ?, 'completed', 'completed', ?, NOW())
-        `, [userId, current.activity || current.session_title, actualDur, durationSeconds, notes || current.notes || 'Completed via Learning Journal Kanban']);
+        `, [userId, exerciseName, actualDur, durationSeconds, cleanNotes]);
+      } else if (notes !== undefined && notes !== null) {
+        // Idempotency: If already done, update notes on existing practice_session if needed
+        await connection.query(`
+          UPDATE practice_sessions
+          SET notes = ?, duration_minutes = ?, duration_seconds = ?
+          WHERE user_id = ? AND session_type = 'Learning Journal' AND exercise_name = ?
+          ORDER BY id DESC LIMIT 1
+        `, [cleanNotes, actualDur, actualDur * 60, userId, exerciseName]).catch(() => {});
       }
 
       // Automatically mark journal_kanban_tracker activity as completed
-      await pool.query(`
+      await connection.query(`
         INSERT INTO student_practice_activity_completions (user_id, module_id, activity_key, completion_status, completed_at, session_id)
         VALUES (?, 1, 'journal_kanban_tracker', 'completed', NOW(), ?)
         ON DUPLICATE KEY UPDATE completion_status = 'completed', completed_at = NOW(), session_id = ?
@@ -490,16 +534,26 @@ exports.updateSessionStatus = async (req, res, next) => {
       completedAt = null;
     }
 
-    await pool.query(`
+    const noteToSave = (notes !== undefined && notes !== null && String(notes).trim() !== '')
+      ? String(notes).trim()
+      : null;
+
+    await connection.query(`
       UPDATE student_practice_sessions
       SET status = ?, actual_duration = ?, started_at = ?, completed_at = ?, notes = COALESCE(?, notes), updated_at = NOW()
       WHERE id = ? AND user_id = ?
-    `, [cleanStatus, actualDur, startedAt, completedAt, notes || null, sessionId, userId]);
+    `, [cleanStatus, actualDur, startedAt, completedAt, noteToSave, sessionId, userId]);
 
-    // Recalculate Stage 5 and Module progress
-    await updateStageFiveProgress(userId);
+    // Recalculate Stage 5 and Module progress within the same transaction
+    await updateStageFiveProgress(userId, connection);
 
-    const [updated] = await pool.query('SELECT * FROM student_practice_sessions WHERE id = ?', [sessionId]);
+    // Fetch authoritative session record
+    const [updated] = await connection.query('SELECT * FROM student_practice_sessions WHERE id = ?', [sessionId]);
+
+    await connection.commit();
+
+    const durationMs = Date.now() - startTime;
+    console.log(`[PracticeCtrl] updateSessionStatus success: session=${sessionId} user=${userId} status=${cleanStatus} duration=${durationMs}ms`);
 
     res.status(200).json({
       success: true,
@@ -507,7 +561,15 @@ exports.updateSessionStatus = async (req, res, next) => {
       session: updated[0]
     });
   } catch (err) {
+    if (connection) {
+      await connection.rollback().catch(() => {});
+    }
+    console.error(`[PracticeCtrl ERROR] updateSessionStatus failed for session=${req.params?.id} user=${req.user?.id}:`, err);
     next(err);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };
 
